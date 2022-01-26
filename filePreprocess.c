@@ -19,9 +19,10 @@ FILE* preprocessInputFile(FILE* originalFileStream, char* tempFilePath)
     /*
      * Read line from source file and write to destination 
      * file after replacing given word.
-     */
+     */ 
     while (!fgets(lineReadBuffer, MAX_LINE_LENGTH, originalFileStream))
     {
+        
         // Replace all occurrence of word from current line
         replaceAll(buffer, oldWord, newWord);
 
