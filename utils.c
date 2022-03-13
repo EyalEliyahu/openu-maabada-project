@@ -26,6 +26,19 @@ char** getLineContent(char* lineString){
     // return array; */
 }
 
+char *strExt(const char *s1, const char *s2)
+{
+    char *pointer = malloc(strlen(s1) + strlen(s2) + 1);
+
+    if (pointer == NULL)
+    {
+        perror("failed to allocate memory");
+        exit(EXIT_FAILURE);
+    } 
+
+    return strcat(strcpy(pointer, s1), s2);
+}
+
 void *safeMalloc(long size) {
 	void *ptr = malloc(size);
 	if (ptr == NULL) {
@@ -71,7 +84,7 @@ int is_integer(char *string) {
 }
 
 int is_index(char* operand, int line) {
-	char symbol[MAX_LINE_LEN];
+	char symbol[MAX_LINE_LENGTH];
 	int j;
 
 	for (j = 0; operand[j] && operand[j] != '[' && operand[j] != '\0'; j++) {
@@ -98,7 +111,7 @@ int fetch_symbol(int line, char* line_content, char *symbol_dest) {
 
 	FIND_NEXT_CHAR(line_content, i);
 
-	for (; line_content[i] && line_content[i] != ':' && line_content[i] != EOF && i <= MAX_LINE_LEN; i++, j++) {
+	for (; line_content[i] && line_content[i] != ':' && line_content[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++) {
 		symbol_dest[j] = line_content[i];
 	}
 	symbol_dest[j] = '\0';
@@ -133,7 +146,7 @@ int fetch_operands(int line, char* line_content, int i, char **operands_array, i
 			return FALSE; 
 		}
 
-		operands_array[*num_of_operands] = malloc(MAX_LINE_LEN);
+		operands_array[*num_of_operands] = malloc(MAX_LINE_LENGTH);
 		for (j = 0; line_content[i] && line_content[i] != '\t' && line_content[i] != ' ' && line_content[i] != '\n' && line_content[i] != EOF &&
 		            line_content[i] != ','; i++, j++) {
 			operands_array[*num_of_operands][j] = line_content[i];
@@ -172,7 +185,7 @@ int fetch_operands(int line, char* line_content, int i, char **operands_array, i
 
 int fetch_type(char *line_content, int *i) {
 
-	char temp[MAX_LINE_LEN];
+	char temp[MAX_LINE_LENGTH];
 	int j;
 
 	if (line_content[*i] != '.') {
@@ -218,7 +231,7 @@ int fetch_address_type(char *operand, int line) {
 unsigned int fetch_register(char *operand) {
 	unsigned int reg;
 	int index=0, j;
-	char temp[MAX_LINE_LEN];
+	char temp[MAX_LINE_LENGTH];
 
 	if (operand[0] == 'r' && isdigit(operand[1]) && operand[2] == '\0') {
 		reg = atoi(&operand[1]);

@@ -8,6 +8,7 @@
 #include "utils.h"
 #include "assemblyStructures.h"
 
+
 symbol_line *symbol_head = NULL;
 symbol_line *symbol_tail = NULL;
 
