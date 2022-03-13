@@ -23,4 +23,5 @@ typedef enum lineType {
     COMMENT,
     EMPTY_LINE
 } lineType;
+
 #endif
