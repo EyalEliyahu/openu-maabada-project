@@ -24,4 +24,6 @@ int update_symbol_with_entry_attribute(char *symbol_name, int line);
 extern symbol_line *symbol_head;
 extern symbol_line *symbol_tail;
 
+
 #endif
+

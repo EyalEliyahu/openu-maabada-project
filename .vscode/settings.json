@@ -1,0 +1,14 @@
+{
+    "files.associations": {
+        "symboltable.h": "c",
+        "assemblystractures.h": "c",
+        "utils.h": "c",
+        "globalstructs.h": "c",
+        "string.h": "c",
+        "stdlib.h": "c",
+        "assemblystructures.h": "c",
+        "consts.h": "c",
+        "firstphase.h": "c",
+        "stdio.h": "c"
+    }
+}

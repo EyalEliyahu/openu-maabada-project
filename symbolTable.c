@@ -6,7 +6,8 @@
 #include "stdint.h"
 #include "symbolTable.h"
 #include "utils.h"
-#include "assembly_structures.h"
+#include "assemblyStructures.h"
+
 
 symbol_line *symbol_head = NULL;
 symbol_line *symbol_tail = NULL;
