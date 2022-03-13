@@ -1,0 +1,153 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <string.h>
+#include "utils.h"
+#include "macroStructs.h"
+
+/* This function handles the macro replacement */
+int process_macro_line(int line, char *line_content, int *in_macro, char *macro, char *file, FILE *am_file_ptr) {
+	int i=0, j=0, k=0;
+	char first_word[MAX_LINE_LENGTH];
+	macro_line *temp;
+	char* line_in_macro = "";
+	/* look for the next char that is not whitespace/tab/newline */
+	FIND_NEXT_CHAR(line_content, i); 
+
+	/* Get the line content after removing spaces and tabs from the beginning until reach whitespace/tab/newline */
+	for (; line_content[i] && line_content[i] != '\n' && line_content[i] != '\t' && line_content[i] != ' ' && line_content[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++) {
+		first_word[j] = line_content[i];
+	}
+	first_word[j] = '\0';
+
+	/* Check if the line contains macro that we already saved */
+	if(macro_exists_in_list(first_word) && !*in_macro) {
+		temp = macro_line_in_list(first_word);
+		/* replace macro name with macro content */
+		while (k < temp->num_of_content_lines)
+		{
+			fprintf(am_file_ptr, "%s", temp->content_lines[k++]);
+		}
+		return TRUE;
+	}
+
+	i = 0;
+	j = 0;
+	FIND_NEXT_CHAR(line_content, i); 
+	/* Checks if this line is start of new macro */
+    if (strncmp("macro", line_content+i, 5) == 0 && !*in_macro) {
+		/* go to the end of the word: macro */
+		INCREASE_I_UNTILL_CHAR(line_content, 'o', i);
+		FIND_NEXT_CHAR(line_content, i);
+		for (; line_content[i] && line_content[i] != ' ' && line_content[i] != '\n' && line_content[i] != '\t' && line_content[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++) {
+			macro[j] = line_content[i];
+		}
+		macro[j] = '\0';
+
+		*in_macro = TRUE;
+		macro_list_append(macro);
+		return TRUE;
+	}
+
+	/* Checks if this line is end of a macro */
+	if (strncmp("endm", line_content+i, 4) == 0 && *in_macro) {
+		*in_macro = FALSE;
+		i=0;
+		while (i < MAX_LINE_LENGTH)
+		{
+			macro[i] = '\0';
+			++i;
+		}
+		
+		return TRUE;
+	}
+
+	/* write regular line to am file */
+	if (!*in_macro)	
+		fprintf(am_file_ptr, "%s", line_content);
+	/* the line is part of a macro so we added it to macro content */
+	else {
+		temp = macro_line_in_list(macro);
+		temp->num_of_content_lines += 1;
+		temp->content_lines = realloc(temp->content_lines, temp->num_of_content_lines*sizeof(line_content));
+		line_in_macro = malloc(sizeof(char) * (strlen(line_content) + 1));
+		strcpy(line_in_macro,line_content);
+		temp->content_lines[temp->num_of_content_lines-1] = line_in_macro;
+		return TRUE;
+	}	
+
+    return TRUE;
+}
+
+
+int macro_process(char *fileName)
+{
+	char *temp_string = "";
+	int macro_phase_success = TRUE;
+	char macro[MAX_LINE_LENGTH];
+	int in_macro = FALSE;
+	char line_content[MAX_LINE_LENGTH + 2];
+	int line = 1;
+	FILE *assembly_file_ptr;
+	FILE *am_file_ptr;
+	char *am_file_name;
+	char *assembly_file_name;
+
+	/*
+	if(!openFileSafe(am_file_ptr, fileName, ".am", "w")) {
+		return FALSE;
+	}
+	
+	if(!openFileSafe(assembly_file_ptr, fileName, ".as", "r")) {
+		return FALSE;
+	}
+	*/
+
+	assembly_file_name = strExt(fileName, ".as");
+	assembly_file_ptr = fopen(assembly_file_name, "r");
+	if (assembly_file_ptr == NULL)
+	{
+		printf("ASSEMBLER ERROR: Could not open the following file: \"%s\" --- skipping it...\n", assembly_file_name);
+		free(assembly_file_name);
+		return FALSE;
+	}
+
+	/* open .am and .as files */
+	am_file_name = strExt(fileName, ".am");
+	am_file_ptr = fopen(am_file_name, "w");
+	if (am_file_ptr == NULL)
+	{
+		printf("ASSEMBLER ERROR: Could not write to the following file: \"%s\" --- skipping it...\n", am_file_name);
+		free(am_file_name);
+		return FALSE;
+	}
+
+	/* run the macro_process_line function on every line in .as file */
+	for (; fgets(line_content, MAX_LINE_LENGTH + 2, assembly_file_ptr) != NULL; line++)
+	{
+		/* check if line no reach the max length */ 
+		if (!feof(assembly_file_ptr) && strchr(line_content, '\n') == NULL)
+		{
+			print_error_message(line, "line exceeds the max line length");
+			macro_phase_success = FALSE;
+			/* if the line is too long continue the rest of the chars to get to the new line */ 
+			while (*temp_string != '\n' && *temp_string != EOF)
+			{
+				*temp_string = fgetc(assembly_file_ptr);
+			}
+		}
+		else
+		{
+			/* run process_macro_line function */ 
+			if (!process_macro_line(line, line_content, &in_macro, macro, fileName, am_file_ptr)) {
+				macro_phase_success = FALSE;
+			}
+		}
+	}
+	
+	/* free dynamic allocated memory used for macro and close am and assembly files */
+	fclose(am_file_ptr);
+	fclose(assembly_file_ptr);
+	free_macro_list();
+	return macro_phase_success;
+}

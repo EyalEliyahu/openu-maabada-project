@@ -4,7 +4,7 @@
 #include "consts.h"
 #include "globalStructs.h"
 #include "symbolTable.h"
-#include "assemblyStructures.h"
+#include "assembly_structures.h"
 
 /*
  * TODO
@@ -23,13 +23,22 @@ char* stringsConcat(char *string1, char* string2);
 
 int openFileSafe(FILE* fileStream, char* fileName, char* fileExt, char* openMethod);
 
+char* strExt(const char *s1, const char *s2);
+
 int fetch_symbol(int line, char* line_content, char *symbol_dest);
 
 
 
-#define FIND_NEXT_CHAR(string, index) \
+/*#define FIND_NEXT_CHAR(string, index) \
         for (;string[(index)] && (string[(index)] == '\t' || string[(index)] == ' '); (++(index)))\
         ;\
+*/
+
+#define FIND_NEXT_CHAR(string, index) \
+        while (string[i] == ' ' || string[i] == '\t'|| string[i] == '\n')\
+        {\
+                ++index;\
+        }
 
 #define INCREASE_I_UNTILL_CHAR(string, char, index) \
         for (;string[(index)] != char; (++(index)))\
