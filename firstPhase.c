@@ -187,12 +187,14 @@ int parseLine(int lineIndex, char *lineContent) {
 }
 
 int runFirstPhase(FILE* fileAfterMacroParsing) {
+	int lineIndex;
 	char lineContent[MAX_LINE_WITH_LINEDROP_LEN];
-		for (int lineIndex = 0; fgets(lineContent, MAX_LINE_WITH_LINEDROP_LEN, fileAfterMacroParsing); lineIndex++) {
-			int lineParseSuccess = parseLine(lineIndex, lineContent);
-			if(!lineParseSuccess) {
-				return FALSE;
-			}
-		}
-		return TRUE;
+	// for (lineIndex = 0; fgets(lineContent, MAX_LINE_WITH_LINEDROP_LEN, fileAfterMacroParsing); lineIndex++) {
+		// int lineParseSuccess = parseLine(lineIndex, lineContent);
+		// printf("Line: %d Status: %d, Content: %s", lineIndex, lineParseSuccess, lineContent);
+		// if(!lineParseSuccess) {
+			// return FALSE;
+		// }
+	// }
+	return TRUE;
 }

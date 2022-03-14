@@ -4,7 +4,7 @@
 #include "consts.h"
 #include "globalStructs.h"
 #include "symbolTable.h"
-#include "assembly_structures.h"
+#include "assemblyStructures.h"
 
 /*
  * TODO
