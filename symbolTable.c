@@ -9,25 +9,22 @@
 #include "assemblyStructures.h"
 
 
-symbol_line *symbol_head = NULL;
-symbol_line *symbol_tail = NULL;
-
-
-void free_symbol_table()
+void free_symbol_table(symbolTable* table)
 {
     symbol_line *temp;
 
-    while (symbol_head)
+    while (table->symbolHead)
     {
-        temp = symbol_head->next;
-        free(symbol_head);
-        symbol_head = temp;
+        temp = table->symbolHead->next;
+        free(table->symbolHead);
+        table->symbolHead = temp;
     }
+	free(table);
 }
 
-int symbol_exists_in_table(char *symbol_name)
+int symbol_exists_in_table(char *symbol_name, symbolTable* table)
 {
-    symbol_line *temp = symbol_head;
+    symbol_line *temp = table->symbolHead;
     while (temp)
     {
         if (strcmp(temp->symbol, symbol_name) == 0)
@@ -38,9 +35,9 @@ int symbol_exists_in_table(char *symbol_name)
     return FALSE;
 }
 
-symbol_line *symbol_line_in_table(char *symbol_name)
+symbol_line *symbol_line_in_table(char *symbol_name, symbolTable* table)
 {
-    symbol_line *temp = symbol_head;
+    symbol_line *temp = table->symbolHead;
     while (temp)
     {
         if (strcmp(temp->symbol, symbol_name) == 0)
@@ -51,9 +48,9 @@ symbol_line *symbol_line_in_table(char *symbol_name)
     return NULL;
 }
 
-void print_symbol_table() /* Used for debugging */
+void print_symbol_table(symbolTable* table) /* Used for debugging */
 {
-    symbol_line *temp = symbol_head;
+    symbol_line *temp = table->symbolHead;
 	printf("----------------------- SYMBOL TABLE START ---------------------\n");
     while (temp)
     {
@@ -63,8 +60,8 @@ void print_symbol_table() /* Used for debugging */
 	printf("----------------------- SYMBOL TABLE END ---------------------\n");
 }
 
-symbol_line * get_symbol_line_from_symbol_table(char * symbol) {
-    symbol_line * sl = symbol_head;
+symbol_line * get_symbol_line_from_symbol_table(char * symbol, symbolTable* table) {
+    symbol_line * sl = table->symbolHead;
     while (sl) {
         if (strcmp(sl->symbol, symbol) == 0) {
             return sl;
@@ -74,7 +71,12 @@ symbol_line * get_symbol_line_from_symbol_table(char * symbol) {
 	return NULL;
 }
 
-void symbol_table_append(char* symbol_name, int symbol_type)
+symbolTable* initSymbolTable() {
+	symbolTable* newTable = (symbolTable*)malloc(sizeof(symbolTable));
+	return newTable;
+}
+
+void symbol_table_append(char* symbol_name, int symbol_type, symbolTable* table)
 {
 	symbol_line* new_symbol = (symbol_line*)malloc(sizeof(symbol_line));
 
@@ -83,7 +85,7 @@ void symbol_table_append(char* symbol_name, int symbol_type)
 		exit(1);
 	}
 	
-	strcpy(new_symbol->symbol,symbol_name);
+	strcpy(new_symbol->symbol, symbol_name);
 
 	new_symbol->value = 0;
 	new_symbol->base = 0;
@@ -98,15 +100,15 @@ void symbol_table_append(char* symbol_name, int symbol_type)
 	}
 	new_symbol->symbol_type = symbol_type; 
 
-	if(!symbol_head) {
-		symbol_head = new_symbol;
-		symbol_tail = symbol_head;
+	if(!table->symbolHead) {
+		table->symbolHead = new_symbol;
+		table->symbolTail = table->symbolHead;
 		}
 	else {
-		symbol_tail->next = new_symbol;
-		symbol_tail = symbol_tail->next;
+		table->symbolTail->next = new_symbol;
+		table->symbolTail = table->symbolTail->next;
 	}
-	symbol_tail->next = NULL;
+	table->symbolTail->next = NULL;
 
 	return;
 }
@@ -126,9 +128,9 @@ int validate_symbol_name(char *name, int line) {
 	       !is_reserved_word(name, line);
 }
 
-void update_symbol_table_data_types() {
+void update_symbol_table_data_types(symbolTable* table) {
 	
-	symbol_line *temp = symbol_head;
+	symbol_line *temp = table->symbolHead;
     while (temp)
     {
         if (temp->symbol_type == DATA) {
@@ -141,9 +143,9 @@ void update_symbol_table_data_types() {
 	
 }
 
-int update_symbol_with_entry_attribute(char *symbol_name, int line)
+int update_symbol_with_entry_attribute(char *symbol_name, int line, symbolTable* table)
 {
-    symbol_line *temp = symbol_head;
+    symbol_line *temp = table->symbolHead;
     while (temp)
     {
         if (strcmp(temp->symbol, symbol_name) == 0) {

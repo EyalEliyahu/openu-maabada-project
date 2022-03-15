@@ -4,6 +4,7 @@
 #include "utils.h"
 #include "firstPhase.h"
 #include "macro.h"
+#include "symbolTable.h"
 
 void compileFile(char* fileName);
 
@@ -23,13 +24,13 @@ void compileFile(char* fileName) {
 
 	isMacroParseSuccess = macro_process(fileName); 
 	if(isMacroParseSuccess) {
-		FILE fileAfterMacroParsing;
+		FILE* fileAfterMacroParsing = NULL;
+		symbolTable* table = initSymbolTable();
 		/* Reading the new assembly file - after the macros parsing */
 		if(openFileSafe(&fileAfterMacroParsing, fileName, ".am", "r")) {
 			/* Running First Phase */
 			printf("Running First Phase on: \"%s.am\" \n", fileName);
-			printf("!!!!: %d", &fileAfterMacroParsing);
-			isFirstPhaseSuccess = runFirstPhase(&fileAfterMacroParsing);
+			isFirstPhaseSuccess = runFirstPhase(fileAfterMacroParsing, table);
 		} else {
 			isFirstPhaseSuccess = FALSE;
 			isSecondPhaseSuccess = FALSE;

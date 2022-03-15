@@ -113,7 +113,7 @@ int handle_code(int lineIndex, char *line_content, int i) {
 }
 
 
-int parseLine(int lineIndex, char *lineContent) {
+int parseLine(int lineIndex, char *lineContent, symbolTable* table) {
     char extern_symbol[MAX_LINE_LEN];
 	int data_type;
 	int i=0, j;
@@ -127,7 +127,7 @@ int parseLine(int lineIndex, char *lineContent) {
 		return FALSE;
 	}
 	if (THERE_IS_SYMBOL) {
-		if (symbol_exists_in_table(symbol_name)) {
+		if (symbol_exists_in_table(symbol_name, table)) {
 			print_error_message(lineIndex, "Symbol is already defined.");
 			return FALSE;
 		}
@@ -147,7 +147,7 @@ int parseLine(int lineIndex, char *lineContent) {
 
 	if ( data_type == CODE ) {
 		if (THERE_IS_SYMBOL) {
-			symbol_table_append(symbol_name, CODE);
+			symbol_table_append(symbol_name, CODE, table);
 		}
 		if (!handle_code(lineIndex, lineContent, i))
 			return FALSE;
@@ -155,8 +155,9 @@ int parseLine(int lineIndex, char *lineContent) {
 	}
 	else {
 		if (data_type == DATA || data_type == STRING) {
-			if (THERE_IS_SYMBOL)
-				symbol_table_append(symbol_name, DATA);
+			if (THERE_IS_SYMBOL){
+				symbol_table_append(symbol_name, DATA, table);
+			}
 			if (data_type == DATA) {
 				if (!handle_data(lineIndex, lineContent, i))
 					return FALSE;
@@ -178,23 +179,25 @@ int parseLine(int lineIndex, char *lineContent) {
 				print_error_message(lineIndex, "Invalid symbol for extern type");
 				return FALSE;
 			}
-			if (!symbol_exists_in_table(extern_symbol))
-				symbol_table_append(extern_symbol, EXTERN); /* Extern value is defaulted to 0 */
+			if (!symbol_exists_in_table(extern_symbol, table)){
+				symbol_table_append(extern_symbol, EXTERN, table); /* Extern value is defaulted to 0 */
+			}
 		}
 	}
    	
 	return TRUE;
 }
 
-int runFirstPhase(FILE* fileAfterMacroParsing) {
+int runFirstPhase(FILE* fileAfterMacroParsing, symbolTable* table) {
 	int lineIndex;
 	char lineContent[MAX_LINE_WITH_LINEDROP_LEN];
-	// for (lineIndex = 0; fgets(lineContent, MAX_LINE_WITH_LINEDROP_LEN, fileAfterMacroParsing); lineIndex++) {
-		// int lineParseSuccess = parseLine(lineIndex, lineContent);
-		// printf("Line: %d Status: %d, Content: %s", lineIndex, lineParseSuccess, lineContent);
-		// if(!lineParseSuccess) {
-			// return FALSE;
-		// }
-	// }
+	fgets(lineContent, MAX_LINE_WITH_LINEDROP_LEN, fileAfterMacroParsing);
+	for (lineIndex = 0; fgets(lineContent, MAX_LINE_WITH_LINEDROP_LEN, fileAfterMacroParsing); lineIndex++) {
+		int lineParseSuccess = parseLine(lineIndex, lineContent, table);
+		if(!lineParseSuccess) {
+			return FALSE;
+		}
+	}
+	print_symbol_table(table);
 	return TRUE;
 }

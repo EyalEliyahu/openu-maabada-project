@@ -21,7 +21,7 @@ void *safeMalloc(long size);
  */
 char* stringsConcat(char *string1, char* string2);
 
-int openFileSafe(FILE* fileStream, char* fileName, char* fileExt, char* openMethod);
+int openFileSafe(FILE** fileStream, char* fileName, char* fileExt, char* openMethod);
 
 char* strExt(const char *s1, const char *s2);
 

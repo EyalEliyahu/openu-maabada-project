@@ -55,15 +55,16 @@ char* stringsConcat(char *string1, char* string2) {
 	return concattedString;
 }
 
-int openFileSafe(FILE* fileStream, char* fileName, char* fileExt, char* openMethod) {
+int openFileSafe(FILE** fileStream, char* fileName, char* fileExt, char* openMethod) {
 	char* fileNameWithExt = stringsConcat(fileName, fileExt);
-	fileStream = fopen(fileNameWithExt, openMethod);
+	*fileStream = fopen(fileNameWithExt, openMethod);
 	if(fileStream == NULL) {
 		free(fileNameWithExt);
 		printf("Error: Unable to read \"%s\". skipping it.\n", fileNameWithExt);
 		return FALSE;
+	} else {
+		return TRUE;
 	}
-	return TRUE;
 }
 
 void print_error_message(int line, char* message, ...) {
