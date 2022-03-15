@@ -91,8 +91,8 @@ int macro_process(char *fileName)
 	FILE *assembly_file_ptr;
 	FILE *am_file_ptr;
 
-	
-	if(!openFileSafe(&am_file_ptr, fileName, ".am", "w") || openFileSafe(&assembly_file_ptr, fileName, ".as", "r")) {
+	int hasFilesOpend = openFileSafe(&am_file_ptr, fileName, ".am", "w") && openFileSafe(&assembly_file_ptr, fileName, ".as", "r");
+	if(!hasFilesOpend) {
 		return FALSE;
 	}
 
