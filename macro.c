@@ -6,17 +6,17 @@
 #include "macroStructs.h"
 
 /* This function handles the macro replacement */
-int process_macro_line(int line, char *line_content, int *in_macro, char *macro, char *file, FILE *am_file_ptr) {
+int process_macro_line(int line, char *lineContent, int *in_macro, char *macro, char *file, FILE *am_file_ptr) {
 	int i=0, j=0, k=0;
 	char first_word[MAX_LINE_LENGTH];
 	macro_line *temp;
 	char* line_in_macro = "";
 	/* look for the next char that is not whitespace/tab/newline */
-	FIND_NEXT_CHAR(line_content, i); 
+	FIND_NEXT_CHAR(lineContent, i); 
 
 	/* Get the line content after removing spaces and tabs from the beginning until reach whitespace/tab/newline */
-	for (; line_content[i] && line_content[i] != '\n' && line_content[i] != '\t' && line_content[i] != ' ' && line_content[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++) {
-		first_word[j] = line_content[i];
+	for (; lineContent[i] && lineContent[i] != '\n' && lineContent[i] != '\t' && lineContent[i] != ' ' && lineContent[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++) {
+		first_word[j] = lineContent[i];
 	}
 	first_word[j] = '\0';
 
@@ -33,14 +33,14 @@ int process_macro_line(int line, char *line_content, int *in_macro, char *macro,
 
 	i = 0;
 	j = 0;
-	FIND_NEXT_CHAR(line_content, i); 
+	FIND_NEXT_CHAR(lineContent, i); 
 	/* Checks if this line is start of new macro */
-    if (strncmp("macro", line_content+i, 5) == 0 && !*in_macro) {
+    if (strncmp("macro", lineContent+i, 5) == 0 && !*in_macro) {
 		/* go to the end of the word: macro */
-		INCREASE_I_UNTILL_CHAR(line_content, 'o', i);
-		FIND_NEXT_CHAR(line_content, i);
-		for (; line_content[i] && line_content[i] != ' ' && line_content[i] != '\n' && line_content[i] != '\t' && line_content[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++) {
-			macro[j] = line_content[i];
+		INCREASE_I_UNTILL_CHAR(lineContent, 'o', i);
+		FIND_NEXT_CHAR(lineContent, i);
+		for (; lineContent[i] && lineContent[i] != ' ' && lineContent[i] != '\n' && lineContent[i] != '\t' && lineContent[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++) {
+			macro[j] = lineContent[i];
 		}
 		macro[j] = '\0';
 
@@ -50,7 +50,7 @@ int process_macro_line(int line, char *line_content, int *in_macro, char *macro,
 	}
 
 	/* Checks if this line is end of a macro */
-	if (strncmp("endm", line_content+i, 4) == 0 && *in_macro) {
+	if (strncmp("endm", lineContent+i, 4) == 0 && *in_macro) {
 		*in_macro = FALSE;
 		i=0;
 		while (i < MAX_LINE_LENGTH)
@@ -64,14 +64,14 @@ int process_macro_line(int line, char *line_content, int *in_macro, char *macro,
 
 	/* write regular line to am file */
 	if (!*in_macro)	
-		fprintf(am_file_ptr, "%s", line_content);
+		fprintf(am_file_ptr, "%s", lineContent);
 	/* the line is part of a macro so we added it to macro content */
 	else {
 		temp = macro_line_in_list(macro);
 		temp->num_of_content_lines += 1;
-		temp->content_lines = realloc(temp->content_lines, temp->num_of_content_lines*sizeof(line_content));
-		line_in_macro = malloc(sizeof(char) * (strlen(line_content) + 1));
-		strcpy(line_in_macro,line_content);
+		temp->content_lines = realloc(temp->content_lines, temp->num_of_content_lines*sizeof(lineContent));
+		line_in_macro = malloc(sizeof(char) * (strlen(lineContent) + 1));
+		strcpy(line_in_macro,lineContent);
 		temp->content_lines[temp->num_of_content_lines-1] = line_in_macro;
 		return TRUE;
 	}	
@@ -86,7 +86,7 @@ int macro_process(char *fileName)
 	int macro_phase_success = TRUE;
 	char macro[MAX_LINE_LENGTH];
 	int in_macro = FALSE;
-	char line_content[MAX_LINE_LENGTH + 2];
+	char lineContent[MAX_LINE_LENGTH + 2];
 	int line = 1;
 	FILE *assembly_file_ptr;
 	FILE *am_file_ptr;
@@ -123,10 +123,10 @@ int macro_process(char *fileName)
 	}
 
 	/* run the macro_process_line function on every line in .as file */
-	for (; fgets(line_content, MAX_LINE_LENGTH + 2, assembly_file_ptr) != NULL; line++)
+	for (; fgets(lineContent, MAX_LINE_LENGTH + 2, assembly_file_ptr) != NULL; line++)
 	{
 		/* check if line no reach the max length */ 
-		if (!feof(assembly_file_ptr) && strchr(line_content, '\n') == NULL)
+		if (!feof(assembly_file_ptr) && strchr(lineContent, '\n') == NULL)
 		{
 			print_error_message(line, "line exceeds the max line length");
 			macro_phase_success = FALSE;
@@ -139,7 +139,7 @@ int macro_process(char *fileName)
 		else
 		{
 			/* run process_macro_line function */ 
-			if (!process_macro_line(line, line_content, &in_macro, macro, fileName, am_file_ptr)) {
+			if (!process_macro_line(line, lineContent, &in_macro, macro, fileName, am_file_ptr)) {
 				macro_phase_success = FALSE;
 			}
 		}

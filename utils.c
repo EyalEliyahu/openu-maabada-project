@@ -106,18 +106,18 @@ int is_index(char* operand, int line) {
 }
 
 
-int fetch_symbol(int line, char* line_content, char *symbol_dest) {
+int fetch_symbol(int line, char* lineContent, char *symbol_dest) {
 	int j, i;
 	i = j = 0;
 
-	FIND_NEXT_CHAR(line_content, i);
+	FIND_NEXT_CHAR(lineContent, i);
 
-	for (; line_content[i] && line_content[i] != ':' && line_content[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++) {
-		symbol_dest[j] = line_content[i];
+	for (; lineContent[i] && lineContent[i] != ':' && lineContent[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++) {
+		symbol_dest[j] = lineContent[i];
 	}
 	symbol_dest[j] = '\0';
 
-	if (line_content[i] == ':') {
+	if (lineContent[i] == ':') {
 		if (!validate_symbol_name(symbol_dest, line)) {
 			print_error_message(line, "invalid symbol name");
 			symbol_dest[0] = '\0';
@@ -129,17 +129,17 @@ int fetch_symbol(int line, char* line_content, char *symbol_dest) {
 	return FALSE;
 }
 
-int fetch_operands(int line, char* line_content, int i, char **operands_array, int *num_of_operands) {
+int fetch_operands(int line, char* lineContent, int i, char **operands_array, int *num_of_operands) {
 	int j;
 	operands_array[0] = operands_array[1] = NULL;
 
-	if (line_content[i] == ',') {
+	if (lineContent[i] == ',') {
 		print_error_message(line, "Unexpected comma");
 		return FALSE;
 	}
 
 
-	for (*num_of_operands = 0; line_content[i] != EOF && line_content[i] != '\n' && line_content[i];) {
+	for (*num_of_operands = 0; lineContent[i] != EOF && lineContent[i] != '\n' && lineContent[i];) {
 		if (*num_of_operands == 2) {
 			print_error_message(line, "Too many operands for this assembly command");
 			free(operands_array[0]);
@@ -148,16 +148,16 @@ int fetch_operands(int line, char* line_content, int i, char **operands_array, i
 		}
 
 		operands_array[*num_of_operands] = malloc(MAX_LINE_LENGTH);
-		for (j = 0; line_content[i] && line_content[i] != '\t' && line_content[i] != ' ' && line_content[i] != '\n' && line_content[i] != EOF &&
-		            line_content[i] != ','; i++, j++) {
-			operands_array[*num_of_operands][j] = line_content[i];
+		for (j = 0; lineContent[i] && lineContent[i] != '\t' && lineContent[i] != ' ' && lineContent[i] != '\n' && lineContent[i] != EOF &&
+		            lineContent[i] != ','; i++, j++) {
+			operands_array[*num_of_operands][j] = lineContent[i];
 		}
 		operands_array[*num_of_operands][j] = '\0';
 		(*num_of_operands)++;
-		FIND_NEXT_CHAR(line_content, i);
+		FIND_NEXT_CHAR(lineContent, i);
 
-		if (line_content[i] == '\n' || line_content[i] == EOF || !line_content[i]) break;
-		else if (line_content[i] != ',') {
+		if (lineContent[i] == '\n' || lineContent[i] == EOF || !lineContent[i]) break;
+		else if (lineContent[i] != ',') {
 			print_error_message(line, "There needs to be a comma between operands");
 			free(operands_array[0]);
 			if (*num_of_operands > 1) {
@@ -166,10 +166,10 @@ int fetch_operands(int line, char* line_content, int i, char **operands_array, i
 			return FALSE;
 		}
 		i++;
-		FIND_NEXT_CHAR(line_content, i);
-		if (line_content[i] == '\n' || line_content[i] == EOF || !line_content[i])
+		FIND_NEXT_CHAR(lineContent, i);
+		if (lineContent[i] == '\n' || lineContent[i] == EOF || !lineContent[i])
 			print_error_message(line, "There needs to be an operand after comma");
-		else if (line_content[i] == ',') 
+		else if (lineContent[i] == ',') 
 			print_error_message(line, "Multiple consecutive commas.");
 		else 
 			continue;
@@ -184,17 +184,17 @@ int fetch_operands(int line, char* line_content, int i, char **operands_array, i
 	return TRUE;
 }
 
-int fetch_type(char *line_content, int *i) {
+int fetch_type(char *lineContent, int *i) {
 
 	char temp[MAX_LINE_LENGTH];
 	int j;
 
-	if (line_content[*i] != '.') {
+	if (lineContent[*i] != '.') {
         return CODE;
     }
 
-	for (j = 0; line_content[*i] && line_content[*i] != '\t' && line_content[*i] != ' '; (*i)++, j++) {
-		temp[j] = line_content[*i];
+	for (j = 0; lineContent[*i] && lineContent[*i] != '\t' && lineContent[*i] != ' '; (*i)++, j++) {
+		temp[j] = lineContent[*i];
 	}
     temp[j] = '\0';
 	if (strcmp(temp, ".data") == 0) {
@@ -265,7 +265,7 @@ code_word *generate_first_code_word(assembly_structure *opcode_data) {
 	return res_word;
 }
 
-code_word *generate_second_code_word(int line, char* line_content, assembly_structure *opcode_data, char **operands_array, int num_of_operands) {
+code_word *generate_second_code_word(int line, char* lineContent, assembly_structure *opcode_data, char **operands_array, int num_of_operands) {
 	code_word *res_word;
 	int address1 = NO_ADDRESS;
 	int address2 = NO_ADDRESS;
@@ -359,16 +359,16 @@ int calculate_offset(int ic) {
     return ic - calculate_base(ic);
 }
 
-int validate_string(int line, char *line_content, int i) {
+int validate_string(int line, char *lineContent, int i) {
 
-	if (line_content[i] != '"') {
+	if (lineContent[i] != '"') {
 		print_error_message(line, "string type should start with quotes!");
 		return FALSE;
 	}
 	i++;
 
-	for (; line_content[i] != '"' && line_content[i] != EOF && line_content[i] != '\n'; i++);
-	if (line_content[i] == '"')
+	for (; lineContent[i] != '"' && lineContent[i] != EOF && lineContent[i] != '\n'; i++);
+	if (lineContent[i] == '"')
 		return TRUE;
 
 	return TRUE;

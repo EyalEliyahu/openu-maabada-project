@@ -4,23 +4,23 @@
 #include <string.h>
 #include "firstPhase.h"
 
-int handle_data(int lineIndex, char *line_content, int i) {
+int handle_data(int lineIndex, char *lineContent, int i) {
 	int j;
 	char data_param[MAX_LINE_LEN];
 	data_word *data_to_add;
 
-	FIND_NEXT_CHAR(line_content,i);
+	FIND_NEXT_CHAR(lineContent,i);
 
-	if (line_content[i] == '\0' || line_content[i] == '\n')
+	if (lineContent[i] == '\0' || lineContent[i] == '\n')
 		return TRUE;
 
-	if (line_content[i] == ',')
+	if (lineContent[i] == ',')
 		i++;
 
-	FIND_NEXT_CHAR(line_content,i);
+	FIND_NEXT_CHAR(lineContent,i);
 
-	for (j = 0; line_content[i] && line_content[i] != ',' && line_content[i] != '\n' && line_content[i] != '\t' && line_content[i] != ' ' && line_content[i] != EOF; i++, j++) {
-		data_param[j] = line_content[i];
+	for (j = 0; lineContent[i] && lineContent[i] != ',' && lineContent[i] != '\n' && lineContent[i] != '\t' && lineContent[i] != ' ' && lineContent[i] != EOF; i++, j++) {
+		data_param[j] = lineContent[i];
 	}
 	data_param[j] = '\0';
 	
@@ -36,16 +36,16 @@ int handle_data(int lineIndex, char *line_content, int i) {
 		return FALSE;
 	}
 
-	return handle_data(lineIndex,line_content,i);
+	return handle_data(lineIndex,lineContent,i);
 
 }
 
-int handle_string(int lineIndex, char *line_content, int i) {
+int handle_string(int lineIndex, char *lineContent, int i) {
 	data_word *data_to_add;
 	data_to_add = (data_word *) malloc(sizeof(data_word));
 	
 
-	if (line_content[i] == '"') {
+	if (lineContent[i] == '"') {
 		data_to_add->data = '\0';
 		machine_data_section[DC] = *data_to_add;
 		free(data_to_add);
@@ -53,16 +53,16 @@ int handle_string(int lineIndex, char *line_content, int i) {
 		return TRUE;	
 	}
 
-	data_to_add->data = line_content[i];
+	data_to_add->data = lineContent[i];
 	machine_data_section[DC] = *data_to_add;
 	free(data_to_add);
 	i++;
 	
 	DC++;
-	return handle_string(lineIndex,line_content,i);
+	return handle_string(lineIndex,lineContent,i);
 }
 
-int handle_code(int lineIndex, char *line_content, int i) {
+int handle_code(int lineIndex, char *lineContent, int i) {
 	int j, num_of_operands=0;
 	char *operands_array[2];
 	assembly_structure *opcode_data;
@@ -73,8 +73,8 @@ int handle_code(int lineIndex, char *line_content, int i) {
 	*/
 	char function_name[MAX_LINE_LEN];
 
-	for (j = 0; line_content[i] && line_content[i] != '\n' && line_content[i] != '\t' && line_content[i] != ' ' && line_content[i] != EOF; i++, j++) {
-		function_name[j] = line_content[i];
+	for (j = 0; lineContent[i] && lineContent[i] != '\n' && lineContent[i] != '\t' && lineContent[i] != ' ' && lineContent[i] != EOF; i++, j++) {
+		function_name[j] = lineContent[i];
 	}
 	function_name[j] = '\0';
 	opcode_data = fetch_function_data(function_name);
@@ -83,13 +83,13 @@ int handle_code(int lineIndex, char *line_content, int i) {
 		return FALSE;
 	}
 
-	FIND_NEXT_CHAR(line_content, i); 
+	FIND_NEXT_CHAR(lineContent, i); 
 
-	if (!fetch_operands(lineIndex, line_content, i, operands_array, &num_of_operands))  {
+	if (!fetch_operands(lineIndex, lineContent, i, operands_array, &num_of_operands))  {
 		return FALSE;
 	}
 
-	second_word = generate_second_code_word(lineIndex, line_content, opcode_data, operands_array, num_of_operands);
+	second_word = generate_second_code_word(lineIndex, lineContent, opcode_data, operands_array, num_of_operands);
 	if (!second_word) {
 		return FALSE;
 	}
@@ -114,7 +114,7 @@ int handle_code(int lineIndex, char *line_content, int i) {
 
 
 int parseLine(int lineIndex, char *lineContent, symbolTable* table) {
-    char extern_symbol[MAX_LINE_LEN];
+    char externSymbol[MAX_LINE_LEN];
 	int data_type;
 	int i=0, j;
 	char symbol_name[MAX_LINE_LEN];
@@ -171,16 +171,16 @@ int parseLine(int lineIndex, char *lineContent, symbolTable* table) {
 		}
 		else if (data_type == EXTERN) {
 			for (j = 0; lineContent[i] && lineContent[i] != '\n' && lineContent[i] != ' ' && lineContent[i] != '\t' && lineContent[i] != EOF; i++, j++) {
-				extern_symbol[j] = lineContent[i];
+				externSymbol[j] = lineContent[i];
 			}
-			extern_symbol[j] = '\0';
+			externSymbol[j] = '\0';
 			/* If invalid external label name, it's an error */
-			if (!validate_symbol_name(extern_symbol, lineIndex)) {
+			if (!validate_symbol_name(externSymbol, lineIndex)) {
 				print_error_message(lineIndex, "Invalid symbol for extern type");
 				return FALSE;
 			}
-			if (!symbol_exists_in_table(extern_symbol, table)){
-				symbol_table_append(extern_symbol, EXTERN, table); /* Extern value is defaulted to 0 */
+			if (!symbol_exists_in_table(externSymbol, table)){
+				symbol_table_append(externSymbol, EXTERN, table); /* Extern value is defaulted to 0 */
 			}
 		}
 	}
