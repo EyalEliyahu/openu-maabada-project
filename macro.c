@@ -90,35 +90,9 @@ int macro_process(char *fileName)
 	int line = 1;
 	FILE *assembly_file_ptr;
 	FILE *am_file_ptr;
-	char *am_file_name;
-	char *assembly_file_name;
 
-	/*
-	if(!openFileSafe(am_file_ptr, fileName, ".am", "w")) {
-		return FALSE;
-	}
 	
-	if(!openFileSafe(assembly_file_ptr, fileName, ".as", "r")) {
-		return FALSE;
-	}
-	*/
-
-	assembly_file_name = strExt(fileName, ".as");
-	assembly_file_ptr = fopen(assembly_file_name, "r");
-	if (assembly_file_ptr == NULL)
-	{
-		printf("ASSEMBLER ERROR: Could not open the following file: \"%s\" --- skipping it...\n", assembly_file_name);
-		free(assembly_file_name);
-		return FALSE;
-	}
-
-	/* open .am and .as files */
-	am_file_name = strExt(fileName, ".am");
-	am_file_ptr = fopen(am_file_name, "w");
-	if (am_file_ptr == NULL)
-	{
-		printf("ASSEMBLER ERROR: Could not write to the following file: \"%s\" --- skipping it...\n", am_file_name);
-		free(am_file_name);
+	if(!openFileSafe(&am_file_ptr, fileName, ".am", "w") || openFileSafe(&assembly_file_ptr, fileName, ".as", "r")) {
 		return FALSE;
 	}
 
