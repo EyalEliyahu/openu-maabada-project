@@ -93,7 +93,7 @@ int is_index(char* operand, int line) {
 	}
 
     symbol[j] = '\0';
-	if (!validate_symbol_name(symbol, line))
+	if (!validateSymbolName(symbol, line))
 		return FALSE;
 
 	if (operand[j] == '[' && operand[j+1] == 'r' && atoi(&operand[j+2]) <= 9 && operand[j+3] == ']' && operand[j+4] == '\0') /* SYMBOL[rx] */
@@ -118,7 +118,7 @@ int fetch_symbol(int line, char* lineContent, char *symbol_dest) {
 	symbol_dest[j] = '\0';
 
 	if (lineContent[i] == ':') {
-		if (!validate_symbol_name(symbol_dest, line)) {
+		if (!validateSymbolName(symbol_dest, line)) {
 			print_error_message(line, "invalid symbol name");
 			symbol_dest[0] = '\0';
 			return TRUE; 
@@ -223,7 +223,7 @@ int fetch_address_type(char *operand, int line) {
 		return IMMEDIATE;
 	if (operand[0] && is_index(operand, line))
 		return INDEX;
-	if (validate_symbol_name(operand, line))
+	if (validateSymbolName(operand, line))
 		return DIRECT;
 
 	return NO_ADDRESS;

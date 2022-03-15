@@ -46,7 +46,7 @@ int fetch_symbol(int line, char* lineContent, char *symbol_dest);
         (++(index));
 
 #define THERE_IS_SYMBOL\
-        symbol_name[0] != '\0'
+        symbolName[0] != '\0'
 
 void append(char* s, char c);
 void print_error_message(int line, char* message, ...);

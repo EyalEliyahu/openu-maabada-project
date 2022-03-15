@@ -9,9 +9,9 @@
 #include "assemblyStructures.h"
 
 
-void free_symbol_table(symbolTable* table)
+void freeSymbolTable(symbolTable* table)
 {
-    symbol_line *temp;
+    symbolItem *temp;
 
     while (table->symbolHead)
     {
@@ -22,12 +22,12 @@ void free_symbol_table(symbolTable* table)
 	free(table);
 }
 
-int symbol_exists_in_table(char *symbol_name, symbolTable* table)
+int symbolExistsInTable(char *symbolName, symbolTable* table)
 {
-    symbol_line *temp = table->symbolHead;
+    symbolItem *temp = table->symbolHead;
     while (temp)
     {
-        if (strcmp(temp->symbol, symbol_name) == 0)
+        if (strcmp(temp->symbol, symbolName) == 0)
             return TRUE;
         else
             temp = temp->next;
@@ -35,12 +35,12 @@ int symbol_exists_in_table(char *symbol_name, symbolTable* table)
     return FALSE;
 }
 
-symbol_line *symbol_line_in_table(char *symbol_name, symbolTable* table)
+symbolItem *symbolItemInTable(char *symbolName, symbolTable* table)
 {
-    symbol_line *temp = table->symbolHead;
+    symbolItem *temp = table->symbolHead;
     while (temp)
     {
-        if (strcmp(temp->symbol, symbol_name) == 0)
+        if (strcmp(temp->symbol, symbolName) == 0)
             return temp;
         else
             temp = temp->next;
@@ -48,20 +48,20 @@ symbol_line *symbol_line_in_table(char *symbol_name, symbolTable* table)
     return NULL;
 }
 
-void print_symbol_table(symbolTable* table) /* Used for debugging */
+void printSymbolTable(symbolTable* table) /* Used for debugging */
 {
-    symbol_line *temp = table->symbolHead;
+    symbolItem *temp = table->symbolHead;
 	printf("----------------------- SYMBOL TABLE START ---------------------\n");
     while (temp)
     {
-		printf("Symbol: %s | Value: %d | Base: %d | Offset: %d | Attribute: %d\n", temp->symbol, temp->value, temp->base, temp->offset, temp->symbol_type);
+		printf("Symbol: %s | Value: %d | Base: %d | Offset: %d | Attribute: %d\n", temp->symbol, temp->value, temp->base, temp->offset, temp->symbolType);
 		temp = temp->next;
     }
 	printf("----------------------- SYMBOL TABLE END ---------------------\n");
 }
 
-symbol_line * get_symbol_line_from_symbol_table(char * symbol, symbolTable* table) {
-    symbol_line * sl = table->symbolHead;
+symbolItem * getSymbolItemFromSymbolTable(char * symbol, symbolTable* table) {
+    symbolItem * sl = table->symbolHead;
     while (sl) {
         if (strcmp(sl->symbol, symbol) == 0) {
             return sl;
@@ -76,29 +76,29 @@ symbolTable* initSymbolTable() {
 	return newTable;
 }
 
-void symbol_table_append(char* symbol_name, int symbol_type, symbolTable* table)
+void symbolTableAppend(char* symbolName, int symbolType, symbolTable* table)
 {
-	symbol_line* new_symbol = (symbol_line*)malloc(sizeof(symbol_line));
+	symbolItem* new_symbol = (symbolItem*)malloc(sizeof(symbolItem));
 
 	if (!new_symbol) {
 		fprintf(stderr, "Memory allocation for new symbol failed!");
 		exit(1);
 	}
 	
-	strcpy(new_symbol->symbol, symbol_name);
+	strcpy(new_symbol->symbol, symbolName);
 
 	new_symbol->value = 0;
 	new_symbol->base = 0;
 	new_symbol->offset = 0;
-	if (symbol_type == CODE) {
+	if (symbolType == CODE) {
 		new_symbol->value = IC;
 		new_symbol->base = calculate_base(IC);
 		new_symbol->offset = calculate_offset(IC);
 	}
-	else if (symbol_type == DATA) {
+	else if (symbolType == DATA) {
 		new_symbol->value = DC;
 	}
-	new_symbol->symbol_type = symbol_type; 
+	new_symbol->symbolType = symbolType; 
 
 	if(!table->symbolHead) {
 		table->symbolHead = new_symbol;
@@ -113,7 +113,7 @@ void symbol_table_append(char* symbol_name, int symbol_type, symbolTable* table)
 	return;
 }
 
-int is_alphanumeric_str(char *string) {
+int isAlphanumericStr(char *string) {
 	int i;
 	/*check for every char in string if it is non alphanumeric char if it is function returns TRUE*/
 	for (i = 0; string[i]; i++) {
@@ -122,18 +122,18 @@ int is_alphanumeric_str(char *string) {
 	return TRUE;
 }
 
-int validate_symbol_name(char *name, int line) {
+int validateSymbolName(char *name, int line) {
 	/* Check length, first char is alpha and all the others are alphanumeric, and not saved word */
-	return name[0] && strlen(name) <= MAX_SYMBOL_SIZE && isalpha(name[0]) && is_alphanumeric_str(name + 1) &&
+	return name[0] && strlen(name) <= MAX_SYMBOL_SIZE && isalpha(name[0]) && isAlphanumericStr(name + 1) &&
 	       !is_reserved_word(name, line);
 }
 
-void update_symbol_table_data_types(symbolTable* table) {
+void updateSymbolTableDataTypes(symbolTable* table) {
 	
-	symbol_line *temp = table->symbolHead;
+	symbolItem *temp = table->symbolHead;
     while (temp)
     {
-        if (temp->symbol_type == DATA) {
+        if (temp->symbolType == DATA) {
 			temp->value += ICF;
 			temp->base = calculate_base(temp->value);
 			temp->offset = calculate_offset(temp->value);
@@ -143,18 +143,18 @@ void update_symbol_table_data_types(symbolTable* table) {
 	
 }
 
-int update_symbol_with_entry_attribute(char *symbol_name, int line, symbolTable* table)
+int updateSymbolWithEntryAttribute(char *symbolName, int line, symbolTable* table)
 {
-    symbol_line *temp = table->symbolHead;
+    symbolItem *temp = table->symbolHead;
     while (temp)
     {
-        if (strcmp(temp->symbol, symbol_name) == 0) {
-			if (temp->symbol_type == DATA) {
-				temp->symbol_type = DATAANDENTRY;
+        if (strcmp(temp->symbol, symbolName) == 0) {
+			if (temp->symbolType == DATA) {
+				temp->symbolType = DATAANDENTRY;
             	return TRUE;
 			}
-			if (temp->symbol_type == CODE) {
-				temp->symbol_type = CODEANDENTRY;
+			if (temp->symbolType == CODE) {
+				temp->symbolType = CODEANDENTRY;
             	return TRUE;
 			}
 			else {

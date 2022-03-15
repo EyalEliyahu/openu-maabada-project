@@ -115,19 +115,19 @@ int handle_code(int lineIndex, char *lineContent, int i) {
 
 int parseLine(int lineIndex, char *lineContent, symbolTable* table) {
     char externSymbol[MAX_LINE_LEN];
-	int data_type;
+	int dataType;
 	int i=0, j;
-	char symbol_name[MAX_LINE_LEN];
+	char symbolName[MAX_LINE_LEN];
 
 	FIND_NEXT_CHAR(lineContent, i); 
 	if (!lineContent[i] || lineContent[i] == '\n' || lineContent[i] == EOF || lineContent[i] == ';')
 		return TRUE; 
 	
-	if (fetch_symbol(lineIndex, lineContent, symbol_name)) {
+	if (fetch_symbol(lineIndex, lineContent, symbolName)) {
 		return FALSE;
 	}
 	if (THERE_IS_SYMBOL) {
-		if (symbol_exists_in_table(symbol_name, table)) {
+		if (symbolExistsInTable(symbolName, table)) {
 			print_error_message(lineIndex, "Symbol is already defined.");
 			return FALSE;
 		}
@@ -138,27 +138,27 @@ int parseLine(int lineIndex, char *lineContent, symbolTable* table) {
 	}
 
 	FIND_NEXT_CHAR(lineContent, i);
-	data_type = fetch_type(lineContent, &i);
-	if (data_type == FAILED_TO_FIND) {
+	dataType = fetch_type(lineContent, &i);
+	if (dataType == FAILED_TO_FIND) {
 		return FALSE;
 	}
 
 	FIND_NEXT_CHAR(lineContent, i);
 
-	if ( data_type == CODE ) {
+	if ( dataType == CODE ) {
 		if (THERE_IS_SYMBOL) {
-			symbol_table_append(symbol_name, CODE, table);
+			symbolTableAppend(symbolName, CODE, table);
 		}
 		if (!handle_code(lineIndex, lineContent, i))
 			return FALSE;
 
 	}
 	else {
-		if (data_type == DATA || data_type == STRING) {
+		if (dataType == DATA || dataType == STRING) {
 			if (THERE_IS_SYMBOL){
-				symbol_table_append(symbol_name, DATA, table);
+				symbolTableAppend(symbolName, DATA, table);
 			}
-			if (data_type == DATA) {
+			if (dataType == DATA) {
 				if (!handle_data(lineIndex, lineContent, i))
 					return FALSE;
 			}
@@ -169,18 +169,18 @@ int parseLine(int lineIndex, char *lineContent, symbolTable* table) {
 					return FALSE;
 			}	
 		}
-		else if (data_type == EXTERN) {
+		else if (dataType == EXTERN) {
 			for (j = 0; lineContent[i] && lineContent[i] != '\n' && lineContent[i] != ' ' && lineContent[i] != '\t' && lineContent[i] != EOF; i++, j++) {
 				externSymbol[j] = lineContent[i];
 			}
 			externSymbol[j] = '\0';
 			/* If invalid external label name, it's an error */
-			if (!validate_symbol_name(externSymbol, lineIndex)) {
+			if (!validateSymbolName(externSymbol, lineIndex)) {
 				print_error_message(lineIndex, "Invalid symbol for extern type");
 				return FALSE;
 			}
-			if (!symbol_exists_in_table(externSymbol, table)){
-				symbol_table_append(externSymbol, EXTERN, table); /* Extern value is defaulted to 0 */
+			if (!symbolExistsInTable(externSymbol, table)){
+				symbolTableAppend(externSymbol, EXTERN, table); /* Extern value is defaulted to 0 */
 			}
 		}
 	}
@@ -198,6 +198,6 @@ int runFirstPhase(FILE* fileAfterMacroParsing, symbolTable* table) {
 			return FALSE;
 		}
 	}
-	print_symbol_table(table);
+	printSymbolTable(table);
 	return TRUE;
 }
