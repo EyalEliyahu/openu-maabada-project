@@ -65,11 +65,6 @@ char *reserved_words[NUM_OF_RESERVED_WORDS] = {
 	"r14",
 	"r15"};
 
-int IC = IC_INIT_VALUE;
-int DC = DC_INIT_VALUE;
-int ICF = 0;
-int DCF = 0; 
-
 int isReservedWord(char *word, int line) {
 	int i; 
 
@@ -93,7 +88,7 @@ assemblyStructure* fetchFunctionData(char *functionName) {
 	return NULL;
 }
 
-void printMachineCode() { /* used for debugging */
+void printMachineCode(int IC, int DC) { /* used for debugging */
 	int i;
 	printf("------------------------ CODE ---------------------\n");
 	for (i=0; i < IC - IC_INIT_VALUE; i++)

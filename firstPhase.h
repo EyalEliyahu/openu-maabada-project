@@ -5,6 +5,6 @@
 #include "consts.h"
 #include "utils.h"
 
-int runFirstPhase(FILE* fileAfterMacroParsing, symbolTable* table);
+int runFirstPhase(FILE* fileAfterMacroParsing, symbolTable* table, int* IC, int* DC);
 
 #endif

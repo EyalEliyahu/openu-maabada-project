@@ -76,7 +76,7 @@ symbolTable* initSymbolTable() {
 	return newTable;
 }
 
-void symbolTableAppend(char* symbolName, int symbolType, symbolTable* table)
+void symbolTableAppend(char* symbolName, int symbolType, symbolTable* table, int IC, int DC)
 {
 	symbolItem* new_symbol = (symbolItem*)malloc(sizeof(symbolItem));
 
@@ -128,13 +128,13 @@ int validateSymbolName(char *name, int line) {
 	       !isReservedWord(name, line);
 }
 
-void updateSymbolTableDataTypes(symbolTable* table) {
+void updateSymbolTableDataTypes(symbolTable* table, int IC) {
 	
 	symbolItem *temp = table->symbolHead;
     while (temp)
     {
         if (temp->symbolType == DATA) {
-			temp->value += ICF;
+			temp->value += IC;
 			temp->base = calculateBase(temp->value);
 			temp->offset = calculateOffset(temp->value);
 		}

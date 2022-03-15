@@ -4,7 +4,7 @@
 #include <string.h>
 #include "firstPhase.h"
 
-int handleData(int lineIndex, char *lineContent, int i) {
+int handleData(int lineIndex, char *lineContent, int i, int *DC) {
 	int j;
 	char dataParam[MAX_LINE_LEN];
 	dataWord *dataToAdd;
@@ -27,42 +27,42 @@ int handleData(int lineIndex, char *lineContent, int i) {
 	if(atoi(dataParam)){
 		dataToAdd = (dataWord *) malloc(sizeof(dataWord));
 		dataToAdd->data = atoi(dataParam);
-		machineDataSection[DC] = *dataToAdd;
+		machineDataSection[*DC] = *dataToAdd;
 		free(dataToAdd);
-		DC++;
+		(*DC)++;
 	}
 	else {
 		printErrorMessage(lineIndex, "Invalid data provided");
 		return FALSE;
 	}
 
-	return handleData(lineIndex,lineContent,i);
+	return handleData(lineIndex,lineContent,i, DC);
 
 }
 
-int handleString(int lineIndex, char *lineContent, int i) {
+int handleString(int lineIndex, char* lineContent, int i, int* DC) {
 	dataWord *dataToAdd;
 	dataToAdd = (dataWord *) malloc(sizeof(dataWord));
 	
 
 	if (lineContent[i] == '"') {
 		dataToAdd->data = '\0';
-		machineDataSection[DC] = *dataToAdd;
+		machineDataSection[*DC] = *dataToAdd;
 		free(dataToAdd);
-		DC++;
+		(*DC)++;
 		return TRUE;	
 	}
 
 	dataToAdd->data = lineContent[i];
-	machineDataSection[DC] = *dataToAdd;
+	machineDataSection[*DC] = *dataToAdd;
 	free(dataToAdd);
 	i++;
 	
-	DC++;
-	return handleString(lineIndex,lineContent,i);
+	(*DC)++;
+	return handleString(lineIndex,lineContent,i, DC);
 }
 
-int handleCode(int lineIndex, char *lineContent, int i) {
+int handleCode(int lineIndex, char *lineContent, int i, int* IC) {
 	int j, numOfOperands=0;
 	char *operandsArray[2];
 	assemblyStructure *opcodeData;
@@ -93,24 +93,24 @@ int handleCode(int lineIndex, char *lineContent, int i) {
 
 	firstWord = generateFirstCodeWord(opcodeData);
 
-	machineCodeSection[IC-IC_INIT_VALUE] = *firstWord;
-	machineCodeSection[(IC+1)-IC_INIT_VALUE] = *secondWord;
+	machineCodeSection[*IC-IC_INIT_VALUE] = *firstWord;
+	machineCodeSection[(*IC+1)-IC_INIT_VALUE] = *secondWord;
 
 	if (numOfOperands == 0) {
-		machineCodeSection[IC-IC_INIT_VALUE] = *firstWord;
-		IC += firstWord->L;
+		machineCodeSection[*IC-IC_INIT_VALUE] = *firstWord;
+		*IC += firstWord->L;
 	}
 	else {
-		machineCodeSection[IC-IC_INIT_VALUE] = *firstWord;
-		machineCodeSection[(IC+1)-IC_INIT_VALUE] = *secondWord;
-		IC += firstWord->L + secondWord->L;
+		machineCodeSection[*IC-IC_INIT_VALUE] = *firstWord;
+		machineCodeSection[(*IC+1)-IC_INIT_VALUE] = *secondWord;
+		*IC += firstWord->L + secondWord->L;
 	}
 
 	return TRUE;
 }
 
 
-int parseLine(int lineIndex, char *lineContent, symbolTable* table) {
+int parseLineForFirstPhase(int lineIndex, char *lineContent, symbolTable* table, int *IC, int *DC) {
     char externSymbol[MAX_LINE_LEN];
 	int dataType;
 	int i=0, j;
@@ -144,25 +144,25 @@ int parseLine(int lineIndex, char *lineContent, symbolTable* table) {
 
 	if ( dataType == CODE ) {
 		if (THERE_IS_SYMBOL) {
-			symbolTableAppend(symbolName, CODE, table);
+			symbolTableAppend(symbolName, CODE, table, *IC, *DC);
 		}
-		if (!handleCode(lineIndex, lineContent, i))
+		if (!handleCode(lineIndex, lineContent, i, IC))
 			return FALSE;
 
 	}
 	else {
 		if (dataType == DATA || dataType == STRING) {
 			if (THERE_IS_SYMBOL){
-				symbolTableAppend(symbolName, DATA, table);
+				symbolTableAppend(symbolName, DATA, table, *IC, *DC);
 			}
 			if (dataType == DATA) {
-				if (!handleData(lineIndex, lineContent, i))
+				if (!handleData(lineIndex, lineContent, i, DC))
 					return FALSE;
 			}
 			else {
 				if (!validateString(lineIndex, lineContent, i))
 					return FALSE;
-				if (!handleString(lineIndex, lineContent, i+1))
+				if (!handleString(lineIndex, lineContent, i+1, DC))
 					return FALSE;
 			}	
 		}
@@ -177,7 +177,7 @@ int parseLine(int lineIndex, char *lineContent, symbolTable* table) {
 				return FALSE;
 			}
 			if (!symbolExistsInTable(externSymbol, table)){
-				symbolTableAppend(externSymbol, EXTERN, table); /* Extern value is defaulted to 0 */
+				symbolTableAppend(externSymbol, EXTERN, table, *IC, *DC); /* Extern value is defaulted to 0 */
 			}
 		}
 	}
@@ -185,16 +185,16 @@ int parseLine(int lineIndex, char *lineContent, symbolTable* table) {
 	return TRUE;
 }
 
-int runFirstPhase(FILE* fileAfterMacroParsing, symbolTable* table) {
+int runFirstPhase(FILE* fileAfterMacroParsing, symbolTable* table, int* IC, int* DC) {
 	int lineIndex;
 	char lineContent[MAX_LINE_WITH_LINEDROP_LEN];
 	fgets(lineContent, MAX_LINE_WITH_LINEDROP_LEN, fileAfterMacroParsing);
 	for (lineIndex = 0; fgets(lineContent, MAX_LINE_WITH_LINEDROP_LEN, fileAfterMacroParsing); lineIndex++) {
-		int lineParseSuccess = parseLine(lineIndex, lineContent, table);
+		int lineParseSuccess = parseLineForFirstPhase(lineIndex, lineContent, table, IC, DC);
 		if(!lineParseSuccess) {
 			return FALSE;
 		}
 	}
-	printSymbolTable(table);
+	updateSymbolTableDataTypes(table, *IC);
 	return TRUE;
 }
