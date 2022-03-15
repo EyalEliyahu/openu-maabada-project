@@ -4,10 +4,10 @@
 #include <string.h>
 #include "firstPhase.h"
 
-int handle_data(int lineIndex, char *lineContent, int i) {
+int handleData(int lineIndex, char *lineContent, int i) {
 	int j;
-	char data_param[MAX_LINE_LEN];
-	data_word *data_to_add;
+	char dataParam[MAX_LINE_LEN];
+	dataWord *dataToAdd;
 
 	FIND_NEXT_CHAR(lineContent,i);
 
@@ -20,93 +20,90 @@ int handle_data(int lineIndex, char *lineContent, int i) {
 	FIND_NEXT_CHAR(lineContent,i);
 
 	for (j = 0; lineContent[i] && lineContent[i] != ',' && lineContent[i] != '\n' && lineContent[i] != '\t' && lineContent[i] != ' ' && lineContent[i] != EOF; i++, j++) {
-		data_param[j] = lineContent[i];
+		dataParam[j] = lineContent[i];
 	}
-	data_param[j] = '\0';
+	dataParam[j] = '\0';
 	
-	if(atoi(data_param)){
-		data_to_add = (data_word *) malloc(sizeof(data_word));
-		data_to_add->data = atoi(data_param);
-		machine_data_section[DC] = *data_to_add;
-		free(data_to_add);
+	if(atoi(dataParam)){
+		dataToAdd = (dataWord *) malloc(sizeof(dataWord));
+		dataToAdd->data = atoi(dataParam);
+		machineDataSection[DC] = *dataToAdd;
+		free(dataToAdd);
 		DC++;
 	}
 	else {
-		print_error_message(lineIndex, "Invalid data provided");
+		printErrorMessage(lineIndex, "Invalid data provided");
 		return FALSE;
 	}
 
-	return handle_data(lineIndex,lineContent,i);
+	return handleData(lineIndex,lineContent,i);
 
 }
 
-int handle_string(int lineIndex, char *lineContent, int i) {
-	data_word *data_to_add;
-	data_to_add = (data_word *) malloc(sizeof(data_word));
+int handleString(int lineIndex, char *lineContent, int i) {
+	dataWord *dataToAdd;
+	dataToAdd = (dataWord *) malloc(sizeof(dataWord));
 	
 
 	if (lineContent[i] == '"') {
-		data_to_add->data = '\0';
-		machine_data_section[DC] = *data_to_add;
-		free(data_to_add);
+		dataToAdd->data = '\0';
+		machineDataSection[DC] = *dataToAdd;
+		free(dataToAdd);
 		DC++;
 		return TRUE;	
 	}
 
-	data_to_add->data = lineContent[i];
-	machine_data_section[DC] = *data_to_add;
-	free(data_to_add);
+	dataToAdd->data = lineContent[i];
+	machineDataSection[DC] = *dataToAdd;
+	free(dataToAdd);
 	i++;
 	
 	DC++;
-	return handle_string(lineIndex,lineContent,i);
+	return handleString(lineIndex,lineContent,i);
 }
 
-int handle_code(int lineIndex, char *lineContent, int i) {
-	int j, num_of_operands=0;
-	char *operands_array[2];
-	assembly_structure *opcode_data;
-	code_word *first_word;
-	code_word *second_word;
-	/*
-	code_word *direct_address_word;
-	*/
-	char function_name[MAX_LINE_LEN];
+int handleCode(int lineIndex, char *lineContent, int i) {
+	int j, numOfOperands=0;
+	char *operandsArray[2];
+	assemblyStructure *opcodeData;
+	codeWord *firstWord;
+	codeWord *secondWord;
+	char functionName[MAX_LINE_LEN];
 
 	for (j = 0; lineContent[i] && lineContent[i] != '\n' && lineContent[i] != '\t' && lineContent[i] != ' ' && lineContent[i] != EOF; i++, j++) {
-		function_name[j] = lineContent[i];
+		functionName[j] = lineContent[i];
 	}
-	function_name[j] = '\0';
-	opcode_data = fetch_function_data(function_name);
-	if(!opcode_data) {
-		print_error_message(lineIndex, "could not find this assembly command");
+	functionName[j] = '\0';
+	opcodeData = fetchFunctionData(functionName);
+	if(!opcodeData) {
+		printErrorMessage(lineIndex, "could not find this assembly command");
 		return FALSE;
 	}
 
 	FIND_NEXT_CHAR(lineContent, i); 
 
-	if (!fetch_operands(lineIndex, lineContent, i, operands_array, &num_of_operands))  {
+	if (!fetchOperands(lineIndex, lineContent, i, operandsArray, &numOfOperands))  {
 		return FALSE;
 	}
 
-	second_word = generate_second_code_word(lineIndex, lineContent, opcode_data, operands_array, num_of_operands);
-	if (!second_word) {
+	secondWord = generateSecondCodeWord(lineIndex, lineContent, opcodeData, operandsArray, numOfOperands);
+	if (!secondWord) {
 		return FALSE;
 	}
 
-	first_word = generate_first_code_word(opcode_data);
+	firstWord = generateFirstCodeWord(opcodeData);
 
-	machine_code_section[IC-IC_INIT_VALUE] = *first_word;
-	machine_code_section[(IC+1)-IC_INIT_VALUE] = *second_word;
+	machineCodeSection[IC-IC_INIT_VALUE] = *firstWord;
+	machineCodeSection[(IC+1)-IC_INIT_VALUE] = *secondWord;
 
-	if (num_of_operands == 0) {
-		machine_code_section[IC-IC_INIT_VALUE] = *first_word;
-		IC += first_word->L;
+	if (numOfOperands == 0) {
+		machineCodeSection[IC-IC_INIT_VALUE] = *firstWord;
+		IC += firstWord->L;
 	}
 	else {
-		machine_code_section[IC-IC_INIT_VALUE] = *first_word;
-		machine_code_section[(IC+1)-IC_INIT_VALUE] = *second_word;
-		IC += first_word->L + second_word->L;
+		machineCodeSection[IC-IC_INIT_VALUE] = *firstWord;
+		machineCodeSection[(IC+1)-IC_INIT_VALUE] = *secondWord;
+		IC += firstWord->L + secondWord->L;
 	}
 
 	return TRUE;
@@ -123,12 +120,12 @@ int parseLine(int lineIndex, char *lineContent, symbolTable* table) {
 	if (!lineContent[i] || lineContent[i] == '\n' || lineContent[i] == EOF || lineContent[i] == ';')
 		return TRUE; 
 	
-	if (fetch_symbol(lineIndex, lineContent, symbolName)) {
+	if (fetchSymbol(lineIndex, lineContent, symbolName)) {
 		return FALSE;
 	}
 	if (THERE_IS_SYMBOL) {
 		if (symbolExistsInTable(symbolName, table)) {
-			print_error_message(lineIndex, "Symbol is already defined.");
+			printErrorMessage(lineIndex, "Symbol is already defined.");
 			return FALSE;
 		}
 		INCREASE_I_UNTILL_CHAR(lineContent, ':', i);
@@ -138,7 +135,7 @@ int parseLine(int lineIndex, char *lineContent, symbolTable* table) {
 	}
 
 	FIND_NEXT_CHAR(lineContent, i);
-	dataType = fetch_type(lineContent, &i);
+	dataType = fetchType(lineContent, &i);
 	if (dataType == FAILED_TO_FIND) {
 		return FALSE;
 	}
@@ -149,7 +146,7 @@ int parseLine(int lineIndex, char *lineContent, symbolTable* table) {
 		if (THERE_IS_SYMBOL) {
 			symbolTableAppend(symbolName, CODE, table);
 		}
-		if (!handle_code(lineIndex, lineContent, i))
+		if (!handleCode(lineIndex, lineContent, i))
 			return FALSE;
 
 	}
@@ -159,13 +156,13 @@ int parseLine(int lineIndex, char *lineContent, symbolTable* table) {
 				symbolTableAppend(symbolName, DATA, table);
 			}
 			if (dataType == DATA) {
-				if (!handle_data(lineIndex, lineContent, i))
+				if (!handleData(lineIndex, lineContent, i))
 					return FALSE;
 			}
 			else {
-				if (!validate_string(lineIndex, lineContent, i))
+				if (!validateString(lineIndex, lineContent, i))
 					return FALSE;
-				if (!handle_string(lineIndex, lineContent, i+1))
+				if (!handleString(lineIndex, lineContent, i+1))
 					return FALSE;
 			}	
 		}
@@ -176,7 +173,7 @@ int parseLine(int lineIndex, char *lineContent, symbolTable* table) {
 			externSymbol[j] = '\0';
 			/* If invalid external label name, it's an error */
 			if (!validateSymbolName(externSymbol, lineIndex)) {
-				print_error_message(lineIndex, "Invalid symbol for extern type");
+				printErrorMessage(lineIndex, "Invalid symbol for extern type");
 				return FALSE;
 			}
 			if (!symbolExistsInTable(externSymbol, table)){

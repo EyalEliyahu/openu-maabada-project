@@ -92,8 +92,8 @@ void symbolTableAppend(char* symbolName, int symbolType, symbolTable* table)
 	new_symbol->offset = 0;
 	if (symbolType == CODE) {
 		new_symbol->value = IC;
-		new_symbol->base = calculate_base(IC);
-		new_symbol->offset = calculate_offset(IC);
+		new_symbol->base = calculateBase(IC);
+		new_symbol->offset = calculateOffset(IC);
 	}
 	else if (symbolType == DATA) {
 		new_symbol->value = DC;
@@ -125,7 +125,7 @@ int isAlphanumericStr(char *string) {
 int validateSymbolName(char *name, int line) {
 	/* Check length, first char is alpha and all the others are alphanumeric, and not saved word */
 	return name[0] && strlen(name) <= MAX_SYMBOL_SIZE && isalpha(name[0]) && isAlphanumericStr(name + 1) &&
-	       !is_reserved_word(name, line);
+	       !isReservedWord(name, line);
 }
 
 void updateSymbolTableDataTypes(symbolTable* table) {
@@ -135,8 +135,8 @@ void updateSymbolTableDataTypes(symbolTable* table) {
     {
         if (temp->symbolType == DATA) {
 			temp->value += ICF;
-			temp->base = calculate_base(temp->value);
-			temp->offset = calculate_offset(temp->value);
+			temp->base = calculateBase(temp->value);
+			temp->offset = calculateOffset(temp->value);
 		}
 		temp = temp->next;
     }
@@ -158,13 +158,13 @@ int updateSymbolWithEntryAttribute(char *symbolName, int line, symbolTable* tabl
             	return TRUE;
 			}
 			else {
-				print_error_message(line, "A symbol can be either entry or extern but not both");
+				printErrorMessage(line, "A symbol can be either entry or extern but not both");
 				return FALSE;
 			}	
 		}
 		temp = temp->next;
     }
 	
-	print_error_message(line, "Could not find a symbol in symbol table for this entry");
+	printErrorMessage(line, "Could not find a symbol in symbol table for this entry");
     return FALSE;
 }

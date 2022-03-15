@@ -8,7 +8,7 @@
 /* This function handles the macro replacement */
 int process_macro_line(int line, char *lineContent, int *in_macro, char *macro, char *file, FILE *am_file_ptr) {
 	int i=0, j=0, k=0;
-	char first_word[MAX_LINE_LENGTH];
+	char firstWord[MAX_LINE_LENGTH];
 	macro_line *temp;
 	char* line_in_macro = "";
 	/* look for the next char that is not whitespace/tab/newline */
@@ -16,13 +16,13 @@ int process_macro_line(int line, char *lineContent, int *in_macro, char *macro, 
 
 	/* Get the line content after removing spaces and tabs from the beginning until reach whitespace/tab/newline */
 	for (; lineContent[i] && lineContent[i] != '\n' && lineContent[i] != '\t' && lineContent[i] != ' ' && lineContent[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++) {
-		first_word[j] = lineContent[i];
+		firstWord[j] = lineContent[i];
 	}
-	first_word[j] = '\0';
+	firstWord[j] = '\0';
 
 	/* Check if the line contains macro that we already saved */
-	if(macro_exists_in_list(first_word) && !*in_macro) {
-		temp = macro_line_in_list(first_word);
+	if(macro_exists_in_list(firstWord) && !*in_macro) {
+		temp = macro_line_in_list(firstWord);
 		/* replace macro name with macro content */
 		while (k < temp->num_of_content_lines)
 		{
@@ -128,7 +128,7 @@ int macro_process(char *fileName)
 		/* check if line no reach the max length */ 
 		if (!feof(assembly_file_ptr) && strchr(lineContent, '\n') == NULL)
 		{
-			print_error_message(line, "line exceeds the max line length");
+			printErrorMessage(line, "line exceeds the max line length");
 			macro_phase_success = FALSE;
 			/* if the line is too long continue the rest of the chars to get to the new line */ 
 			while (*temp_string != '\n' && *temp_string != EOF)

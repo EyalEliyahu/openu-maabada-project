@@ -16,17 +16,17 @@ enum addresses_types {IMMEDIATE, DIRECT, INDEX, REGISTER, NO_ADDRESS, FAILED_ADD
 enum {SOURCE, DESTINATION};
 
 /* struct for holding an opcode and it's binary value */
-typedef struct assembly_structure {
+typedef struct assemblyStructure {
 	char* name;
 	unsigned int opcode;
     unsigned int funct;
-	int num_of_operands_per_function;
-	int source_operand_types[5];
-	int destination_operand_types[5];
-} assembly_structure;
+	int numOfOperandsPerFunction;
+	int sourceOperandTypes[5];
+	int destinationOperandTypes[5];
+} assemblyStructure;
 
 /* Code Word Struct */
-typedef struct code_word {
+typedef struct codeWord {
 	/* shared to all words */
 	unsigned int ARE: 3;
 	int L;
@@ -37,14 +37,14 @@ typedef struct code_word {
 
 	/* second word */
 	unsigned int funct: 4;
-	unsigned int source_reg: 4;
-	unsigned int source_address: 2;
-	unsigned int destination_reg: 4;
-	unsigned int destination_address: 2;
+	unsigned int sourceRegister: 4;
+	unsigned int sourceAddress: 2;
+	unsigned int destinationRegister: 4;
+	unsigned int destinationAddress: 2;
 
 	/* operands */
-	char *first_operand;
-	char *second_operand;
+	char *firstOperand;
+	char *secondOperand;
 
 	/* immediate address */
 	unsigned int immediate: 16;
@@ -53,21 +53,21 @@ typedef struct code_word {
 	unsigned int base: 16;
 	unsigned int offset: 16;
 
-} code_word;
+} codeWord;
 
 /* DATA Word Struct */
-typedef struct data_word {
+typedef struct dataWord {
 	int data;
-} data_word;
+} dataWord;
 
-int is_reserved_word(char *word, int line);
-assembly_structure* fetch_function_data(char *function);
-void print_machine_code();
-int validate_operands(int line, int address1, int address2, int num_of_operands, assembly_structure *opcode_data);
+int isReservedWord(char *word, int line);
+assemblyStructure* fetchFunctionData(char *function);
+void printMachineCode();
+int validateOperands(int line, int address1, int address2, int numOfOperands, assemblyStructure *opcodeData);
 
-extern assembly_structure assembly_structure_table[];
-extern code_word machine_code_section[];
-extern data_word machine_data_section[];
+extern assemblyStructure assemblyStructureTable[];
+extern codeWord machineCodeSection[];
+extern dataWord machineDataSection[];
 extern int IC;
 extern int DC;
 extern int ICF;
