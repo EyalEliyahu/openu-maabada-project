@@ -4,7 +4,7 @@
 #include "consts.h"
 #include "globalStructs.h"
 #include "symbolTable.h"
-#include "assembly_structures.h"
+#include "assemblyStructures.h"
 
 /*
  * TODO
@@ -21,18 +21,11 @@ void *safeMalloc(long size);
  */
 char* stringsConcat(char *string1, char* string2);
 
-int openFileSafe(FILE* fileStream, char* fileName, char* fileExt, char* openMethod);
+int openFileSafe(FILE** fileStream, char* fileName, char* fileExt, char* openMethod);
 
 char* strExt(const char *s1, const char *s2);
 
-int fetch_symbol(int line, char* line_content, char *symbol_dest);
-
-
-
-/*#define FIND_NEXT_CHAR(string, index) \
-        for (;string[(index)] && (string[(index)] == '\t' || string[(index)] == ' '); (++(index)))\
-        ;\
-*/
+int fetchSymbol(int line, char* lineContent, char *symbolDest);
 
 #define FIND_NEXT_CHAR(string, index) \
         while (string[i] == ' ' || string[i] == '\t'|| string[i] == '\n')\
@@ -46,18 +39,18 @@ int fetch_symbol(int line, char* line_content, char *symbol_dest);
         (++(index));
 
 #define THERE_IS_SYMBOL\
-        symbol_name[0] != '\0'
+        symbolName[0] != '\0'
 
 void append(char* s, char c);
-void print_error_message(int line, char* message, ...);
-int fetch_symbol(int line, char* line_content, char *symbol_dest);
-int fetch_type(char *line_content, int *i);
-int fetch_operands(int line, char* line_content, int i, char **operands_array, int *num_of_operands);
-code_word *generate_first_code_word(assembly_structure *opcode_data);
-code_word *generate_second_code_word(int line, char* line_content, assembly_structure *opcode_data, char **operands_array, int num_of_operands);
-int calculate_base(int ic);
-int calculate_offset(int ic);
-int validate_string(int line, char *line_content, int i);
+void printErrorMessage(int line, char* message, ...);
+int fetchSymbol(int line, char* lineContent, char *symbolDest);
+int fetchType(char *lineContent, int *i);
+int fetchOperands(int line, char* lineContent, int i, char **operandsArray, int *numOfOperands);
+codeWord *generateFirstCodeWord(assemblyStructure *opcodeData);
+codeWord *generateSecondCodeWord(int line, char* lineContent, assemblyStructure *opcodeData, char **operandsArray, int numOfOperands);
+int calculateBase(int ic);
+int calculateOffset(int ic);
+int validateString(int line, char *lineContent, int i);
 
 #endif
 

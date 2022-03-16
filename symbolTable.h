@@ -3,27 +3,31 @@
 
 #define MAX_SYMBOL_SIZE 31
 
-typedef struct symbol_line {
+
+typedef struct symbolItem {
 	char symbol[MAX_SYMBOL_SIZE];
 	int value;
 	int base;
     int offset;
-	int symbol_type; /* from enum: CODE, DATA, CODE */
-	struct symbol_line *next;
-} symbol_line;
+	int symbolType; /* from enum: CODE, DATA, CODE */
+	struct symbolItem *next;
+} symbolItem;
 
-int symbol_exists_in_table(char *symbol_name);
-symbol_line *symbol_line_in_table(char *symbol_name);
-void symbol_table_append(char* symbol_name, int symbol_type);
-void print_symbol_table();
-void free_symbol_table();
-int validate_symbol_name(char *name, int line);
-void update_symbol_table_data_types();
-int update_symbol_with_entry_attribute(char *symbol_name, int line);
+typedef struct symbolTable {
+	symbolItem* symbolHead;
+	symbolItem* symbolTail;
+} symbolTable;
 
-extern symbol_line *symbol_head;
-extern symbol_line *symbol_tail;
-
+int symbolExistsInTable(char *symbolName, symbolTable* table);
+symbolItem *symbolItemInTable(char *symbolName, symbolTable* table);
+void symbolTableAppend(char* symbolName, int symbolType, symbolTable* table, int IC, int DC);
+void printSymbolTable(symbolTable* table);
+void freeSymbolTable(symbolTable* table);
+int validateSymbolName(char *name, int line);
+void updateSymbolTableDataTypes(symbolTable* table, int IC);
+int updateSymbolWithEntryAttribute(char *symbolName, int line, symbolTable* table);
+symbolItem * getSymbolItemFromSymbolTable(char * symbol, symbolTable* table);
+symbolTable* initSymbolTable();
 
 #endif
 
