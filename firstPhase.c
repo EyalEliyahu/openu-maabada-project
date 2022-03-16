@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -123,7 +122,7 @@ int parseLineForFirstPhase(int lineIndex, char *lineContent, symbolTable* table,
 	if (fetchSymbol(lineIndex, lineContent, symbolName)) {
 		return FALSE;
 	}
-	if (THERE_IS_SYMBOL) {
+	if (THERE_IS_SYMBOL(symbolName)) {
 		if (symbolExistsInTable(symbolName, table)) {
 			printErrorMessage(lineIndex, "Symbol is already defined.");
 			return FALSE;
@@ -143,7 +142,7 @@ int parseLineForFirstPhase(int lineIndex, char *lineContent, symbolTable* table,
 	FIND_NEXT_CHAR(lineContent, i);
 
 	if ( dataType == CODE ) {
-		if (THERE_IS_SYMBOL) {
+		if (THERE_IS_SYMBOL(symbolName)) {
 			symbolTableAppend(symbolName, CODE, table, *IC, *DC);
 		}
 		if (!handleCode(lineIndex, lineContent, i, IC))
@@ -152,7 +151,7 @@ int parseLineForFirstPhase(int lineIndex, char *lineContent, symbolTable* table,
 	}
 	else {
 		if (dataType == DATA || dataType == STRING) {
-			if (THERE_IS_SYMBOL){
+			if (THERE_IS_SYMBOL(symbolName)){
 				symbolTableAppend(symbolName, DATA, table, *IC, *DC);
 			}
 			if (dataType == DATA) {
@@ -196,5 +195,6 @@ int runFirstPhase(FILE* fileAfterMacroParsing, symbolTable* table, int* IC, int*
 		}
 	}
 	updateSymbolTableDataTypes(table, *IC);
+	printSymbolTable(table);
 	return TRUE;
 }

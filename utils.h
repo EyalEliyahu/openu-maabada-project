@@ -9,11 +9,6 @@
 /*
  * TODO
  */
-char** getLineContent(char* lineString);
-
-/*
- * TODO
- */
 void *safeMalloc(long size);
 
 /*
@@ -28,7 +23,7 @@ char* strExt(const char *s1, const char *s2);
 int fetchSymbol(int line, char* lineContent, char *symbolDest);
 
 #define FIND_NEXT_CHAR(string, index) \
-        while (string[i] == ' ' || string[i] == '\t'|| string[i] == '\n')\
+        while (string[index] == ' ' || string[index] == '\t'|| string[index] == '\n')\
         {\
                 ++index;\
         }
@@ -38,7 +33,7 @@ int fetchSymbol(int line, char* lineContent, char *symbolDest);
         ;\
         (++(index));
 
-#define THERE_IS_SYMBOL\
+#define THERE_IS_SYMBOL(symbolName)\
         symbolName[0] != '\0'
 
 void append(char* s, char c);

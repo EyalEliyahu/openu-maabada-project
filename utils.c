@@ -239,7 +239,7 @@ codeWord *generateFirstCodeWord(assemblyStructure *opcodeData) {
 	codeWord *resWord;
 	resWord = (codeWord *) malloc(sizeof(codeWord));
 	resWord->ARE = 4;
-	resWord->L = 1;
+	resWord->L = 4;
 	resWord->sourceAddress = resWord->sourceRegister = resWord->destinationAddress = resWord->destinationRegister = resWord->opcode = resWord->funct = 0;
 	resWord->opcode = opcodeData->opcode;
 	return resWord;

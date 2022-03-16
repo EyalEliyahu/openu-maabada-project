@@ -12,6 +12,7 @@
         "stdio.h": "c",
         "string": "c",
         "iosfwd": "c",
-        "__locale": "c"
+        "__locale": "c",
+        "chrono": "c"
     }
 }

@@ -12,7 +12,7 @@
 #define NUM_OF_OPCODES 16
 
 enum dataTypes {CODE, DATA, STRING, ENTRY, EXTERN, DATAANDENTRY, CODEANDENTRY, FAILED_TO_FIND};
-enum addresses_types {IMMEDIATE, DIRECT, INDEX, REGISTER, NO_ADDRESS, FAILED_ADDRESS};
+enum addressesTypes {IMMEDIATE, DIRECT, INDEX, REGISTER, NO_ADDRESS};
 enum {SOURCE, DESTINATION};
 
 /* struct for holding an opcode and it's binary value */

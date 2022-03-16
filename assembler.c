@@ -41,7 +41,8 @@ void compileFile(char* fileName) {
 				DCF = DC; /* save the final DC value to new variable */
 				/* move the .am file back to the begining for second phase and start from first line */
 				rewind(fileAfterMacroParsing);
-				isSecondPhaseSuccess = runSecondPhase(fileAfterMacroParsing, table);
+				printf("Running Second Phase on: \"%s.am\" \n", fileName);
+				isSecondPhaseSuccess = runSecondPhase(fileAfterMacroParsing, table, IC);
 
 			}
 		}
