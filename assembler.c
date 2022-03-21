@@ -42,7 +42,10 @@ void compileFile(char* fileName) {
 				/* move the .am file back to the begining for second phase and start from first line */
 				rewind(fileAfterMacroParsing);
 				isSecondPhaseSuccess = runSecondPhase(fileAfterMacroParsing, table);
-
+				/* if the second phase was successful and machine code is not too large generate ob, ent, ext files */
+				if(isSecondPhaseSuccess) {
+					generateFiles(fileName, table, &ICF, &DCF);
+				}
 			}
 		}
 	}
