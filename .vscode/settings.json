@@ -13,6 +13,8 @@
         "string": "c",
         "iosfwd": "c",
         "__locale": "c",
-        "chrono": "c"
+        "chrono": "c",
+        "sstream": "c",
+        "algorithm": "c"
     }
 }

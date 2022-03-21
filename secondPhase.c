@@ -15,12 +15,20 @@
 
 int updateCodeWordByType(int line, int instructionIndex, int *i, char* operand, int addressType, symbolTable* table) {
     int symbolNameIndex;
-    char *symbolName;
-
+    char* symbolName;
     if (addressType == IMMEDIATE) {
-        machineCodeSection[*i+instructionIndex].immediate = atoi(&operand[1]);
+        // operand[3] = NULL;
+        printf("\n%s", operand);
+        // for(int a = 0; a < 3; a++) {
+        //     char x = operand[a];
+        //     printf("\n%c", x);
+        // }
+        // printf("\n%s",  &operand);
+        // machineCodeSection[*i+instructionIndex].immediate = 3;
+        /*TODO: fix this line (&operand[1]) - for some reason the string "#-6" raise segmentation fault*/
+        // machineCodeSection[*i+instructionIndex].immediate = atoi(&operand[1]); 
         machineCodeSection[*i+instructionIndex].ARE = 3;
-        (*i)++;
+         (*i)++;
     }
     else if (addressType == DIRECT) {
         symbolItem *temp;
@@ -94,8 +102,8 @@ int updateCodeWords(int IC, symbolTable* table) {
     int lineIndex, instructionIndex, i, adressType;
     char* operand = NULL;
     /* update all of the code words that havent been coded in the first phase */
-	for (instructionIndex=0, lineIndex=0; instructionIndex < IC - IC_INIT_VALUE; instructionIndex++)
-	{   
+	for (instructionIndex = 0, lineIndex = 0; instructionIndex < IC - IC_INIT_VALUE; instructionIndex++)
+	{      
         codeWord instruction = machineCodeSection[instructionIndex];
         int isMovInstuction = instruction.opcode == 0;
         int isAbsoluteARE = instruction.ARE > 3;
@@ -116,13 +124,11 @@ int updateCodeWords(int IC, symbolTable* table) {
 			        	return FALSE;
 				}
 			}
-			else {
-				if (instruction.destinationAddress != REGISTER) {
+			else if (instruction.destinationAddress != REGISTER) {
                     operand = instruction.firstOperand;
                     adressType = instruction.destinationAddress;
                     if (!updateCodeWordByType(lineIndex, instructionIndex, &i, operand, adressType, table))
 			        	return FALSE;
-				}
 			}
 		}
 	}
