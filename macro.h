@@ -3,6 +3,5 @@
 
 int process_macro_line(int line, char *lineContent, int *in_macro, char *macro, char *file, FILE *am_file_ptr);
 
-int macro_process(char *fileName);
-
+int translateMacros(FILE *assemblyFile, char* fileName);
 #endif

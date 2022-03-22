@@ -12,7 +12,7 @@ int process_macro_line(int line, char *lineContent, int *in_macro, char *macro, 
 	macro_line *temp;
 	char* line_in_macro = "";
 	/* look for the next char that is not whitespace/tab/newline */
-	FIND_NEXT_CHAR(lineContent, i); 
+	INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i); 
 
 	/* Get the line content after removing spaces and tabs from the beginning until reach whitespace/tab/newline */
 	for (; lineContent[i] && lineContent[i] != '\n' && lineContent[i] != '\t' && lineContent[i] != ' ' && lineContent[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++) {
@@ -33,12 +33,12 @@ int process_macro_line(int line, char *lineContent, int *in_macro, char *macro, 
 
 	i = 0;
 	j = 0;
-	FIND_NEXT_CHAR(lineContent, i); 
+	INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i); 
 	/* Checks if this line is start of new macro */
     if (strncmp("macro", lineContent+i, 5) == 0 && !*in_macro) {
 		/* go to the end of the word: macro */
 		INCREASE_I_UNTILL_CHAR(lineContent, 'o', i);
-		FIND_NEXT_CHAR(lineContent, i);
+		INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i);
 		for (; lineContent[i] && lineContent[i] != ' ' && lineContent[i] != '\n' && lineContent[i] != '\t' && lineContent[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++) {
 			macro[j] = lineContent[i];
 		}
@@ -80,7 +80,7 @@ int process_macro_line(int line, char *lineContent, int *in_macro, char *macro, 
 }
 
 
-int macro_process(char *fileName)
+int translateMacros(FILE *assemblyFile, char* fileName)
 {
 	char *temp_string = "";
 	int macro_phase_success = TRUE;
@@ -88,26 +88,26 @@ int macro_process(char *fileName)
 	int in_macro = FALSE;
 	char lineContent[MAX_LINE_LENGTH + 2];
 	int line = 1;
-	FILE *assembly_file_ptr;
-	FILE *am_file_ptr;
+	int hasFileOpened;
+	FILE *am_file_ptr = NULL;
 
-	int hasFilesOpend = openFileSafe(&am_file_ptr, fileName, ".am", "w") && openFileSafe(&assembly_file_ptr, fileName, ".as", "r");
-	if(!hasFilesOpend) {
+	hasFileOpened = openFileSafe(&am_file_ptr, fileName, ".am", "w");
+	if(!hasFileOpened) {
 		return FALSE;
 	}
 
-	/* run the macro_process_line function on every line in .as file */
-	for (; fgets(lineContent, MAX_LINE_LENGTH + 2, assembly_file_ptr) != NULL; line++)
+	/* run the translateMacros_line function on every line in .as file */
+	for (; fgets(lineContent, MAX_LINE_LENGTH + 2, assemblyFile) != NULL; line++)
 	{
 		/* check if line no reach the max length */ 
-		if (!feof(assembly_file_ptr) && strchr(lineContent, '\n') == NULL)
+		if (!feof(assemblyFile) && strchr(lineContent, '\n') == NULL)
 		{
 			printErrorMessage(line, "line exceeds the max line length");
 			macro_phase_success = FALSE;
 			/* if the line is too long continue the rest of the chars to get to the new line */ 
 			while (*temp_string != '\n' && *temp_string != EOF)
 			{
-				*temp_string = fgetc(assembly_file_ptr);
+				*temp_string = fgetc(assemblyFile);
 			}
 		}
 		else
@@ -121,7 +121,6 @@ int macro_process(char *fileName)
 	
 	/* free dynamic allocated memory used for macro and close am and assembly files */
 	fclose(am_file_ptr);
-	fclose(assembly_file_ptr);
 	free_macro_list();
 	return macro_phase_success;
 }

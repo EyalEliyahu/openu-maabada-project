@@ -22,7 +22,7 @@ char* strExt(const char *s1, const char *s2);
 
 int fetchSymbol(int line, char* lineContent, char *symbolDest);
 
-#define FIND_NEXT_CHAR(string, index) \
+#define INCREASE_I_UNTILL_NEXT_CHAR(string, index) \
         while (string[index] == ' ' || string[index] == '\t'|| string[index] == '\n')\
         {\
                 ++index;\
@@ -33,7 +33,7 @@ int fetchSymbol(int line, char* lineContent, char *symbolDest);
         ;\
         (++(index));
 
-#define THERE_IS_SYMBOL(symbolName)\
+#define IS_STRING_EXISTS(symbolName)\
         symbolName[0] != '\0'
 
 void append(char* s, char c);

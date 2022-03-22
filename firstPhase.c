@@ -8,7 +8,7 @@ int handleData(int lineIndex, char *lineContent, int i, int *DC) {
 	char dataParam[MAX_LINE_LEN];
 	dataWord *dataToAdd;
 
-	FIND_NEXT_CHAR(lineContent,i);
+	INCREASE_I_UNTILL_NEXT_CHAR(lineContent,i);
 
 	if (lineContent[i] == '\0' || lineContent[i] == '\n')
 		return TRUE;
@@ -16,7 +16,7 @@ int handleData(int lineIndex, char *lineContent, int i, int *DC) {
 	if (lineContent[i] == ',')
 		i++;
 
-	FIND_NEXT_CHAR(lineContent,i);
+	INCREASE_I_UNTILL_NEXT_CHAR(lineContent,i);
 
 	for (j = 0; lineContent[i] && lineContent[i] != ',' && lineContent[i] != '\n' && lineContent[i] != '\t' && lineContent[i] != ' ' && lineContent[i] != EOF; i++, j++) {
 		dataParam[j] = lineContent[i];
@@ -74,12 +74,13 @@ int handleCode(int lineIndex, char *lineContent, int i, int* IC) {
 	}
 	functionName[j] = '\0';
 	opcodeData = fetchFunctionData(functionName);
+
 	if(!opcodeData) {
 		printErrorMessage(lineIndex, "could not find this assembly command");
 		return FALSE;
 	}
 
-	FIND_NEXT_CHAR(lineContent, i); 
+	INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i); 
 
 	if (!fetchOperands(lineIndex, lineContent, i, operandsArray, &numOfOperands))  {
 		return FALSE;
@@ -114,35 +115,35 @@ int parseLineForFirstPhase(int lineIndex, char *lineContent, symbolTable* table,
 	int dataType;
 	int i=0, j;
 	char symbolName[MAX_LINE_LEN];
-
-	FIND_NEXT_CHAR(lineContent, i); 
+	INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i); 
 	if (!lineContent[i] || lineContent[i] == '\n' || lineContent[i] == EOF || lineContent[i] == ';')
 		return TRUE; 
-	
-	if (fetchSymbol(lineIndex, lineContent, symbolName)) {
+
+	if (!fetchSymbol(lineIndex, lineContent, symbolName)) {
 		return FALSE;
 	}
-	if (THERE_IS_SYMBOL(symbolName)) {
-		if (symbolExistsInTable(symbolName, table)) {
+
+	if (IS_STRING_EXISTS(symbolName)) {
+		if (isSymbolExistsInTable(symbolName, table)) {
 			printErrorMessage(lineIndex, "Symbol is already defined.");
 			return FALSE;
 		}
 		INCREASE_I_UNTILL_CHAR(lineContent, ':', i);
 	}
+
 	if (lineContent[i] == '\n') {
 		return TRUE; 
 	}
 
-	FIND_NEXT_CHAR(lineContent, i);
+	INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i);
 	dataType = fetchType(lineContent, &i);
-	if (dataType == FAILED_TO_FIND) {
+	if (dataType == ERROR) {
 		return FALSE;
 	}
 
-	FIND_NEXT_CHAR(lineContent, i);
-
+	INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i);
 	if ( dataType == CODE ) {
-		if (THERE_IS_SYMBOL(symbolName)) {
+		if (IS_STRING_EXISTS(symbolName)) {
 			symbolTableAppend(symbolName, CODE, table, *IC, *DC);
 		}
 		if (!handleCode(lineIndex, lineContent, i, IC))
@@ -151,7 +152,7 @@ int parseLineForFirstPhase(int lineIndex, char *lineContent, symbolTable* table,
 	}
 	else {
 		if (dataType == DATA || dataType == STRING) {
-			if (THERE_IS_SYMBOL(symbolName)){
+			if (IS_STRING_EXISTS(symbolName)){
 				symbolTableAppend(symbolName, DATA, table, *IC, *DC);
 			}
 			if (dataType == DATA) {
@@ -171,11 +172,11 @@ int parseLineForFirstPhase(int lineIndex, char *lineContent, symbolTable* table,
 			}
 			externSymbol[j] = '\0';
 			/* If invalid external label name, it's an error */
-			if (!validateSymbolName(externSymbol, lineIndex)) {
+			if (!isSymbolNameValid(externSymbol, lineIndex)) {
 				printErrorMessage(lineIndex, "Invalid symbol for extern type");
 				return FALSE;
 			}
-			if (!symbolExistsInTable(externSymbol, table)){
+			if (!isSymbolExistsInTable(externSymbol, table)){
 				symbolTableAppend(externSymbol, EXTERN, table, *IC, *DC); /* Extern value is defaulted to 0 */
 			}
 		}
@@ -187,7 +188,6 @@ int parseLineForFirstPhase(int lineIndex, char *lineContent, symbolTable* table,
 int runFirstPhase(FILE* fileAfterMacroParsing, symbolTable* table, int* IC, int* DC) {
 	int lineIndex;
 	char lineContent[MAX_LINE_WITH_LINEDROP_LEN];
-	fgets(lineContent, MAX_LINE_WITH_LINEDROP_LEN, fileAfterMacroParsing);
 	for (lineIndex = 0; fgets(lineContent, MAX_LINE_WITH_LINEDROP_LEN, fileAfterMacroParsing); lineIndex++) {
 		int lineParseSuccess = parseLineForFirstPhase(lineIndex, lineContent, table, IC, DC);
 		if(!lineParseSuccess) {
@@ -195,6 +195,6 @@ int runFirstPhase(FILE* fileAfterMacroParsing, symbolTable* table, int* IC, int*
 		}
 	}
 	updateSymbolTableDataTypes(table, *IC);
-	printSymbolTable(table);
+	// printSymbolTable(table);
 	return TRUE;
 }

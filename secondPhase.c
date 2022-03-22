@@ -17,16 +17,7 @@ int updateCodeWordByType(int line, int instructionIndex, int *i, char* operand, 
     int symbolNameIndex;
     char* symbolName;
     if (addressType == IMMEDIATE) {
-        // operand[3] = NULL;
-        printf("\n%s", operand);
-        // for(int a = 0; a < 3; a++) {
-        //     char x = operand[a];
-        //     printf("\n%c", x);
-        // }
-        // printf("\n%s",  &operand);
-        // machineCodeSection[*i+instructionIndex].immediate = 3;
-        /*TODO: fix this line (&operand[1]) - for some reason the string "#-6" raise segmentation fault*/
-        // machineCodeSection[*i+instructionIndex].immediate = atoi(&operand[1]); 
+        machineCodeSection[*i+instructionIndex].immediate = atoi(&operand[1]); 
         machineCodeSection[*i+instructionIndex].ARE = 3;
          (*i)++;
     }
@@ -73,18 +64,18 @@ int parseLineForSecondPhase(int lineIndex, char *lineContent, symbolTable* table
 	char symbolName[MAX_LINE_WITH_LINEDROP_LEN];
     char entrySymbol[MAX_LINE_WITH_LINEDROP_LEN];
 
-	FIND_NEXT_CHAR(lineContent, i); 
+	INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i); 
     if (!lineContent[i] || lineContent[i] == '\n' || lineContent[i] == EOF || lineContent[i] == ';')
 		return TRUE; 
 
     fetchSymbol(lineIndex, lineContent, symbolName);
 	
-	if (THERE_IS_SYMBOL(symbolName) || lineContent[i] == '\n')
+	if (IS_STRING_EXISTS(symbolName) || lineContent[i] == '\n')
         return TRUE;
 
-    FIND_NEXT_CHAR(lineContent, i)
+    INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i)
 	dataType = fetchType(lineContent, &i);
-    FIND_NEXT_CHAR(lineContent, i)
+    INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i)
 	
     if (dataType == ENTRY) {
         for (j = 0; lineContent[i+j] && lineContent[i+j] != '\n' && lineContent[i+j] != EOF;j++) {
@@ -101,10 +92,11 @@ int parseLineForSecondPhase(int lineIndex, char *lineContent, symbolTable* table
 int updateCodeWords(int IC, symbolTable* table) {
     int lineIndex, instructionIndex, i, adressType;
     char* operand = NULL;
+    codeWord instruction;
     /* update all of the code words that havent been coded in the first phase */
 	for (instructionIndex = 0, lineIndex = 0; instructionIndex < IC - IC_INIT_VALUE; instructionIndex++)
 	{      
-        codeWord instruction = machineCodeSection[instructionIndex];
+        instruction = machineCodeSection[instructionIndex];
         int isMovInstuction = instruction.opcode == 0;
         int isAbsoluteARE = instruction.ARE > 3;
 		if (isMovInstuction && isAbsoluteARE) { /* run on all of the second code words */
@@ -134,8 +126,14 @@ int updateCodeWords(int IC, symbolTable* table) {
 	}
     return TRUE;
 }
+int validateMachineCodeLimitation(int IC, int DC) {
+	if (IC - IC_INIT_VALUE + DC > MAX_machineCodeSection){
+		printf("The machine code is too big and can only include %d words", MAX_machineCodeSection);
+        exit(EXIT_FAILURE);
+    }
+}
 
-int runSecondPhase(FILE* fileAfterMacroParsing, symbolTable* table, int IC) {
+int runSecondPhase(FILE* fileAfterMacroParsing, symbolTable* table, int IC, int DC) {
     int lineIndex;
 	char lineContent[MAX_LINE_WITH_LINEDROP_LEN];
 	for (lineIndex = 1; fgets(lineContent, MAX_LINE_WITH_LINEDROP_LEN, fileAfterMacroParsing) != NULL; lineIndex++)
@@ -145,7 +143,7 @@ int runSecondPhase(FILE* fileAfterMacroParsing, symbolTable* table, int IC) {
 	}
     if (!updateCodeWords(IC, table))
         return FALSE;
-	
-    printSymbolTable(table);
+        
+	validateMachineCodeLimitation(IC, DC);
     return TRUE;
 }

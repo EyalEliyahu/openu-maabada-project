@@ -2,7 +2,7 @@
 CC = gcc # GCC Compiler
 CFLAGS = -ansi -Wall -pedantic # Flags
 GLOBAL_DEPS = consts.h globalStructs.h utils.h  # Dependencies for everything
-EXE_DEPS = assembler.o macro.o firstPhase.o secondPhase.o macroStructs.o utils.o symbolTable.o assemblyStructures.o  # Deps for exe
+EXE_DEPS = assembler.o macro.o firstPhase.o secondPhase.o generateOutputFiles.o macroStructs.o utils.o symbolTable.o assemblyStructures.o  # Deps for exe
 
 ## Executable
 assembler: $(EXE_DEPS) $(GLOBAL_DEPS)
@@ -17,6 +17,9 @@ firstPhase.o: firstPhase.c firstPhase.h $(GLOBAL_DEPS)
 
 secondPhase.o: secondPhase.c secondPhase.h $(GLOBAL_DEPS)
 	$(CC) -c -g secondPhase.c $(CFLAGS) -o $@
+
+generateOutputFiles.o: generateOutputFiles.c generateOutputFiles.h $(GLOBAL_DEPS)
+	$(CC) -c -g generateOutputFiles.c $(CFLAGS) -o $@
 
 macro.o: macro.c macro.h $(GLOBAL_DEPS)
 	$(CC) -c -g macro.c $(CFLAGS) -o $@
