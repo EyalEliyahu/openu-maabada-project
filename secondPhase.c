@@ -128,8 +128,8 @@ int updateCodeWords(int IC, symbolTable* table) {
     return TRUE;
 }
 void validateMachineCodeLimitation(int IC, int DC) {
-	if (IC - IC_INIT_VALUE + DC > MAX_machineCodeSection){
-		printf("The machine code is too big and can only include %d words", MAX_machineCodeSection);
+	if (IC - IC_INIT_VALUE + DC > MAX_MACHINE_CODE_SECTION){
+		printf("The machine code is too big and can only include %d words", MAX_MACHINE_CODE_SECTION);
         exit(EXIT_FAILURE);
     }
 }
