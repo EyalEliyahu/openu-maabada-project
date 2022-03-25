@@ -48,4 +48,3 @@ int calculateOffset(int ic);
 int validateString(int line, char *lineContent, int i);
 
 #endif
-

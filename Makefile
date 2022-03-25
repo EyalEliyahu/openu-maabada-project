@@ -1,6 +1,6 @@
 # Basic compilation macros
 CC = gcc # GCC Compiler
-CFLAGS = -ansi -Wall -pedantic # Flags
+CFLAGS = -Wall -pedantic # Flags
 GLOBAL_DEPS = consts.h globalStructs.h utils.h  # Dependencies for everything
 EXE_DEPS = assembler.o macro.o firstPhase.o secondPhase.o generateOutputFiles.o macroStructs.o utils.o symbolTable.o assemblyStructures.o  # Deps for exe
 

@@ -195,6 +195,5 @@ int runFirstPhase(FILE* fileAfterMacroParsing, symbolTable* table, int* IC, int*
 		}
 	}
 	updateSymbolTableDataTypes(table, *IC);
-	// printSymbolTable(table);
 	return TRUE;
 }

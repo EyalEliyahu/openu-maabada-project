@@ -30,4 +30,3 @@ symbolItem * getSymbolItemFromSymbolTable(char * symbol, symbolTable* table);
 symbolTable* initSymbolTable();
 
 #endif
-

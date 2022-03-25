@@ -93,12 +93,13 @@ int updateCodeWords(int IC, symbolTable* table) {
     int lineIndex, instructionIndex, i, adressType;
     char* operand = NULL;
     codeWord instruction;
+    int isMovInstuction, isAbsoluteARE;
     /* update all of the code words that havent been coded in the first phase */
 	for (instructionIndex = 0, lineIndex = 0; instructionIndex < IC - IC_INIT_VALUE; instructionIndex++)
 	{      
         instruction = machineCodeSection[instructionIndex];
-        int isMovInstuction = instruction.opcode == 0;
-        int isAbsoluteARE = instruction.ARE > 3;
+        isMovInstuction = instruction.opcode == 0;
+        isAbsoluteARE = instruction.ARE > 3;
 		if (isMovInstuction && isAbsoluteARE) { /* run on all of the second code words */
 			i = 1;
 			lineIndex++;
@@ -126,7 +127,7 @@ int updateCodeWords(int IC, symbolTable* table) {
 	}
     return TRUE;
 }
-int validateMachineCodeLimitation(int IC, int DC) {
+void validateMachineCodeLimitation(int IC, int DC) {
 	if (IC - IC_INIT_VALUE + DC > MAX_machineCodeSection){
 		printf("The machine code is too big and can only include %d words", MAX_machineCodeSection);
         exit(EXIT_FAILURE);
