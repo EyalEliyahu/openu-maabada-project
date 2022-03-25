@@ -22,7 +22,7 @@ void freeSymbolTable(symbolTable* table)
 	free(table);
 }
 
-int symbolExistsInTable(char *symbolName, symbolTable* table)
+int isSymbolExistsInTable(char *symbolName, symbolTable* table)
 {
     symbolItem *temp = table->symbolHead;
     while (temp)
@@ -78,13 +78,7 @@ symbolTable* initSymbolTable() {
 
 void symbolTableAppend(char* symbolName, int symbolType, symbolTable* table, int IC, int DC)
 {
-	symbolItem* new_symbol = (symbolItem*)malloc(sizeof(symbolItem));
-
-	if (!new_symbol) {
-		fprintf(stderr, "Memory allocation for new symbol failed!");
-		exit(1);
-	}
-	
+	symbolItem* new_symbol = (symbolItem*)safeMalloc(sizeof(symbolItem));
 	strcpy(new_symbol->symbol, symbolName);
 
 	new_symbol->value = 0;
@@ -122,7 +116,7 @@ int isAlphanumericStr(char *string) {
 	return TRUE;
 }
 
-int validateSymbolName(char *name, int line) {
+int isSymbolNameValid(char *name, int line) {
 	/* Check length, first char is alpha and all the others are alphanumeric, and not saved word */
 	return name[0] && strlen(name) <= MAX_SYMBOL_SIZE && isalpha(name[0]) && isAlphanumericStr(name + 1) &&
 	       !isReservedWord(name, line);
@@ -150,11 +144,11 @@ int updateSymbolWithEntryAttribute(char *symbolName, int line, symbolTable* tabl
     {
         if (strcmp(temp->symbol, symbolName) == 0) {
 			if (temp->symbolType == DATA) {
-				temp->symbolType = DATAANDENTRY;
+				temp->symbolType = DATA_AND_ENTRY;
             	return TRUE;
 			}
 			if (temp->symbolType == CODE) {
-				temp->symbolType = CODEANDENTRY;
+				temp->symbolType = CODE_AND_ENTRY;
             	return TRUE;
 			}
 			else {

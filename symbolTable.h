@@ -18,16 +18,15 @@ typedef struct symbolTable {
 	symbolItem* symbolTail;
 } symbolTable;
 
-int symbolExistsInTable(char *symbolName, symbolTable* table);
+int isSymbolExistsInTable(char *symbolName, symbolTable* table);
 symbolItem *symbolItemInTable(char *symbolName, symbolTable* table);
 void symbolTableAppend(char* symbolName, int symbolType, symbolTable* table, int IC, int DC);
 void printSymbolTable(symbolTable* table);
 void freeSymbolTable(symbolTable* table);
-int validateSymbolName(char *name, int line);
+int isSymbolNameValid(char *name, int line);
 void updateSymbolTableDataTypes(symbolTable* table, int IC);
 int updateSymbolWithEntryAttribute(char *symbolName, int line, symbolTable* table);
 symbolItem * getSymbolItemFromSymbolTable(char * symbol, symbolTable* table);
 symbolTable* initSymbolTable();
 
 #endif
-

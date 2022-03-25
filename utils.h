@@ -9,11 +9,6 @@
 /*
  * TODO
  */
-char** getLineContent(char* lineString);
-
-/*
- * TODO
- */
 void *safeMalloc(long size);
 
 /*
@@ -27,8 +22,8 @@ char* strExt(const char *s1, const char *s2);
 
 int fetchSymbol(int line, char* lineContent, char *symbolDest);
 
-#define FIND_NEXT_CHAR(string, index) \
-        while (string[i] == ' ' || string[i] == '\t'|| string[i] == '\n')\
+#define INCREASE_I_UNTILL_NEXT_CHAR(string, index) \
+        while (string[index] == ' ' || string[index] == '\t'|| string[index] == '\n')\
         {\
                 ++index;\
         }
@@ -38,7 +33,7 @@ int fetchSymbol(int line, char* lineContent, char *symbolDest);
         ;\
         (++(index));
 
-#define THERE_IS_SYMBOL\
+#define IS_STRING_EXISTS(symbolName)\
         symbolName[0] != '\0'
 
 void append(char* s, char c);
@@ -53,4 +48,3 @@ int calculateOffset(int ic);
 int validateString(int line, char *lineContent, int i);
 
 #endif
-

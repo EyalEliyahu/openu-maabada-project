@@ -38,9 +38,9 @@ char* stringsConcat(char *string1, char* string2) {
 int openFileSafe(FILE** fileStream, char* fileName, char* fileExt, char* openMethod) {
 	char* fileNameWithExt = stringsConcat(fileName, fileExt);
 	*fileStream = fopen(fileNameWithExt, openMethod);
-	if(fileStream == NULL) {
-		free(fileNameWithExt);
+	if(*fileStream == NULL) {
 		printf("Error: Unable to read \"%s\". skipping it.\n", fileNameWithExt);
+		free(fileNameWithExt);
 		return FALSE;
 	} else {
 		return TRUE;
@@ -73,7 +73,7 @@ int isIndex(char* operand, int line) {
 	}
 
     symbol[j] = '\0';
-	if (!validateSymbolName(symbol, line))
+	if (!isSymbolNameValid(symbol, line))
 		return FALSE;
 
 	if (operand[j] == '[' && operand[j+1] == 'r' && atoi(&operand[j+2]) <= 9 && operand[j+3] == ']' && operand[j+4] == '\0') /* SYMBOL[rx] */
@@ -90,7 +90,7 @@ int fetchSymbol(int line, char* lineContent, char *symbolDest) {
 	int j, i;
 	i = j = 0;
 
-	FIND_NEXT_CHAR(lineContent, i);
+	INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i);
 
 	for (; lineContent[i] && lineContent[i] != ':' && lineContent[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++) {
 		symbolDest[j] = lineContent[i];
@@ -98,15 +98,15 @@ int fetchSymbol(int line, char* lineContent, char *symbolDest) {
 	symbolDest[j] = '\0';
 
 	if (lineContent[i] == ':') {
-		if (!validateSymbolName(symbolDest, line)) {
+		if (!isSymbolNameValid(symbolDest, line)) {
 			printErrorMessage(line, "invalid symbol name");
 			symbolDest[0] = '\0';
-			return TRUE; 
+			return FALSE; 
 		}
-		return FALSE;
+		return TRUE;
 	}
 	symbolDest[0] = '\0';
-	return FALSE;
+	return TRUE;
 }
 
 int fetchOperands(int line, char* lineContent, int i, char **operandsArray, int *numOfOperands) {
@@ -134,7 +134,7 @@ int fetchOperands(int line, char* lineContent, int i, char **operandsArray, int 
 		}
 		operandsArray[*numOfOperands][j] = '\0';
 		(*numOfOperands)++;
-		FIND_NEXT_CHAR(lineContent, i);
+		INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i);
 
 		if (lineContent[i] == '\n' || lineContent[i] == EOF || !lineContent[i]) break;
 		else if (lineContent[i] != ',') {
@@ -146,7 +146,7 @@ int fetchOperands(int line, char* lineContent, int i, char **operandsArray, int 
 			return FALSE;
 		}
 		i++;
-		FIND_NEXT_CHAR(lineContent, i);
+		INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i);
 		if (lineContent[i] == '\n' || lineContent[i] == EOF || !lineContent[i])
 			printErrorMessage(line, "There needs to be an operand after comma");
 		else if (lineContent[i] == ',') 
@@ -189,7 +189,7 @@ int fetchType(char *lineContent, int *i) {
     if (strcmp(temp, ".extern") == 0) {
         return EXTERN;
     }
-	return FAILED_TO_FIND;
+	return ERROR;
 }
 
 int fetchAddressType(char *operand, int line) {
@@ -203,7 +203,7 @@ int fetchAddressType(char *operand, int line) {
 		return IMMEDIATE;
 	if (operand[0] && isIndex(operand, line))
 		return INDEX;
-	if (validateSymbolName(operand, line))
+	if (isSymbolNameValid(operand, line))
 		return DIRECT;
 
 	return NO_ADDRESS;
@@ -241,6 +241,7 @@ codeWord *generateFirstCodeWord(assemblyStructure *opcodeData) {
 	resWord->ARE = 4;
 	resWord->L = 1;
 	resWord->sourceAddress = resWord->sourceRegister = resWord->destinationAddress = resWord->destinationRegister = resWord->opcode = resWord->funct = 0;
+	
 	resWord->opcode = opcodeData->opcode;
 	return resWord;
 }
@@ -269,7 +270,6 @@ codeWord *generateSecondCodeWord(int line, char* lineContent, assemblyStructure 
 		return NULL;
 	}
 	
-
 	if (opcodeData->numOfOperandsPerFunction == 2) {
 		resWord->firstOperand = operandsArray[0];
 		resWord->secondOperand = operandsArray[1];

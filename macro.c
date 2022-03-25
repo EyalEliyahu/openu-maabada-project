@@ -12,8 +12,9 @@ int processMacroLine(int line, char *lineContent, int *inMacro, char *macro, cha
 	macroLine *temp;
 	char* lineInMacro = "";
 	/* look for the next char that is not whitespace/tab/newline */
-	FIND_NEXT_CHAR(lineContent, i); 
-
+	INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i); 
+	if (lineContent[i] == ';' || lineContent[i] == '\n')
+		return TRUE;
 	/* Get the line content after removing spaces and tabs from the beginning until reach whitespace/tab/newline */
 	for (; lineContent[i] && lineContent[i] != '\n' && lineContent[i] != '\t' && lineContent[i] != ' ' && lineContent[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++) {
 		firstWord[j] = lineContent[i];
@@ -33,12 +34,12 @@ int processMacroLine(int line, char *lineContent, int *inMacro, char *macro, cha
 
 	i = 0;
 	j = 0;
-	FIND_NEXT_CHAR(lineContent, i); 
+	INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i); 
 	/* Checks if this line is start of new macro */
     if (strncmp("macro", lineContent+i, 5) == 0 && !*inMacro) {
 		/* go to the end of the word: macro */
 		INCREASE_I_UNTILL_CHAR(lineContent, 'o', i);
-		FIND_NEXT_CHAR(lineContent, i);
+		INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i);
 		for (; lineContent[i] && lineContent[i] != ' ' && lineContent[i] != '\n' && lineContent[i] != '\t' && lineContent[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++) {
 			macro[j] = lineContent[i];
 		}
@@ -80,7 +81,7 @@ int processMacroLine(int line, char *lineContent, int *inMacro, char *macro, cha
 }
 
 
-int macroProcess(char *fileName)
+int translateMacros(FILE *assemblyFile, char* fileName)
 {
 	char *temp_string = "";
 	int macroPhaseSuccess = TRUE;
@@ -88,6 +89,7 @@ int macroProcess(char *fileName)
 	int inMacro = FALSE;
 	char lineContent[MAX_LINE_LENGTH + 2];
 	int line = 1;
+
 	FILE *assemblyFilePtr;
 	FILE *amFilePtr;
 
@@ -107,7 +109,7 @@ int macroProcess(char *fileName)
 			/* if the line is too long continue the rest of the chars to get to the new line */ 
 			while (*temp_string != '\n' && *temp_string != EOF)
 			{
-				*temp_string = fgetc(assemblyFilePtr);
+				*temp_string = fgetc(assemblyFile);
 			}
 		}
 		else
