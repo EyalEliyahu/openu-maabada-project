@@ -1,8 +1,8 @@
 #ifndef _MACRO_H
 #define _MACRO_H
 
-int process_macro_line(int line, char *lineContent, int *in_macro, char *macro, char *file, FILE *am_file_ptr);
+int processMacroLine(int line, char *lineContent, int *inMacro, char *macro, char *file, FILE *amFilePtr);
 
-int macro_process(char *fileName);
+int macroProcess(char *fileName);
 
 #endif

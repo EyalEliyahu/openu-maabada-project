@@ -27,7 +27,7 @@ void compileFile(char* fileName) {
 	int ICF = 0;
 	int DCF = 0;
 
-	isMacroParseSuccess = macro_process(fileName); 
+	isMacroParseSuccess = macroProcess(fileName); 
 	if(isMacroParseSuccess) {
 		FILE* fileAfterMacroParsing = NULL;
 		symbolTable* table = initSymbolTable();
