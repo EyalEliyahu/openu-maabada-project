@@ -138,6 +138,7 @@ int parseLineForFirstPhase(int lineIndex, char *lineContent, symbolTable* table,
 	INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i);
 	dataType = fetchType(lineContent, &i);
 	if (dataType == ERROR) {
+		printErrorMessage(lineIndex, "Unable to detect label type");
 		return FALSE;
 	}
 
@@ -146,8 +147,9 @@ int parseLineForFirstPhase(int lineIndex, char *lineContent, symbolTable* table,
 		if (IS_STRING_EXISTS(symbolName)) {
 			symbolTableAppend(symbolName, CODE, table, *IC, *DC);
 		}
-		if (!handleCode(lineIndex, lineContent, i, IC))
+		if (!handleCode(lineIndex, lineContent, i, IC)) {
 			return FALSE;
+		}
 
 	}
 	else {
@@ -160,8 +162,9 @@ int parseLineForFirstPhase(int lineIndex, char *lineContent, symbolTable* table,
 					return FALSE;
 			}
 			else {
-				if (!validateString(lineIndex, lineContent, i))
+				if (!validateString(lineIndex, lineContent, i)) {
 					return FALSE;
+				}
 				if (!handleString(lineIndex, lineContent, i+1, DC))
 					return FALSE;
 			}	
