@@ -38,9 +38,9 @@ char* stringsConcat(char *string1, char* string2) {
 int openFileSafe(FILE** fileStream, char* fileName, char* fileExt, char* openMethod) {
 	char* fileNameWithExt = stringsConcat(fileName, fileExt);
 	*fileStream = fopen(fileNameWithExt, openMethod);
-	if(fileStream == NULL) {
-		free(fileNameWithExt);
+	if(*fileStream == NULL) {
 		printf("Error: Unable to read \"%s\". skipping it.\n", fileNameWithExt);
+		free(fileNameWithExt);
 		return FALSE;
 	} else {
 		return TRUE;
