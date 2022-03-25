@@ -1,0 +1,48 @@
+{
+	"folders": [
+		{
+			"name": "openu-maabada-project",
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"symboltable.h": "c",
+			"assemblystractures.h": "c",
+			"utils.h": "c",
+			"globalstructs.h": "c",
+			"string.h": "c",
+			"stdlib.h": "c",
+			"assemblystructures.h": "c",
+			"consts.h": "c",
+			"firstphase.h": "c",
+			"stdio.h": "c",
+			"string": "c",
+			"iosfwd": "c",
+			"__locale": "c",
+			"chrono": "c",
+			"sstream": "c",
+			"algorithm": "c",
+			"math.h": "c",
+			"generateoutputfiles.h": "c",
+			"__bit_reference": "c",
+			"__functional_base": "c",
+			"__node_handle": "c",
+			"atomic": "c",
+			"bitset": "c",
+			"cstddef": "c",
+			"__memory": "c",
+			"functional": "c",
+			"iterator": "c",
+			"limits": "c",
+			"locale": "c",
+			"optional": "c",
+			"ratio": "c",
+			"system_error": "c",
+			"tuple": "c",
+			"type_traits": "c",
+			"vector": "c",
+			"memory": "c"
+		}
+	}
+}

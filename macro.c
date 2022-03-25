@@ -13,7 +13,8 @@ int process_macro_line(int line, char *lineContent, int *in_macro, char *macro, 
 	char* line_in_macro = "";
 	/* look for the next char that is not whitespace/tab/newline */
 	INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i); 
-
+	if (lineContent[i] == ';' || lineContent[i] == '\n')
+		return TRUE;
 	/* Get the line content after removing spaces and tabs from the beginning until reach whitespace/tab/newline */
 	for (; lineContent[i] && lineContent[i] != '\n' && lineContent[i] != '\t' && lineContent[i] != ' ' && lineContent[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++) {
 		firstWord[j] = lineContent[i];
@@ -114,7 +115,7 @@ int translateMacros(FILE *assemblyFile, char* fileName)
 		{
 			/* run process_macro_line function */ 
 			if (!process_macro_line(line, lineContent, &in_macro, macro, fileName, am_file_ptr)) {
-				macro_phase_success = FALSE;
+				return FALSE;
 			}
 		}
 	}
