@@ -5,8 +5,8 @@
 #include "assemblyStructures.h"
 #include "utils.h"
 
-codeWord machineCodeSection[MAX_machineCodeSection];
-dataWord machineDataSection[MAX_machineDataSection];
+codeWord machineCodeSection[MAX_MACHINE_CODE_SECTION];
+dataWord machineDataSection[MAX_MACHINE_DATA_SECTION];
 
 assemblyStructure assemblyStructureTable[] = {
 	{ "mov", 1, 0, 2, {0,1,2,3,-1}, {1,2,3,-1}}, /* opcode = 0000000000000001 = 1 */
