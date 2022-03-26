@@ -24,15 +24,10 @@ void freeMacroList()
 void macroListAppend(char* macroName)
 {
 	macroLine* newMacro = (macroLine*)malloc(sizeof(macroLine));
-
-	if (!newMacro) {
-		fprintf(stderr, "Memory allocation for new macro failed!");
-		exit(1);
-	}
-	
+    
 	strcpy(newMacro->macro,macroName);
     newMacro->numOfContentLines = 0;
-    newMacro->contentLines = malloc(sizeof(char) * MAX_LINE_LENGTH);
+    newMacro->contentLines = safeMalloc(sizeof(char) * MAX_LINE_LENGTH);
 
 	if(!macroHead) {
 		macroHead = newMacro;

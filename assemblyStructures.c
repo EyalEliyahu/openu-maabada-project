@@ -88,19 +88,19 @@ assemblyStructure* fetchFunctionData(char *functionName) {
 	return NULL;
 }
 
-int validate_address_type(int line, assemblyStructure *opcodeData, int address, int source_or_destination)
+int validate_address_type(int line, assemblyStructure *opcodeData, int addressType, int source_or_destination)
 {
 	int i;
 	if (source_or_destination == SOURCE) {
 		for (i = 0; opcodeData->sourceOperandTypes[i] != -1; i++) {
-			if (opcodeData->sourceOperandTypes[i] == address) 
+			if (opcodeData->sourceOperandTypes[i] == addressType) 
 				return TRUE;	
 		}
 	}
 
 	if (source_or_destination == DESTINATION) {
 		for (i = 0; opcodeData->destinationOperandTypes[i] != -1; i++) {
-			if (opcodeData->destinationOperandTypes[i] == address) 
+			if (opcodeData->destinationOperandTypes[i] == addressType) 
 				return TRUE;	
 		}
 	}

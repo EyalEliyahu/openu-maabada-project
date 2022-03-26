@@ -37,7 +37,7 @@ int updateCodeWordByType(int line, int instructionIndex, int *i, char* operand, 
     }
     else if (addressType == INDEX) {
         symbolItem *temp;
-        symbolName = malloc(sizeof(char) * MAX_LINE_LENGTH);
+        symbolName = safeMalloc(sizeof(char) * MAX_LINE_LENGTH);
         for (symbolNameIndex = 0; operand[symbolNameIndex] != '['; symbolNameIndex++) {
             symbolName[symbolNameIndex] = operand[symbolNameIndex];
         }

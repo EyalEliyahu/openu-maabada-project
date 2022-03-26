@@ -68,7 +68,7 @@ int processMacroLine(int line, char *lineContent, int *inMacro, char *macro, cha
 		temp = macroLineInList(macro);
 		temp->numOfContentLines += 1;
 		temp->contentLines = realloc(temp->contentLines, temp->numOfContentLines*sizeof(lineContent));
-		lineInMacro = malloc(sizeof(char) * (strlen(lineContent) + 1));
+		lineInMacro = safeMalloc(sizeof(char) * (strlen(lineContent) + 1));
 		strcpy(lineInMacro,lineContent);
 		temp->contentLines[temp->numOfContentLines-1] = lineInMacro;
 		return TRUE;

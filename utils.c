@@ -6,19 +6,6 @@
 #include <stdarg.h>
 #include "utils.h"
 
-char *strExt(const char *s1, const char *s2)
-{
-    char *pointer = malloc(strlen(s1) + strlen(s2) + 1);
-
-    if (pointer == NULL)
-    {
-        perror("failed to allocate memory");
-        exit(EXIT_FAILURE);
-    } 
-
-    return strcat(strcpy(pointer, s1), s2);
-}
-
 void *safeMalloc(long size) {
 	void *ptr = malloc(size);
 	if (ptr == NULL) {
@@ -132,7 +119,7 @@ int fetchOperands(int line, char* lineContent, int i, char **operandsArray, int 
 			return FALSE; 
 		}
 
-		operandsArray[*numOfOperands] = malloc(MAX_LINE_LENGTH);
+		operandsArray[*numOfOperands] = safeMalloc(MAX_LINE_LENGTH);
 		for (j = 0; lineContent[i] && lineContent[i] != '\t' && lineContent[i] != ' ' && lineContent[i] != '\n' && lineContent[i] != EOF &&
 		            lineContent[i] != ','; i++, j++) {
 			operandsArray[*numOfOperands][j] = lineContent[i];
@@ -241,7 +228,7 @@ unsigned int fetchRegister(char *operand) {
 
 codeWord *generateFirstCodeWord(assemblyStructure *opcodeData) {
 	codeWord *resWord;
-	resWord = (codeWord *) malloc(sizeof(codeWord));
+	resWord = (codeWord *) safeMalloc(sizeof(codeWord));
 	resWord->ARE = 4;
 	resWord->L = 1;
 	resWord->sourceAddress = resWord->sourceRegister = resWord->destinationAddress = resWord->destinationRegister = resWord->opcode = resWord->funct = 0;
@@ -255,7 +242,7 @@ codeWord *generateSecondCodeWord(int line, char* lineContent, assemblyStructure 
 	int address1 = NO_ADDRESS;
 	int address2 = NO_ADDRESS;
 
-	resWord = (codeWord *) malloc(sizeof(codeWord));
+	resWord = (codeWord *) safeMalloc(sizeof(codeWord));
 	resWord->sourceAddress = resWord->sourceRegister = resWord->destinationAddress = resWord->destinationRegister = resWord->opcode = 0;
 	resWord->L = 1;
 	resWord->line = line;
