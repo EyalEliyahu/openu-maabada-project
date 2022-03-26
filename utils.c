@@ -258,9 +258,9 @@ unsigned int fetchRegister(char* operand) {
 	return atoi(temp);
 }
 
-codeWord *generateFirstCodeWord(optCodeData *opcodeData) {
-	codeWord *resWord;
-	resWord = (codeWord *)safeMalloc(sizeof(codeWord));
+codeInstruction *generateFirstCodeWord(optCodeData *opcodeData) {
+	codeInstruction *resWord;
+	resWord = (codeInstruction *)safeMalloc(sizeof(codeInstruction));
 	resWord->ARE = 4;
 	resWord->L = 1;
 	resWord->sourceAddress = resWord->sourceRegister = resWord->destinationAddress = resWord->destinationRegister = resWord->opcode = resWord->funct = 0;
@@ -269,12 +269,12 @@ codeWord *generateFirstCodeWord(optCodeData *opcodeData) {
 	return resWord;
 }
 
-codeWord *generateSecondCodeWord(int lineIndex, char* lineContent, optCodeData *opcodeData, char* *operandsArray, int numOfOperands) {
-	codeWord *resWord;
+codeInstruction *generateSecondCodeWord(int lineIndex, char* lineContent, optCodeData *opcodeData, char* *operandsArray, int numOfOperands) {
+	codeInstruction *resWord;
 	int address1 = NO_ADDRESS;
 	int address2 = NO_ADDRESS;
 
-	resWord = (codeWord *)safeMalloc(sizeof(codeWord));
+	resWord = (codeInstruction *)safeMalloc(sizeof(codeInstruction));
 	resWord->sourceAddress = resWord->sourceRegister = resWord->destinationAddress = resWord->destinationRegister = resWord->opcode = 0;
 	resWord->L = 1;
 	resWord->lineIndex = lineIndex;

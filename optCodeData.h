@@ -17,7 +17,7 @@ typedef struct optCodeData {
 } optCodeData;
 
 /* Code Word Struct */
-typedef struct codeWord {
+typedef struct codeInstruction {
 	/* shared to all words */
 	unsigned int ARE: 3;
 	int L;
@@ -44,19 +44,19 @@ typedef struct codeWord {
 	unsigned int base: 16;
 	unsigned int offset: 16;
 
-} codeWord;
+} codeInstruction;
 
 /* DATA Word Struct */
-typedef struct dataWord {
+typedef struct dataInstruction {
 	int data;
-} dataWord;
+} dataInstruction;
 
 int isReservedWord(char *word);
 optCodeData* fetchFunctionData(char *function);
 int validateOperands(int line, int address1, int address2, int numOfOperands, optCodeData *opcodeData);
 
 extern optCodeData optCodeDataList[];
-extern codeWord machineCodeSection[];
-extern dataWord machineDataSection[];
+extern codeInstruction codeInstructionsList[];
+extern dataInstruction dataInstructionsList[];
 
 #endif

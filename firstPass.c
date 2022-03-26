@@ -4,14 +4,25 @@
 #include "firstPass.h"
 #include "utils.h"
 
-int runFirstPass(FILE* fileAfterMacroParsing, symbolTable* table, int* IC, int* DC);
-int parseLineForFirstPass(int lineIndex, char* lineContent, symbolTable* table, int* IC, int* DC);
-int parseStringEntry(int lineIndex, char* lineContent, int indexInLine, int* DC);
-int parseDataEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, int isReadingFirstParam);
-int parseCodeEntry(int lineIndex, char* lineContent, int indexInLine, int* IC);
+int runFirstPass(FILE* fileAfterMacroParsing, symbolTable* table, int* IC, int* DC,
+	codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION],
+	dataInstruction dataInstructionsList[MAX_MACHINE_DATA_SECTION]
+);
+int parseLineForFirstPass(
+	int lineIndex, char* lineContent, symbolTable* table, int* IC, int* DC,
+	codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION],
+	dataInstruction dataInstructionsList[MAX_MACHINE_DATA_SECTION]
+);
+int parseStringEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, dataInstruction dataInstructionsList[MAX_MACHINE_DATA_SECTION]);
+int parseDataEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, int isReadingFirstParam, dataInstruction dataInstructionsList[MAX_MACHINE_DATA_SECTION]);
+int parseCodeEntry(int lineIndex, char* lineContent, int indexInLine, int* IC, codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION]);
 
 
-int runFirstPass(FILE* fileAfterMacroParsing, symbolTable* table, int* IC, int* DC) {
+int runFirstPass(
+	FILE* fileAfterMacroParsing, symbolTable* table, int* IC, int* DC, 
+	codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION],
+	dataInstruction dataInstructionsList[MAX_MACHINE_DATA_SECTION]
+) {
 	int lineIndex;
 	char lineContent[MAX_LINE_WITH_LINEDROP_LEN];
 	int lineParseSuccess = true;
@@ -23,7 +34,7 @@ int runFirstPass(FILE* fileAfterMacroParsing, symbolTable* table, int* IC, int* 
 			/* if the line is too long continue the rest of the chars to get to the new line */ 
 			while (fgetc(fileAfterMacroParsing) != '\n');
 		} else {
-			lineParseSuccess &= parseLineForFirstPass(lineIndex, lineContent, table, IC, DC);
+			lineParseSuccess &= parseLineForFirstPass(lineIndex, lineContent, table, IC, DC, codeInstructionsList, dataInstructionsList);
 		}
 	}
 	updateSymbolTableDataTypes(table, *IC);
@@ -31,7 +42,11 @@ int runFirstPass(FILE* fileAfterMacroParsing, symbolTable* table, int* IC, int* 
 }
 
 
-int parseLineForFirstPass(int lineIndex, char* lineContent, symbolTable* table, int* IC, int* DC) {
+int parseLineForFirstPass(
+	int lineIndex, char* lineContent, symbolTable* table, int* IC, int* DC,
+	codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION],
+	dataInstruction dataInstructionsList[MAX_MACHINE_DATA_SECTION]
+) {
     char externSymbol[MAX_LINE_LENGTH];
 	int dataType;
 	int indexInLine=0, indexInExternSymbol;
@@ -69,7 +84,7 @@ int parseLineForFirstPass(int lineIndex, char* lineContent, symbolTable* table, 
 		if (IS_STRING_EXISTS(symbolName)) {
 			symbolTableAppend(symbolName, CODE, table, *IC, *DC);
 		}
-		if (!parseCodeEntry(lineIndex, lineContent, indexInLine, IC)) {
+		if (!parseCodeEntry(lineIndex, lineContent, indexInLine, IC, codeInstructionsList)) {
 			return FALSE;
 		}
 
@@ -80,14 +95,14 @@ int parseLineForFirstPass(int lineIndex, char* lineContent, symbolTable* table, 
 				symbolTableAppend(symbolName, DATA, table, *IC, *DC);
 			}
 			if (dataType == DATA) {
-				if (!parseDataEntry(lineIndex, lineContent,indexInLine, DC, TRUE))
+				if (!parseDataEntry(lineIndex, lineContent,indexInLine, DC, TRUE, dataInstructionsList))
 					return FALSE;
 			}
 			else {
 				if (!validateStringEntry(lineIndex, lineContent, indexInLine)) {
 					return FALSE;
 				}
-				if (!parseStringEntry(lineIndex, lineContent, indexInLine+1, DC))
+				if (!parseStringEntry(lineIndex, lineContent, indexInLine+1, DC, dataInstructionsList))
 					return FALSE;
 			}	
 		}
@@ -111,9 +126,9 @@ int parseLineForFirstPass(int lineIndex, char* lineContent, symbolTable* table, 
 }
 
 /* recursive function that handles string line */
-int parseStringEntry(int lineIndex, char* lineContent, int indexInLine, int* DC) {
-	dataWord *dataToAdd;
-	dataToAdd = (dataWord *) safeMalloc(sizeof(dataWord));
+int parseStringEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, dataInstruction dataInstructionsList[MAX_MACHINE_DATA_SECTION]) {
+	dataInstruction *dataToAdd;
+	dataToAdd = (dataInstruction *) safeMalloc(sizeof(dataInstruction));
 	
 
 	if (lineContent[indexInLine] == '"') { /* reached the end of the string */
@@ -124,25 +139,25 @@ int parseStringEntry(int lineIndex, char* lineContent, int indexInLine, int* DC)
 			return FALSE;
 		}
 		dataToAdd->data = '\0';
-		machineDataSection[*DC] = *dataToAdd; /* add '\0' to the data section array because all of the chars already added */
+		dataInstructionsList[*DC] = *dataToAdd; /* add '\0' to the data section array because all of the chars already added */
 		free(dataToAdd);
 		(*DC)++;
 		return TRUE;	
 	}
 
 	dataToAdd->data = lineContent[indexInLine];
-	machineDataSection[*DC] = *dataToAdd; /* add the char to the data section array */
+	dataInstructionsList[*DC] = *dataToAdd; /* add the char to the data section array */
 	free(dataToAdd);
 	indexInLine++;
 	
 	(*DC)++;
-	return parseStringEntry(lineIndex, lineContent,indexInLine, DC); /* start function again to find the next char in string */
+	return parseStringEntry(lineIndex, lineContent,indexInLine, DC, dataInstructionsList); /* start function again to find the next char in string */
 }
 
-int parseDataEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, int isReadingFirstParam) {
+int parseDataEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, int isReadingFirstParam, dataInstruction dataInstructionsList[MAX_MACHINE_DATA_SECTION]) {
 	int indexInDataParam;
 	char dataParam[MAX_LINE_LENGTH];
-	dataWord* dataToAdd;
+	dataInstruction* dataToAdd;
 
 	INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine);
 
@@ -161,9 +176,9 @@ int parseDataEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, i
 	}
 	dataParam[indexInDataParam] = '\0'; /* save the number in char array */
 	if(isStringInteger(dataParam)){ /* if string is valida (it's an integer) add it to the data section array */
-		dataToAdd = (dataWord *) safeMalloc(sizeof(dataWord));
+		dataToAdd = (dataInstruction *) safeMalloc(sizeof(dataInstruction));
 		dataToAdd->data = atoi(dataParam);
-		machineDataSection[*DC] = *dataToAdd;
+		dataInstructionsList[*DC] = *dataToAdd;
 		free(dataToAdd);
 		(*DC)++;
 	}
@@ -176,16 +191,16 @@ int parseDataEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, i
 		return FALSE;
 	}
 
-	return parseDataEntry(lineIndex, lineContent,indexInLine, DC, FALSE); /* start function again to find the next numbers in data row */
+	return parseDataEntry(lineIndex, lineContent,indexInLine, DC, FALSE, dataInstructionsList); /* start function again to find the next numbers in data row */
 
 }
 
-int parseCodeEntry(int lineIndex, char* lineContent, int indexInLine, int* IC) {
+int parseCodeEntry(int lineIndex, char* lineContent, int indexInLine, int* IC, codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION]) {
 	int indexInFunctionName, numOfOperands=0;
 	char* operandsArray[2];
 	optCodeData *opcodeData;
-	codeWord *firstWord;
-	codeWord *secondWord;
+	codeInstruction *firstWord;
+	codeInstruction *secondWord;
 	char functionName[MAX_LINE_LENGTH];
 
 	for (indexInFunctionName = 0; IS_TRUE_CHAR(lineContent[indexInLine]); indexInLine++, indexInFunctionName++) {
@@ -211,16 +226,16 @@ int parseCodeEntry(int lineIndex, char* lineContent, int indexInLine, int* IC) {
 
 	firstWord = generateFirstCodeWord(opcodeData);
 
-	machineCodeSection[*IC-IC_INIT_VALUE] = *firstWord;
-	machineCodeSection[(*IC+1)-IC_INIT_VALUE] = *secondWord;
+	codeInstructionsList[*IC-IC_INIT_VALUE] = *firstWord;
+	codeInstructionsList[(*IC+1)-IC_INIT_VALUE] = *secondWord;
 
 	if (numOfOperands == 0) {
-		machineCodeSection[*IC-IC_INIT_VALUE] = *firstWord;
+		codeInstructionsList[*IC-IC_INIT_VALUE] = *firstWord;
 		*IC += firstWord->L;
 	}
 	else {
-		machineCodeSection[*IC-IC_INIT_VALUE] = *firstWord;
-		machineCodeSection[(*IC+1)-IC_INIT_VALUE] = *secondWord;
+		codeInstructionsList[*IC-IC_INIT_VALUE] = *firstWord;
+		codeInstructionsList[(*IC+1)-IC_INIT_VALUE] = *secondWord;
 		*IC += firstWord->L + secondWord->L;
 	}
 

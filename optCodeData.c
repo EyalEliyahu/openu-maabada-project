@@ -4,9 +4,6 @@
 #include "optCodeData.h"
 #include "utils.h"
 
-codeWord machineCodeSection[MAX_MACHINE_CODE_SECTION];
-dataWord machineDataSection[MAX_MACHINE_DATA_SECTION];
-
 optCodeData optCodeDataList[] = {
 	{ "mov", 1, 0, 2, {0,1,2,3,-1}, {1,2,3,-1}}, /* opcode = 0000000000000001 = 1 */
 	{ "cmp", 2, 0, 2, {0,1,2,3,-1}, {0,1,2,3,-1}}, /* opcode = 0000000000000010 = 2 */

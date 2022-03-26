@@ -3,6 +3,9 @@
 
 #include "symbolTable.h"
 
-void generateOutputFiles(char* fileName, symbolTable* table, int IC, int DC);
-
+void generateOutputFiles(
+	char* fileName, symbolTable* table, int IC, int DC,
+	codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION],
+	dataInstruction dataInstructionsList[MAX_MACHINE_DATA_SECTION]
+);
 #endif

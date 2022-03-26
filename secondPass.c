@@ -6,32 +6,35 @@
 
 #define APPEND_ARE_TO_SYMBOL(addressType, operand) \
         if (addressType == EXTERN) {\
-            machineCodeSection[*indexInLine+instructionIndex].ARE = 1;\
-            machineCodeSection[*indexInLine+instructionIndex].firstOperand = operand;\
+            codeInstructionsList[*indexInLine+instructionIndex].ARE = 1;\
+            codeInstructionsList[*indexInLine+instructionIndex].firstOperand = operand;\
         }\
         else {\
-            machineCodeSection[*indexInLine+instructionIndex].ARE = 2;\
+            codeInstructionsList[*indexInLine+instructionIndex].ARE = 2;\
         }
 
-int updateCodeWordByType(int line, int instructionIndex, int* indexInLine, char* operand, int addressType, symbolTable* table) {
+int updateCodeWordByType(
+    int line, int instructionIndex, int* indexInLine, char* operand, int addressType,
+    symbolTable* table, codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION]
+) {
     int symbolNameIndex;
     char* symbolName;
     if (addressType == IMMEDIATE) {
-        machineCodeSection[*indexInLine+instructionIndex].immediate = atoi(&operand[1]); 
-        machineCodeSection[*indexInLine+instructionIndex].ARE = 3;
+        codeInstructionsList[*indexInLine+instructionIndex].immediate = atoi(&operand[1]); 
+        codeInstructionsList[*indexInLine+instructionIndex].ARE = 3;
          (*indexInLine)++;
     }
     else if (addressType == DIRECT) {
         symbolItem* currentSymbol;
         currentSymbol = getSymbolItem(operand, table);
         if(!currentSymbol) {
-            printLineError(machineCodeSection[instructionIndex].lineIndex, "Could not find symbol: %s in the symbol table", operand);
+            printLineError(codeInstructionsList[instructionIndex].lineIndex, "Could not find symbol: %s in the symbol table", operand);
             return FALSE;
         }
-        machineCodeSection[instructionIndex+*indexInLine].base = currentSymbol->base;
+        codeInstructionsList[instructionIndex+*indexInLine].base = currentSymbol->base;
         APPEND_ARE_TO_SYMBOL(currentSymbol->symbolType, operand);
         (*indexInLine)++;
-        machineCodeSection[instructionIndex+*indexInLine].offset = currentSymbol->offset;
+        codeInstructionsList[instructionIndex+*indexInLine].offset = currentSymbol->offset;
         APPEND_ARE_TO_SYMBOL(currentSymbol->symbolType, operand);
         (*indexInLine)++;
     }
@@ -44,13 +47,13 @@ int updateCodeWordByType(int line, int instructionIndex, int* indexInLine, char*
         symbolName[symbolNameIndex] = '\0';
         currentSymbol = getSymbolItem(symbolName, table);
         if(!currentSymbol) {
-            printLineError(machineCodeSection[instructionIndex].lineIndex, "Could not find symbol: %s in the symbol table", symbolName);
+            printLineError(codeInstructionsList[instructionIndex].lineIndex, "Could not find symbol: %s in the symbol table", symbolName);
             return FALSE;
         }
-        machineCodeSection[instructionIndex+*indexInLine].base = currentSymbol->base;
+        codeInstructionsList[instructionIndex+*indexInLine].base = currentSymbol->base;
         APPEND_ARE_TO_SYMBOL(currentSymbol->symbolType, symbolName);
         (*indexInLine)++;
-        machineCodeSection[instructionIndex+*indexInLine].offset = currentSymbol->offset;
+        codeInstructionsList[instructionIndex+*indexInLine].offset = currentSymbol->offset;
         APPEND_ARE_TO_SYMBOL(currentSymbol->symbolType, symbolName);
         (*indexInLine)++;
     }
@@ -89,15 +92,15 @@ int parseLineForSecondPass(int lineIndex, char* lineContent, symbolTable* table)
     return TRUE;
 }
 
-int updateCodeWords(int IC, symbolTable* table) {
+int updateCodeWords(int IC, symbolTable* table, codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION]) {
     int lineIndex, instructionIndex, i, adressType;
     char* operand = NULL;
-    codeWord instruction;
+    codeInstruction instruction;
     int isMovInstuction, isAbsoluteARE;
     /* update all of the code words that havent been coded in the first pass */
 	for (instructionIndex = 0, lineIndex = 0; instructionIndex < IC - IC_INIT_VALUE; instructionIndex++)
 	{      
-        instruction = machineCodeSection[instructionIndex];
+        instruction = codeInstructionsList[instructionIndex];
         isMovInstuction = instruction.opcode == 0;
         isAbsoluteARE = instruction.ARE > 3;
 		if (isMovInstuction && isAbsoluteARE) { /* run on all of the second code words */
@@ -107,20 +110,20 @@ int updateCodeWords(int IC, symbolTable* table) {
 				if (instruction.sourceAddress != REGISTER) {
                     operand = instruction.firstOperand;
                     adressType = instruction.sourceAddress;
-                    if (!updateCodeWordByType(lineIndex, instructionIndex, &i, operand, adressType, table))
+                    if (!updateCodeWordByType(lineIndex, instructionIndex, &i, operand, adressType, table, codeInstructionsList))
 			        	return FALSE;
 				}
 				if (instruction.destinationAddress != REGISTER) {
                     operand = instruction.secondOperand;
                     adressType = instruction.destinationAddress;
-                    if (!updateCodeWordByType(lineIndex, instructionIndex, &i, operand, adressType, table))
+                    if (!updateCodeWordByType(lineIndex, instructionIndex, &i, operand, adressType, table, codeInstructionsList))
 			        	return FALSE;
 				}
 			}
 			else if (instruction.destinationAddress != REGISTER) {
                     operand = instruction.firstOperand;
                     adressType = instruction.destinationAddress;
-                    if (!updateCodeWordByType(lineIndex, instructionIndex, &i, operand, adressType, table))
+                    if (!updateCodeWordByType(lineIndex, instructionIndex, &i, operand, adressType, table, codeInstructionsList))
 			        	return FALSE;
 			}
 		}
@@ -134,7 +137,10 @@ void validateMachineCodeLimitation(int IC, int DC, int lineIndex) {
     }
 }
 
-int runSecondPass(FILE* fileAfterMacroParsing, symbolTable* table, int IC, int DC) {
+int runSecondPass(
+    FILE* fileAfterMacroParsing, symbolTable* table, int IC, int DC, 
+    codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION]
+) {
     int lineIndex;
 	char lineContent[MAX_LINE_WITH_LINEDROP_LEN];
 	for (lineIndex = 1; fgets(lineContent, MAX_LINE_WITH_LINEDROP_LEN, fileAfterMacroParsing) != NULL; lineIndex++)
@@ -142,7 +148,7 @@ int runSecondPass(FILE* fileAfterMacroParsing, symbolTable* table, int IC, int D
 		if (!parseLineForSecondPass(lineIndex, lineContent, table))
 			return FALSE;
 	}
-    if (!updateCodeWords(IC, table))
+    if (!updateCodeWords(IC, table, codeInstructionsList))
         return FALSE;
         
 	validateMachineCodeLimitation(IC, DC, lineIndex);

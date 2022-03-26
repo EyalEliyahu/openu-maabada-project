@@ -29,6 +29,8 @@ void compileFile(char* fileName) {
 	FILE* assemblyFile = NULL;
 	FILE* fileAfterMacroParsing = NULL;
 	symbolTable* table = NULL;
+	codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION];
+	dataInstruction dataInstructionsList[MAX_MACHINE_DATA_SECTION];
 
 	printf("------- Starting Assembler on file: %s.as -------\n", fileName);
 
@@ -40,14 +42,14 @@ void compileFile(char* fileName) {
 				/* Running First Pass */
 				table = initSymbolTable();
 				printf("Running First Pass on: \"%s.am\" \n", fileName);
-				isFirstPassSuccess = runFirstPass(fileAfterMacroParsing, table, &IC, &DC);
+				isFirstPassSuccess = runFirstPass(fileAfterMacroParsing, table, &IC, &DC, codeInstructionsList, dataInstructionsList);
 				if(isFirstPassSuccess)  {
 					/* move the .am file back to the begining for second pass and start from first line */
 					rewind(fileAfterMacroParsing);
 					printf("Running Second Pass on: \"%s.am\" \n", fileName);
-					isSecondPassSuccess = runSecondPass(fileAfterMacroParsing, table, IC, DC);
+					isSecondPassSuccess = runSecondPass(fileAfterMacroParsing, table, IC, DC, codeInstructionsList);
 					if(isSecondPassSuccess) {
-						generateOutputFiles(fileName, table, IC, DC);
+						generateOutputFiles(fileName, table, IC, DC, codeInstructionsList, dataInstructionsList);
 					}
 
 				}

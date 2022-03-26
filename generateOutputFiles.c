@@ -18,11 +18,14 @@
 #define IS_SYMBOL_OF_ENTRY_TYPE(symbolTableItemIterator) (symbolTableItemIterator->symbolType == CODE_AND_ENTRY || symbolTableItemIterator->symbolType == DATA_AND_ENTRY)
 
 /* function that generates the .ob file */
-void generateObFile(char* fileName, int IC, int DC) {
+void generateObFile(
+	char* fileName, int IC, int DC,
+	 codeInstruction codeInstructionsList[], dataInstruction dataInstructionsList[]
+) {
 	int indexInSection;
 	FILE* obFile = NULL;
 	int hasFileOpened;
-	codeWord currentInstruction;
+	codeInstruction currentInstruction;
 	char* WORD_FORMAT = "\n%.4d A4-B%x-C%x-D%x-E%x";
 	char* WORD_WITH_BASE_FORMAT = "\n%.4d A%x-B%x-C%x-D%x-E%x";
 	int instructionAmount = IC - IC_INIT_VALUE;
@@ -34,7 +37,7 @@ void generateObFile(char* fileName, int IC, int DC) {
 	fprintf(obFile, "%d %d", instructionAmount, DC);
 
 	for (indexInSection = 0; indexInSection < instructionAmount; indexInSection++) {
-		currentInstruction = machineCodeSection[indexInSection];
+		currentInstruction = codeInstructionsList[indexInSection];
 		/* OPCODE WORD */
 		if (currentInstruction.opcode > 0) { 
 				fprintf(
@@ -78,7 +81,7 @@ void generateObFile(char* fileName, int IC, int DC) {
 				);
 
 				indexInSection++;
-				currentInstruction = machineCodeSection[indexInSection];
+				currentInstruction = codeInstructionsList[indexInSection];
 				/* OFFSET */
 				fprintf(
 					obFile,
@@ -96,7 +99,7 @@ void generateObFile(char* fileName, int IC, int DC) {
 			obFile,
 			WORD_FORMAT,
 			IC + indexInSection,
-			VALUE_TO_MASKED_BITS(machineDataSection[indexInSection].data)
+			VALUE_TO_MASKED_BITS(dataInstructionsList[indexInSection].data)
 		);
 	}
     
@@ -137,7 +140,7 @@ void generateEntFile(char* fileName, symbolTable* table) {
 }
 
 /* function that generates the .ext file */
-void generateExtFile(char* fileName, symbolTable* table, int IC) {
+void generateExtFile(char* fileName, symbolTable* table, int IC, codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION]) {
 	FILE* extFile = NULL;
 	int externSymbolsCount = 0;
 	int i, hasFileOpened;
@@ -165,9 +168,9 @@ void generateExtFile(char* fileName, symbolTable* table, int IC) {
         if (currentSymbol->symbolType == EXTERN) {
 			for (i = 0; i < IC - IC_INIT_VALUE; i++)
 			{
-				if ( machineCodeSection[i].ARE == 1)
+				if ( codeInstructionsList[i].ARE == 1)
 				{
-					if (IS_STR_EQL(currentSymbol->symbol, machineCodeSection[i].firstOperand)) {
+					if (IS_STR_EQL(currentSymbol->symbol, codeInstructionsList[i].firstOperand)) {
 						fprintf(extFile, "%s BASE %d\n", currentSymbol->symbol, i+IC_INIT_VALUE);
 						fprintf(extFile, "%s OFFSET %d\n\n", currentSymbol->symbol, i+IC_INIT_VALUE+1);
 						i++;
@@ -182,8 +185,12 @@ void generateExtFile(char* fileName, symbolTable* table, int IC) {
 }
 
 /* function that trigger all of the generate files functions */
-void generateOutputFiles(char* fileName, symbolTable* table, int IC, int DC) {
-	generateObFile(fileName, IC, DC);
+void generateOutputFiles(
+	char* fileName, symbolTable* table, int IC, int DC,
+	codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION],
+	dataInstruction dataInstructionsList[MAX_MACHINE_DATA_SECTION]
+) {
+	generateObFile(fileName, IC, DC, codeInstructionsList, dataInstructionsList);
 	generateEntFile(fileName, table);
-	generateExtFile(fileName, table, IC);
+	generateExtFile(fileName, table, IC, codeInstructionsList);
 }
