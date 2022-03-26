@@ -25,7 +25,7 @@ int updateCodeWordByType(int line, int instructionIndex, int* indexInLine, char*
         symbolItem *temp;
         temp = symbolItemInTable(operand, table);
         if(!temp) {
-            printLineError(machineCodeSection[instructionIndex].line, "Could not find symbol: %s in the symbol table", operand);
+            printLineError(machineCodeSection[instructionIndex].lineIndex, "Could not find symbol: %s in the symbol table", operand);
             return FALSE;
         }
         machineCodeSection[instructionIndex+*indexInLine].base = temp->base;
@@ -44,7 +44,7 @@ int updateCodeWordByType(int line, int instructionIndex, int* indexInLine, char*
         symbolName[symbolNameIndex] = '\0';
         temp = symbolItemInTable(symbolName, table);
         if(!temp) {
-            printLineError(machineCodeSection[instructionIndex].line, "Could not find symbol: %s in the symbol table", symbolName);
+            printLineError(machineCodeSection[instructionIndex].lineIndex, "Could not find symbol: %s in the symbol table", symbolName);
             return FALSE;
         }
         machineCodeSection[instructionIndex+*indexInLine].base = temp->base;
