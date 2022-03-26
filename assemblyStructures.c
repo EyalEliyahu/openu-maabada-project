@@ -109,13 +109,21 @@ int validate_address_type(int line, assemblyStructure *opcodeData, int address, 
 {
 	int i;
 	if (source_or_destination == SOURCE) {
+		if(line == 14)
+			printf("HERE!");
 		for (i = 0; opcodeData->sourceOperandTypes[i] != -1; i++) {
+			if(line == 14) {
+				printf("\n opcodeData->sourceOperandTypes[i]: %d, address: %d",opcodeData->sourceOperandTypes[i] ,address);
+			}
+			
 			if (opcodeData->sourceOperandTypes[i] == address) 
 				return TRUE;	
 		}
 	}
 
 	if (source_or_destination == DESTINATION) {
+		if(line == 14)
+			printf("THERE!");
 		for (i = 0; opcodeData->destinationOperandTypes[i] != -1; i++) {
 			if (opcodeData->destinationOperandTypes[i] == address) 
 				return TRUE;	

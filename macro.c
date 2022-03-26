@@ -14,9 +14,8 @@ int processMacroLine(int line, char *lineContent, int *inMacro, char *macro, cha
 	/* look for the next char that is not whitespace/tab/newline */
 	INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i);
 	/* Get the line content after removing spaces and tabs from the beginning until reach whitespace/tab/newline */
-	for (; lineContent[i] && lineContent[i] != '\n' && lineContent[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++) {
+	for (; lineContent[i] && lineContent[i] != '\n' && lineContent[i] != '\t' && lineContent[i] != ' ' && lineContent[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++)
 		firstWord[j] = lineContent[i];
-	}
 	firstWord[j] = '\0';
 
 	/* Check if the line contains macro that we already saved */
@@ -38,9 +37,9 @@ int processMacroLine(int line, char *lineContent, int *inMacro, char *macro, cha
 		/* go to the end of the word: macro */
 		INCREASE_I_UNTILL_CHAR(lineContent, 'o', i);
 		INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i);
-		for (; lineContent[i] && lineContent[i] != '\n' && lineContent[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++) {
+		for (; lineContent[i] && lineContent[i] != ' ' && lineContent[i] != '\n' && lineContent[i] != '\t' && lineContent[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++)
 			macro[j] = lineContent[i];
-		}
+			
 		macro[j] = '\0';
 
 		*inMacro = TRUE;
