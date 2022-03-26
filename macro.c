@@ -8,13 +8,11 @@
 /* This function handles the macro replacement */
 int processMacroLine(int line, char *lineContent, int *inMacro, char *macro, char *file, FILE *amFilePtr) {
 	int i=0, j=0, k=0;
-	char firstWord[MAX_LINE_LENGTH];
+	char firstWord[MAX_LINE_LENGTH + 2];
 	macroLine *temp;
 	char* lineInMacro = "";
 	/* look for the next char that is not whitespace/tab/newline */
-	INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i); 
-	if (lineContent[i] == ';' || lineContent[i] == '\n')
-		return TRUE;
+	INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i);
 	/* Get the line content after removing spaces and tabs from the beginning until reach whitespace/tab/newline */
 	for (; lineContent[i] && lineContent[i] != '\n' && lineContent[i] != '\t' && lineContent[i] != ' ' && lineContent[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++) {
 		firstWord[j] = lineContent[i];
@@ -83,8 +81,7 @@ int processMacroLine(int line, char *lineContent, int *inMacro, char *macro, cha
 
 int translateMacros(FILE *assemblyFile, char* fileName)
 {
-	char *temp_string = "";
-	int macroPhaseSuccess = TRUE;
+	int macroPassSuccess = TRUE;
 	char macro[MAX_LINE_LENGTH];
 	int inMacro = FALSE;
 	char lineContent[MAX_LINE_LENGTH + 2];
@@ -102,28 +99,25 @@ int translateMacros(FILE *assemblyFile, char* fileName)
 	for (; fgets(lineContent, MAX_LINE_LENGTH + 2, assemblyFilePtr) != NULL; line++)
 	{
 		/* check if line no reach the max length */ 
-		if (!feof(assemblyFilePtr) && strchr(lineContent, '\n') == NULL)
-		{
-			printErrorMessage(line, "line exceeds the max line length");
-			macroPhaseSuccess = FALSE;
-			/* if the line is too long continue the rest of the chars to get to the new line */ 
-			while (*temp_string != '\n' && *temp_string != EOF)
-			{
-				*temp_string = fgetc(assemblyFile);
-			}
-		}
-		else
-		{
+		// if (!feof(assemblyFilePtr) && strchr(lineContent, '\n') == NULL)
+		// {
+			// printErrorMessage(line, "line exceeds the max line length");
+			// macroPassSuccess = FALSE;
+			// /* if the line is too long continue the rest of the chars to get to the new line */ 
+			// while (fgetc(assemblyFilePtr) != '\n');
+		// }
+		// else
+		// {
 			/* run processMacroLine function */ 
 			if (!processMacroLine(line, lineContent, &inMacro, macro, fileName, amFilePtr)) {
-				macroPhaseSuccess = FALSE;
+				macroPassSuccess = FALSE;
 			}
-		}
+		// }
 	}
 	
 	/* free dynamic allocated memory used for macro and close am and assembly files */
 	fclose(amFilePtr);
 	fclose(assemblyFilePtr);
 	freeMacroList();
-	return macroPhaseSuccess;
+	return macroPassSuccess;
 }

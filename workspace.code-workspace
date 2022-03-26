@@ -14,7 +14,7 @@
 			"stdlib.h": "c",
 			"assemblystructures.h": "c",
 			"consts.h": "c",
-			"firstphase.h": "c",
+			"firstpass.h": "c",
 			"stdio.h": "c",
 			"string": "c",
 			"iosfwd": "c",

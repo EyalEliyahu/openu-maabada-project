@@ -2,8 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include "utils.h"
-#include "firstPhase.h"
-#include "secondPhase.h"
+#include "firstPass.h"
+#include "secondPass.h"
 #include "macro.h"
 #include "symbolTable.h"
 #include "generateOutputFiles.h"
@@ -21,8 +21,8 @@ int main(int argc, char* argv[]) {
 
 void compileFile(char* fileName) {
 	int isMacroParseSuccess;
-	int isFirstPhaseSuccess;
-	int isSecondPhaseSuccess;
+	int isFirstPassSuccess;
+	int isSecondPassSuccess;
 	int IC = IC_INIT_VALUE;
 	int DC = DC_INIT_VALUE;
 	FILE* assemblyFile = NULL;
@@ -41,19 +41,19 @@ void compileFile(char* fileName) {
 	if(!openFileSafe(&fileAfterMacroParsing, fileName, ".am", "r")) 
 		return;
 
-	/* Running First Phase */
+	/* Running First Pass */
 	table = initSymbolTable();
-	printf("Running First Phase on: \"%s.am\" \n", fileName);
+	printf("Running First Pass on: \"%s.am\" \n", fileName);
 
-	isFirstPhaseSuccess = runFirstPhase(fileAfterMacroParsing, table, &IC, &DC);
-	if(!isFirstPhaseSuccess) 
+	isFirstPassSuccess = runFirstPass(fileAfterMacroParsing, table, &IC, &DC);
+	if(!isFirstPassSuccess) 
 		return;
 
-	/* move the .am file back to the begining for second phase and start from first line */
+	/* move the .am file back to the begining for second pass and start from first line */
 	rewind(fileAfterMacroParsing);
-	printf("Running Second Phase on: \"%s.am\" \n", fileName);
-	isSecondPhaseSuccess = runSecondPhase(fileAfterMacroParsing, table, IC, DC);
-	if(!isSecondPhaseSuccess)
+	printf("Running Second Pass on: \"%s.am\" \n", fileName);
+	isSecondPassSuccess = runSecondPass(fileAfterMacroParsing, table, IC, DC);
+	if(!isSecondPassSuccess)
 		return;
 
 	generateOutputFiles(fileName, table, IC, DC);
