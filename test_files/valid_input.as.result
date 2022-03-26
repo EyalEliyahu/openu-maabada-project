@@ -1,5 +1,8 @@
 ------- Starting Assembler on file: valid_input.as -------
 Running First Pass on: "valid_input.am" 
-ASSEMBLER ERROR [line 7]: Invalid assembly function: "m1"
-ASSEMBLER ERROR [line 14]: The addressing type provided is incompatible with this assembly command
+HERE!
+ opcodeData->sourceOperandTypes[i]: 0, address: 4
+ opcodeData->sourceOperandTypes[i]: 1, address: 4
+ opcodeData->sourceOperandTypes[i]: 2, address: 4
+ opcodeData->sourceOperandTypes[i]: 3, address: 4ASSEMBLER ERROR [line 15]: The addressing type provided is incompatible with this assembly command
 ------- Finnish Assembler on file: valid_input.as -------
