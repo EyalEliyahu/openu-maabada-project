@@ -3,8 +3,7 @@
 declare -a file_extensions=("ob" "ext" "ent" "result")
 prefix_of_extension="expected"
 
-tests_folder=$PWD
-cd ..
+tests_folder="$PWD/test_files"
 make
 cd $tests_folder
   as_file="valid_input.as"

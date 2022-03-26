@@ -127,9 +127,9 @@ int updateCodeWords(int IC, symbolTable* table) {
 	}
     return TRUE;
 }
-void validateMachineCodeLimitation(int IC, int DC) {
+void validateMachineCodeLimitation(int IC, int DC, int lineIndex) {
 	if (IC - IC_INIT_VALUE + DC > MAX_MACHINE_CODE_SECTION){
-		printf("The machine code is too big and can only include %d words", MAX_MACHINE_CODE_SECTION);
+		printErrorMessage(lineIndex, "The machine code is too big and can only include %d words", MAX_MACHINE_CODE_SECTION);
         exit(EXIT_FAILURE);
     }
 }
@@ -145,6 +145,6 @@ int runSecondPass(FILE* fileAfterMacroParsing, symbolTable* table, int IC, int D
     if (!updateCodeWords(IC, table))
         return FALSE;
         
-	validateMachineCodeLimitation(IC, DC);
+	validateMachineCodeLimitation(IC, DC, lineIndex);
     return TRUE;
 }

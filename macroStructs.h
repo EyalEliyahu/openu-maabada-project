@@ -16,7 +16,6 @@ void freeMacroList();
 void macroListAppend(char* macroName);
 macroLine *macroLineInList(char *macroName);
 int macroExistsInList(char *macroName);
-void printMacroList();
 
 extern macroLine *macroHead;
 extern macroLine *macroTail;

@@ -39,7 +39,7 @@ int openFileSafe(FILE** fileStream, char* fileName, char* fileExt, char* openMet
 	char* fileNameWithExt = stringsConcat(fileName, fileExt);
 	*fileStream = fopen(fileNameWithExt, openMethod);
 	if(*fileStream == NULL) {
-		printf("Error: Unable to read \"%s\". skipping it.\n", fileNameWithExt);
+		printf("Error: Unable to read file: \"%s\". skipping it.\n", fileNameWithExt);
 		free(fileNameWithExt);
 		return FALSE;
 	} else {
