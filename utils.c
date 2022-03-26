@@ -69,32 +69,32 @@ int openFileSafe(FILE* *fileStream, char* fileName, char* fileExt, char* openMet
 int isSymbolWithValidIndex(char* operandString, int lineIndex)
 {
 	char symbolPart[MAX_LINE_LENGTH];
-	int j;
+	int indexInSymbolPart;
 
-	for (j = 0; operandString[j] && operandString[j] != '[' && operandString[j] != '\0'; j++)
+	for (indexInSymbolPart = 0; operandString[indexInSymbolPart] && operandString[indexInSymbolPart] != '[' && operandString[indexInSymbolPart] != '\0'; indexInSymbolPart++)
 	{
-		symbolPart[j] = operandString[j];
+		symbolPart[indexInSymbolPart] = operandString[indexInSymbolPart];
 	}
 
-	symbolPart[j] = '\0';
+	symbolPart[indexInSymbolPart] = '\0';
 	if (!isSymbolNameValid(symbolPart, lineIndex))
 		return FALSE;
 
 	if (
-		operandString[j] == '[' &&
-		operandString[j + 1] == 'r' &&
-		atoi(&operandString[j + 2]) <= 9 &&
-		operandString[j + 3] == ']' &&
-		operandString[j + 4] == '\0') /* SYMBOL[rx] */
+		operandString[indexInSymbolPart] == '[' &&
+		operandString[indexInSymbolPart + 1] == 'r' &&
+		atoi(&operandString[indexInSymbolPart + 2]) <= 9 &&
+		operandString[indexInSymbolPart + 3] == ']' &&
+		operandString[indexInSymbolPart + 4] == '\0') /* SYMBOL[rx] */
 		return TRUE;
 
 	if (
-		operandString[j] == '[' &&
-		operandString[j + 1] == 'r' &&
-		atoi(&operandString[j + 2]) >= 10 &&
-		atoi(&operandString[j + 2]) <= 15 &&
-		operandString[j + 4] == ']' &&
-		operandString[j + 5] == '\0') /* SYMBOL[r1x] */
+		operandString[indexInSymbolPart] == '[' &&
+		operandString[indexInSymbolPart + 1] == 'r' &&
+		atoi(&operandString[indexInSymbolPart + 2]) >= 10 &&
+		atoi(&operandString[indexInSymbolPart + 2]) <= 15 &&
+		operandString[indexInSymbolPart + 4] == ']' &&
+		operandString[indexInSymbolPart + 5] == '\0') /* SYMBOL[r1x] */
 		return TRUE;
 
 	return FALSE;
@@ -127,14 +127,14 @@ int getSymbolFromLine(int lineIndex, char* lineContent, char* symbolDest)
 	return TRUE;
 }
 
-int fetchOperands(int line, char* lineContent, int indexAtLine, char* *operandsArray, int* numOfOperands)
+int fetchOperands(int lineIndex, char* lineContent, int indexAtLine, char* *operandsArray, int* numOfOperands)
 {
-	int j;
+	int indexInOperandStr;
 	operandsArray[0] = operandsArray[1] = NULL;
 
 	if (lineContent[indexAtLine] == ',')
 	{
-		printLineError(line, "Unexpected comma");
+		printLineError(lineIndex, "Unexpected comma");
 		return FALSE;
 	}
 
@@ -142,40 +142,38 @@ int fetchOperands(int line, char* lineContent, int indexAtLine, char* *operandsA
 	{
 		if (*numOfOperands == 2)
 		{
-			printLineError(line, "Too many operands for this assembly command");
+			printLineError(lineIndex, "Too many operands for this assembly command");
 			free(operandsArray[0]);
 			free(operandsArray[1]);
 			return FALSE;
 		}
 
 		operandsArray[*numOfOperands] = safeMalloc(MAX_LINE_LENGTH);
-		for (j = 0; IS_TRUE_CHAR(lineContent[indexAtLine]) && lineContent[indexAtLine] != ',';
-			 indexAtLine++, j++)
+		for (indexInOperandStr = 0; IS_TRUE_CHAR(lineContent[indexAtLine]) && lineContent[indexAtLine] != ','; indexAtLine++, indexInOperandStr++)
 		{
-			operandsArray[*numOfOperands][j] = lineContent[indexAtLine];
+			operandsArray[*numOfOperands][indexInOperandStr] = lineContent[indexAtLine];
 		}
-		operandsArray[*numOfOperands][j] = '\0';
+		operandsArray[*numOfOperands][indexInOperandStr] = '\0';
 		(*numOfOperands)++;
 		INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexAtLine);
 
-		if (lineContent[indexAtLine] == '\n' || lineContent[indexAtLine] == EOF || !lineContent[indexAtLine])
+		if (IS_NULLISH_CHAR(lineContent[indexAtLine]))
 			break;
 		else if (lineContent[indexAtLine] != ',')
 		{
-			printLineError(line, "There needs to be a comma between operands");
+			printLineError(lineIndex, "There needs to be a comma between operands");
 			free(operandsArray[0]);
 			if (*numOfOperands > 1)
-			{
 				free(operandsArray[1]);
-			}
+				
 			return FALSE;
 		}
 		indexAtLine++;
 		INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexAtLine);
 		if (IS_NULLISH_CHAR(lineContent[indexAtLine]))
-			printLineError(line, "There needs to be an operand after comma");
+			printLineError(lineIndex, "There needs to be an operand after comma");
 		else if (lineContent[indexAtLine] == ',')
-			printLineError(line, "Multiple consecutive commas.");
+			printLineError(lineIndex, "Multiple consecutive commas.");
 		else
 			continue;
 		{
@@ -379,18 +377,18 @@ int calcIcOffset(int ic) {
 	return ic % 16;
 }
 
-int validateStringEntry(int line, char* lineContent, int indexAtLine ){
+int validateStringEntry(int lineIndex, char* lineContent, int indexAtLine ){
 
 	if (lineContent[indexAtLine] != '"')
 	{
-		printLineError(line, "String type should start with quotes");
+		printLineError(lineIndex, "String type should start with quotes");
 		return FALSE;
 	}
 	indexAtLine++;
 
 	if (lineContent[indexAtLine] == '"')
 	{
-		printLineError(line, "String should not be empty!");
+		printLineError(lineIndex, "String should not be empty!");
 		return FALSE;
 	}
 
@@ -398,10 +396,19 @@ int validateStringEntry(int line, char* lineContent, int indexAtLine ){
 		indexAtLine++;
 
 	if (lineContent[indexAtLine] != '"') {
-		printLineError(line, "String type should end with quotes");
+		printLineError(lineIndex, "String type should end with quotes");
 		return FALSE;
 
 	}
 
+	return TRUE;
+}
+
+int isAlphanumericStr(char* string) {
+	int i;
+	/*check for every char in string if it is non alphanumeric char if it is function returns TRUE*/
+	for (i = 0; string[i]; i++) {
+		if (!isalpha(string[i]) && !isdigit(string[i])) return FALSE;
+	}
 	return TRUE;
 }

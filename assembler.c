@@ -17,6 +17,7 @@ int main(int argc, char* argv[]) {
 		compileFile(argv[fileIndex]);
 	}
 	return EXIT_SUCCESS;
+	free(argv);
 }
 
 /* Handle the compile's process of file*/
@@ -57,4 +58,8 @@ void compileFile(char* fileName) {
 		}
 	}
 	printf("------- Finish Assembler on file: %s.as -------\n", fileName);
+	
+	fclose(assemblyFile);
+	fclose(fileAfterMacroParsing);
+	freeSymbolTable(table);
 }

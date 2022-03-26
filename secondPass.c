@@ -4,7 +4,7 @@
 #include "utils.h"
 #include "symbolTable.h"
 
-#define ADD_ARE(addressType, operand) \
+#define APPEND_ARE_TO_SYMBOL(addressType, operand) \
         if (addressType == EXTERN) {\
             machineCodeSection[*indexInLine+instructionIndex].ARE = 1;\
             machineCodeSection[*indexInLine+instructionIndex].firstOperand = operand;\
@@ -22,36 +22,36 @@ int updateCodeWordByType(int line, int instructionIndex, int* indexInLine, char*
          (*indexInLine)++;
     }
     else if (addressType == DIRECT) {
-        symbolItem *temp;
-        temp = symbolItemInTable(operand, table);
-        if(!temp) {
+        symbolItem* currentSymbol;
+        currentSymbol = getSymbolItem(operand, table);
+        if(!currentSymbol) {
             printLineError(machineCodeSection[instructionIndex].lineIndex, "Could not find symbol: %s in the symbol table", operand);
             return FALSE;
         }
-        machineCodeSection[instructionIndex+*indexInLine].base = temp->base;
-        ADD_ARE(temp->symbolType, operand);
+        machineCodeSection[instructionIndex+*indexInLine].base = currentSymbol->base;
+        APPEND_ARE_TO_SYMBOL(currentSymbol->symbolType, operand);
         (*indexInLine)++;
-        machineCodeSection[instructionIndex+*indexInLine].offset = temp->offset;
-        ADD_ARE(temp->symbolType, operand);
+        machineCodeSection[instructionIndex+*indexInLine].offset = currentSymbol->offset;
+        APPEND_ARE_TO_SYMBOL(currentSymbol->symbolType, operand);
         (*indexInLine)++;
     }
     else if (addressType == INDEX) {
-        symbolItem *temp;
+        symbolItem* currentSymbol;
         symbolName = safeMalloc(sizeof(char) * MAX_LINE_LENGTH);
         for (symbolNameIndex = 0; operand[symbolNameIndex] != '['; symbolNameIndex++) {
             symbolName[symbolNameIndex] = operand[symbolNameIndex];
         }
         symbolName[symbolNameIndex] = '\0';
-        temp = symbolItemInTable(symbolName, table);
-        if(!temp) {
+        currentSymbol = getSymbolItem(symbolName, table);
+        if(!currentSymbol) {
             printLineError(machineCodeSection[instructionIndex].lineIndex, "Could not find symbol: %s in the symbol table", symbolName);
             return FALSE;
         }
-        machineCodeSection[instructionIndex+*indexInLine].base = temp->base;
-        ADD_ARE(temp->symbolType, symbolName);
+        machineCodeSection[instructionIndex+*indexInLine].base = currentSymbol->base;
+        APPEND_ARE_TO_SYMBOL(currentSymbol->symbolType, symbolName);
         (*indexInLine)++;
-        machineCodeSection[instructionIndex+*indexInLine].offset = temp->offset;
-        ADD_ARE(temp->symbolType, symbolName);
+        machineCodeSection[instructionIndex+*indexInLine].offset = currentSymbol->offset;
+        APPEND_ARE_TO_SYMBOL(currentSymbol->symbolType, symbolName);
         (*indexInLine)++;
     }
 

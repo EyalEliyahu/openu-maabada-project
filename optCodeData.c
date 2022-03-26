@@ -77,11 +77,11 @@ int isReservedWord(char *word) {
 }	
 
 optCodeData* fetchFunctionData(char *functionName) {
-	int i;
-	for (i = 0; i < NUM_OF_OPCODES; i++)
+	int optCodeIndex;
+	for (optCodeIndex = 0; optCodeIndex < NUM_OF_OPCODES; optCodeIndex++)
 	{
-		if (strcmp(functionName, optCodeDataList[i].name) == 0) {
-			return &optCodeDataList[i];
+		if (strcmp(functionName, optCodeDataList[optCodeIndex].name) == 0) {
+			return &optCodeDataList[optCodeIndex];
 		}
 	}
 	return NULL;

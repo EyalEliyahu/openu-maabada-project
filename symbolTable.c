@@ -9,52 +9,26 @@
 #include "optCodeData.h"
 
 
-void freeSymbolTable(symbolTable* table)
+symbolItem* getSymbolItem(char* symbolName, symbolTable* table)
 {
-    symbolItem *temp;
-
-    while (table->symbolHead)
+    symbolItem* currentSymbol = table->symbolHead;
+    while (currentSymbol)
     {
-        temp = table->symbolHead->next;
-        free(table->symbolHead);
-        table->symbolHead = temp;
-    }
-	free(table);
-}
-
-int isSymbolExistsInTable(char* symbolName, symbolTable* table)
-{
-    symbolItem *temp = table->symbolHead;
-    while (temp)
-    {
-        if (IS_STR_EQL(temp->symbol, symbolName))
-            return TRUE;
+        if (IS_STR_EQL(currentSymbol->symbol, symbolName))
+            return currentSymbol;
         else
-            temp = temp->next;
-    }
-    return FALSE;
-}
-
-symbolItem *symbolItemInTable(char* symbolName, symbolTable* table)
-{
-    symbolItem *temp = table->symbolHead;
-    while (temp)
-    {
-        if (IS_STR_EQL(temp->symbol, symbolName))
-            return temp;
-        else
-            temp = temp->next;
+            currentSymbol = currentSymbol->next;
     }
     return NULL;
 }
 
-symbolItem * getSymbolItemFromSymbolTable(char*  symbol, symbolTable* table) {
-    symbolItem * sl = table->symbolHead;
-    while (sl) {
-        if (IS_STR_EQL(sl->symbol, symbol)) {
-            return sl;
+ symbolItem*  getSymbolItemFromSymbolTable(char*  symbol, symbolTable* table) {
+    symbolItem*  currentSymbol = table->symbolHead;
+    while (currentSymbol) {
+        if (IS_STR_EQL(currentSymbol->symbol, symbol)) {
+            return currentSymbol;
         }
-        sl = sl->next;
+        currentSymbol = currentSymbol->next;
     }
 	return NULL;
 }
@@ -66,42 +40,33 @@ symbolTable* initSymbolTable() {
 
 void symbolTableAppend(char* symbolName, int symbolType, symbolTable* table, int IC, int DC)
 {
-	symbolItem* new_symbol = (symbolItem*)safeMalloc(sizeof(symbolItem));
-	strcpy(new_symbol->symbol, symbolName);
+	symbolItem* newSymbol = (symbolItem*)safeMalloc(sizeof(symbolItem));
+	strcpy(newSymbol->symbol, symbolName);
 
-	new_symbol->value = 0;
-	new_symbol->base = 0;
-	new_symbol->offset = 0;
+	newSymbol->value = 0;
+	newSymbol->base = 0;
+	newSymbol->offset = 0;
 	if (symbolType == CODE) {
-		new_symbol->value = IC;
-		new_symbol->base = calcIcBase(IC);
-		new_symbol->offset = calcIcOffset(IC);
+		newSymbol->value = IC;
+		newSymbol->base = calcIcBase(IC);
+		newSymbol->offset = calcIcOffset(IC);
 	}
 	else if (symbolType == DATA) {
-		new_symbol->value = DC;
+		newSymbol->value = DC;
 	}
-	new_symbol->symbolType = symbolType; 
+	newSymbol->symbolType = symbolType; 
 
 	if(!table->symbolHead) {
-		table->symbolHead = new_symbol;
+		table->symbolHead = newSymbol;
 		table->symbolTail = table->symbolHead;
 		}
 	else {
-		table->symbolTail->next = new_symbol;
+		table->symbolTail->next = newSymbol;
 		table->symbolTail = table->symbolTail->next;
 	}
 	table->symbolTail->next = NULL;
 
 	return;
-}
-
-int isAlphanumericStr(char* string) {
-	int i;
-	/*check for every char in string if it is non alphanumeric char if it is function returns TRUE*/
-	for (i = 0; string[i]; i++) {
-		if (!isalpha(string[i]) && !isdigit(string[i])) return FALSE;
-	}
-	return TRUE;
 }
 
 int isSymbolNameValid(char* name, int line) {
@@ -112,31 +77,31 @@ int isSymbolNameValid(char* name, int line) {
 
 void updateSymbolTableDataTypes(symbolTable* table, int IC) {
 	
-	symbolItem *temp = table->symbolHead;
-    while (temp)
+	symbolItem* currentSymbol = table->symbolHead;
+    while (currentSymbol)
     {
-        if (temp->symbolType == DATA) {
-			temp->value += IC;
-			temp->base = calcIcBase(temp->value);
-			temp->offset = calcIcOffset(temp->value);
+        if (currentSymbol->symbolType == DATA) {
+			currentSymbol->value += IC;
+			currentSymbol->base = calcIcBase(currentSymbol->value);
+			currentSymbol->offset = calcIcOffset(currentSymbol->value);
 		}
-		temp = temp->next;
+		currentSymbol = currentSymbol->next;
     }
 	
 }
 
 int updateSymbolWithEntryAttribute(char* symbolName, int line, symbolTable* table)
 {
-    symbolItem *temp = table->symbolHead;
-    while (temp)
+    symbolItem* currentSymbol = table->symbolHead;
+    while (currentSymbol)
     {
-        if (IS_STR_EQL(temp->symbol, symbolName)) {
-			if (temp->symbolType == DATA) {
-				temp->symbolType = DATA_AND_ENTRY;
+        if (IS_STR_EQL(currentSymbol->symbol, symbolName)) {
+			if (currentSymbol->symbolType == DATA) {
+				currentSymbol->symbolType = DATA_AND_ENTRY;
             	return TRUE;
 			}
-			if (temp->symbolType == CODE) {
-				temp->symbolType = CODE_AND_ENTRY;
+			if (currentSymbol->symbolType == CODE) {
+				currentSymbol->symbolType = CODE_AND_ENTRY;
             	return TRUE;
 			}
 			else {
@@ -144,9 +109,22 @@ int updateSymbolWithEntryAttribute(char* symbolName, int line, symbolTable* tabl
 				return FALSE;
 			}	
 		}
-		temp = temp->next;
+		currentSymbol = currentSymbol->next;
     }
 	
 	printLineError(line, "Could not find a symbol in symbol table for this entry");
     return FALSE;
+}
+
+void freeSymbolTable(symbolTable* table)
+{
+    symbolItem* currentSymbol;
+
+    while (table->symbolHead)
+    {
+        currentSymbol = table->symbolHead->next;
+        free(table->symbolHead);
+        table->symbolHead = currentSymbol;
+    }
+	free(table);
 }

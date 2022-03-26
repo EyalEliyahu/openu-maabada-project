@@ -10,7 +10,7 @@ typedef struct symbolItem {
 	int base;
     int offset;
 	int symbolType; /* from enum: CODE, DATA, CODE */
-	struct symbolItem *next;
+	struct symbolItem* next;
 } symbolItem;
 
 typedef struct symbolTable {
@@ -18,14 +18,12 @@ typedef struct symbolTable {
 	symbolItem* symbolTail;
 } symbolTable;
 
-int isSymbolExistsInTable(char* symbolName, symbolTable* table);
-symbolItem *symbolItemInTable(char* symbolName, symbolTable* table);
+ symbolItem* getSymbolItem(char* symbolName, symbolTable* table);
 void symbolTableAppend(char* symbolName, int symbolType, symbolTable* table, int IC, int DC);
 void freeSymbolTable(symbolTable* table);
 int isSymbolNameValid(char* name, int line);
 void updateSymbolTableDataTypes(symbolTable* table, int IC);
 int updateSymbolWithEntryAttribute(char* symbolName, int line, symbolTable* table);
-symbolItem * getSymbolItemFromSymbolTable(char*  symbol, symbolTable* table);
 symbolTable* initSymbolTable();
 
 #endif
