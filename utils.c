@@ -149,7 +149,7 @@ int fetchOperands(int line, char *lineContent, int indexAtLine, char **operandsA
 		}
 
 		operandsArray[*numOfOperands] = safeMalloc(MAX_LINE_LENGTH);
-		for (j = 0; !IS_NULLISH_CHAR(lineContent[indexAtLine]) && !IS_WHITESPACES_CHAR(lineContent[indexAtLine]) && lineContent[indexAtLine] != ',';
+		for (j = 0; IS_TRUE_CHAR(lineContent[indexAtLine]) && lineContent[indexAtLine] != ',';
 			 indexAtLine++, j++)
 		{
 			operandsArray[*numOfOperands][j] = lineContent[indexAtLine];
@@ -190,43 +190,39 @@ int fetchOperands(int line, char *lineContent, int indexAtLine, char **operandsA
 	return TRUE;
 }
 
-int fetchType(char *lineContent, int *i)
-{
+int fetchType(char *lineContent, int *indexInLine) {
+	char typeString[MAX_LINE_LENGTH];
+	int indexInThypeString = 0;
 
-	char temp[MAX_LINE_LENGTH];
-	int j;
-
-	if (lineContent[*i] != '.')
-	{
+	if (lineContent[*indexInLine] != '.'){
 		return CODE;
 	}
 
-	for (j = 0; !IS_NULLISH_CHAR(lineContent[*i]) && !IS_WHITESPACES_CHAR(lineContent[*i]); (*i)++, j++)
+	for (; IS_TRUE_CHAR(lineContent[*indexInLine]); (*indexInLine)++, indexInThypeString++)
 	{
-		temp[j] = lineContent[*i];
+		typeString[indexInThypeString] = lineContent[*indexInLine];
 	}
-	temp[j] = '\0';
-	if (IS_STR_EQL(temp, ".data"))
+	typeString[indexInThypeString] = '\0';
+	if (IS_STR_EQL(typeString, ".data"))
 	{
 		return DATA;
 	}
-	if (IS_STR_EQL(temp, ".string"))
+	if (IS_STR_EQL(typeString, ".string"))
 	{
 		return STRING;
 	}
-	if (IS_STR_EQL(temp, ".entry"))
+	if (IS_STR_EQL(typeString, ".entry"))
 	{
 		return ENTRY;
 	}
-	if (IS_STR_EQL(temp, ".extern"))
+	if (IS_STR_EQL(typeString, ".extern"))
 	{
 		return EXTERN;
 	}
 	return ERROR;
 }
 
-int fetchAddressType(char *operand, int line)
-{
+int fetchAddressType(char *operand, int line) {
 	if (operand[0] == '\0')
 		return NO_ADDRESS;
 	if (operand[0] == 'r' && isdigit(operand[1]) && operand[2] == '\0')
@@ -242,8 +238,7 @@ int fetchAddressType(char *operand, int line)
 	return NO_ADDRESS;
 }
 
-unsigned int fetchRegister(char *operand)
-{
+unsigned int fetchRegister(char *operand) {
 	unsigned int reg;
 	int index = 0, j;
 	char temp[MAX_LINE_LENGTH];
@@ -272,8 +267,7 @@ unsigned int fetchRegister(char *operand)
 	return atoi(temp);
 }
 
-codeWord *generateFirstCodeWord(assemblyStructure *opcodeData)
-{
+codeWord *generateFirstCodeWord(assemblyStructure *opcodeData) {
 	codeWord *resWord;
 	resWord = (codeWord *)safeMalloc(sizeof(codeWord));
 	resWord->ARE = 4;
@@ -284,8 +278,7 @@ codeWord *generateFirstCodeWord(assemblyStructure *opcodeData)
 	return resWord;
 }
 
-codeWord *generateSecondCodeWord(int line, char *lineContent, assemblyStructure *opcodeData, char **operandsArray, int numOfOperands)
-{
+codeWord *generateSecondCodeWord(int line, char *lineContent, assemblyStructure *opcodeData, char **operandsArray, int numOfOperands) {
 	codeWord *resWord;
 	int address1 = NO_ADDRESS;
 	int address2 = NO_ADDRESS;
@@ -386,8 +379,7 @@ int calcIcOffset(int ic) {
 	return ic % 16;
 }
 
-int validateStringEntry(int line, char *lineContent, int indexAtLine)
-{
+int validateStringEntry(int line, char *lineContent, int indexAtLine ){
 
 	if (lineContent[indexAtLine] != '"')
 	{

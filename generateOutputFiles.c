@@ -6,7 +6,15 @@
 #include "utils.h"
 #include "symbolTable.h"
 
+
+
 #define MAST_EXCEPT_LAST_FOUR_BITS(value) ((value) & 0x000F) /* get 4 last bits from number */
+#define VALUE_TO_MASKED_BITS(value)\
+					MAST_EXCEPT_LAST_FOUR_BITS(value >> 12),\
+					MAST_EXCEPT_LAST_FOUR_BITS(value >> 8),\
+					MAST_EXCEPT_LAST_FOUR_BITS(value >> 4),\
+					MAST_EXCEPT_LAST_FOUR_BITS(value)
+
 #define IS_SYMBOL_OF_ENTRY_TYPE(symbolTableItemIterator) (symbolTableItemIterator->symbolType == CODE_AND_ENTRY || symbolTableItemIterator->symbolType == DATA_AND_ENTRY)
 
 /* function that generates the .ob file */
@@ -14,77 +22,81 @@ void generateObFile(char *fileName, int IC, int DC) {
 	int indexInSection;
 	FILE *obFile = NULL;
 	int hasFileOpened;
-
+	codeWord currentInstruction;
+	char* WORD_FORMAT = "\n%.4d A4-B%x-C%x-D%x-E%x";
+	char* WORD_WITH_BASE_FORMAT = "\n%.4d A%x-B%x-C%x-D%x-E%x";
+	int instructionAmount = IC - IC_INIT_VALUE;
 	hasFileOpened = openFileSafe(&obFile, fileName, ".ob", "w");
 	if(!hasFileOpened) {
 		return;
 	}
 
-	fprintf(obFile, "%d %d", IC - IC_INIT_VALUE, DC);
+	fprintf(obFile, "%d %d", instructionAmount, DC);
 
-	for (indexInSection = 0; indexInSection < IC - IC_INIT_VALUE; indexInSection++) {
+	for (indexInSection = 0; indexInSection < instructionAmount; indexInSection++) {
+		currentInstruction = machineCodeSection[indexInSection];
 		/* OPCODE WORD */
-		if (machineCodeSection[indexInSection].opcode > 0) { 
-				fprintf(obFile, "\n%.4d A4-B%x-C%x-D%x-E%x",
-				indexInSection+IC_INIT_VALUE,
-				MAST_EXCEPT_LAST_FOUR_BITS(machineCodeSection[indexInSection].opcode >> 12), 
-				MAST_EXCEPT_LAST_FOUR_BITS(machineCodeSection[indexInSection].opcode >> 8), 
-				MAST_EXCEPT_LAST_FOUR_BITS(machineCodeSection[indexInSection].opcode >> 4), 
-				MAST_EXCEPT_LAST_FOUR_BITS(machineCodeSection[indexInSection].opcode))
+		if (currentInstruction.opcode > 0) { 
+				fprintf(
+					obFile,
+					WORD_FORMAT,
+					indexInSection+IC_INIT_VALUE,
+					VALUE_TO_MASKED_BITS(currentInstruction.opcode)
+				);
 			;
 		}
 		/* SECOND CODE WORD (funct, regs, addresses) */
-		else if (machineCodeSection[indexInSection].L > 0) { 
-				fprintf(obFile, "\n%.4d A4-B%x-C%x-D%x-E%x",
-				indexInSection+IC_INIT_VALUE,
-				machineCodeSection[indexInSection].funct,
-				machineCodeSection[indexInSection].sourceRegister,
-				machineCodeSection[indexInSection].sourceAddress << 2 | machineCodeSection[indexInSection].destinationRegister >> 2,
-				((machineCodeSection[indexInSection].destinationRegister & 3) << 2) | machineCodeSection[indexInSection].destinationAddress)
-			;
+		else if (currentInstruction.L > 0) { 
+				fprintf(
+					obFile,
+					WORD_FORMAT,
+					indexInSection+IC_INIT_VALUE,
+					currentInstruction.funct,
+					currentInstruction.sourceRegister,
+					currentInstruction.sourceAddress << 2 | currentInstruction.destinationRegister >> 2,
+					((currentInstruction.destinationRegister & 3) << 2) | currentInstruction.destinationAddress
+				);
 		}
 		/* IMMEDIATE ADDRESS TYPE DATA */
-		else if (machineCodeSection[indexInSection].immediate > 0) { 
-				fprintf(obFile, "\n%.4d A4-B%x-C%x-D%x-E%x",
-				indexInSection+IC_INIT_VALUE,
-				MAST_EXCEPT_LAST_FOUR_BITS(machineCodeSection[indexInSection].immediate >> 12), 
-				MAST_EXCEPT_LAST_FOUR_BITS(machineCodeSection[indexInSection].immediate >> 8), 
-				MAST_EXCEPT_LAST_FOUR_BITS(machineCodeSection[indexInSection].immediate >> 4), 
-				MAST_EXCEPT_LAST_FOUR_BITS(machineCodeSection[indexInSection].immediate))
+		else if (currentInstruction.immediate > 0) { 
+				fprintf(
+					obFile,
+					WORD_FORMAT,
+					indexInSection+IC_INIT_VALUE,
+					VALUE_TO_MASKED_BITS(currentInstruction.immediate)
+				)
 			;
 		}
 		/* BASE + OFFSET (DIRECT & INDEX) */
 		else {  /* BASE */
-				fprintf(obFile, "\n%.4d A%x-B%x-C%x-D%x-E%x",
-				indexInSection+IC_INIT_VALUE,
-				machineCodeSection[indexInSection].ARE,
-				MAST_EXCEPT_LAST_FOUR_BITS(machineCodeSection[indexInSection].base >> 12), 
-				MAST_EXCEPT_LAST_FOUR_BITS(machineCodeSection[indexInSection].base >> 8), 
-				MAST_EXCEPT_LAST_FOUR_BITS(machineCodeSection[indexInSection].base >> 4), 
-				MAST_EXCEPT_LAST_FOUR_BITS(machineCodeSection[indexInSection].base))
-			;
+				fprintf(
+					obFile,
+					WORD_WITH_BASE_FORMAT,
+					indexInSection+IC_INIT_VALUE,
+					currentInstruction.ARE,
+					VALUE_TO_MASKED_BITS(currentInstruction.base)
+				);
+
 				indexInSection++;
+				currentInstruction = machineCodeSection[indexInSection];
 				/* OFFSET */
-				fprintf(obFile, "\n%.4d A%x-B%x-C%x-D%x-E%x",
-				indexInSection+IC_INIT_VALUE,
-				machineCodeSection[indexInSection].ARE,
-				MAST_EXCEPT_LAST_FOUR_BITS(machineCodeSection[indexInSection].offset >> 12), 
-				MAST_EXCEPT_LAST_FOUR_BITS(machineCodeSection[indexInSection].offset >> 8), 
-				MAST_EXCEPT_LAST_FOUR_BITS(machineCodeSection[indexInSection].offset >> 4), 
-				MAST_EXCEPT_LAST_FOUR_BITS(machineCodeSection[indexInSection].offset))
-			;	
+				fprintf(
+					obFile,
+					WORD_WITH_BASE_FORMAT,
+					indexInSection+IC_INIT_VALUE,
+					currentInstruction.ARE,
+					VALUE_TO_MASKED_BITS(currentInstruction.offset)
+			);	
 		}
 		
 	}
 	/* ALL DATA SECTION */
 	for (indexInSection = 0; indexInSection < DC; indexInSection++) {
         fprintf(
-			obFile, "\n%.4d A4-B%x-C%x-D%x-E%x",
+			obFile,
+			WORD_FORMAT,
 			IC + indexInSection,
-			MAST_EXCEPT_LAST_FOUR_BITS(machineDataSection[indexInSection].data >> 12), 
-			MAST_EXCEPT_LAST_FOUR_BITS(machineDataSection[indexInSection].data >> 8), 
-			MAST_EXCEPT_LAST_FOUR_BITS(machineDataSection[indexInSection].data >> 4), 
-			MAST_EXCEPT_LAST_FOUR_BITS(machineDataSection[indexInSection].data)
+			VALUE_TO_MASKED_BITS(machineDataSection[indexInSection].data)
 		);
 	}
     

@@ -44,4 +44,7 @@ int isStringInteger(char *string);
 #define IS_STR_EQL(stringA, stringB)\
        strcmp(stringA, stringB) == 0
 
+#define IS_TRUE_CHAR(c)\
+       !IS_NULLISH_CHAR(c) && !IS_WHITESPACES_CHAR(c)
+
 #endif

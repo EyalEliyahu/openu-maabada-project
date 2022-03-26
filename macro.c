@@ -6,44 +6,43 @@
 #include "macroStructs.h"
 
 /* This function handles the macro replacement */
-int processMacroLine(int line, char *lineContent, int *isInMacro, char *macro, char *file, FILE *amFilePtr) {
-	int indexInLine=0, j=0, k=0;
+int processMacroLine(int line, char *lineContent, int *isInMacro, char *macroString, char *file, FILE *amFilePtr) {
+	int indexInLine=0, indexInWord=0, indexInMacroLine=0;
 	char firstWord[MAX_LINE_LENGTH + 2];
-	macroLine *temp;
+	macroLine *currentMacroLine;
 	char* lineInMacro = "";
 	/* look for the next char that is not whitespace/tab/newline */
 	INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine);
 	/* Get the line content after removing spaces and tabs from the beginning until reach whitespace/tab/newline */
-	for (; !IS_NULLISH_CHAR(lineContent[indexInLine]) && !IS_WHITESPACES_CHAR(lineContent[indexInLine]) && indexInLine <= MAX_LINE_LENGTH; indexInLine++, j++)
-		firstWord[j] = lineContent[indexInLine];
-	firstWord[j] = '\0';
+	for (; IS_TRUE_CHAR(lineContent[indexInLine]) && indexInLine <= MAX_LINE_LENGTH; indexInLine++, indexInWord++)
+		firstWord[indexInWord] = lineContent[indexInLine];
+	firstWord[indexInWord] = '\0';
 
 	/* Check if the line contains macro that we already saved */
 	if(macroExistsInList(firstWord) && !*isInMacro) {
-		temp = macroLineInList(firstWord);
+		currentMacroLine = macroLineInList(firstWord);
 		/* replace macro name with macro content */
-		while (k < temp->numOfContentLines)
-		{
-			fprintf(amFilePtr, "%s", temp->contentLines[k++]);
+		while (indexInMacroLine < currentMacroLine->numOfContentLines) {
+			fprintf(amFilePtr, "%s", currentMacroLine->contentLines[indexInMacroLine++]);
 		}
 		return TRUE;
 	}
 
 	indexInLine = 0;
-	j = 0;
+	indexInWord = 0;
 	INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine); 
 	/* Checks if this line is start of new macro */
     if (strncmp("macro", lineContent+indexInLine, 5) == 0 && !*isInMacro) {
 		/* go to the end of the word: macro */
 		INCREASE_INDEX_UNTILL_CHAR(lineContent, 'o', indexInLine);
 		INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine);
-		for (; !IS_NULLISH_CHAR(lineContent[indexInLine]) && !IS_WHITESPACES_CHAR(lineContent[indexInLine]) && indexInLine <= MAX_LINE_LENGTH; indexInLine++, j++)
-			macro[j] = lineContent[indexInLine];
+		for (; IS_TRUE_CHAR(lineContent[indexInLine]) && indexInLine <= MAX_LINE_LENGTH; indexInLine++, indexInWord++)
+			macroString[indexInWord] = lineContent[indexInLine];
 			
-		macro[j] = '\0';
+		macroString[indexInWord] = '\0';
 
 		*isInMacro = TRUE;
-		macroListAppend(macro);
+		macroListAppend(macroString);
 		return TRUE;
 	}
 
@@ -53,7 +52,7 @@ int processMacroLine(int line, char *lineContent, int *isInMacro, char *macro, c
 		indexInLine=0;
 		while (indexInLine < MAX_LINE_LENGTH)
 		{
-			macro[indexInLine] = '\0';
+			macroString[indexInLine] = '\0';
 			indexInLine++;
 		}
 		
@@ -65,12 +64,12 @@ int processMacroLine(int line, char *lineContent, int *isInMacro, char *macro, c
 		fprintf(amFilePtr, "%s", lineContent);
 	/* the line is part of a macro so we added it to macro content */
 	else {
-		temp = macroLineInList(macro);
-		temp->numOfContentLines += 1;
-		temp->contentLines = realloc(temp->contentLines, temp->numOfContentLines*sizeof(lineContent));
+		currentMacroLine = macroLineInList(macroString);
+		currentMacroLine->numOfContentLines += 1;
+		currentMacroLine->contentLines = realloc(currentMacroLine->contentLines, currentMacroLine->numOfContentLines*sizeof(lineContent));
 		lineInMacro = safeMalloc(sizeof(char) * (strlen(lineContent) + 1));
 		strcpy(lineInMacro,lineContent);
-		temp->contentLines[temp->numOfContentLines-1] = lineInMacro;
+		currentMacroLine->contentLines[currentMacroLine->numOfContentLines-1] = lineInMacro;
 		return TRUE;
 	}	
 
@@ -84,7 +83,7 @@ int translateMacros(FILE *assemblyFile, char* fileName)
 	char macro[MAX_LINE_LENGTH];
 	int isInMacro = FALSE;
 	char lineContent[MAX_LINE_LENGTH + 2];
-	int line = 1;
+	int lineIndex = 1;
 
 	FILE *assemblyFilePtr;
 	FILE *amFilePtr;
@@ -95,10 +94,10 @@ int translateMacros(FILE *assemblyFile, char* fileName)
 	}
 
 	/* run the macroProcessLine function on every line in .as file */
-	for (; fgets(lineContent, MAX_LINE_LENGTH + 2, assemblyFilePtr) != NULL; line++)
+	for (; fgets(lineContent, MAX_LINE_LENGTH + 2, assemblyFilePtr) != NULL; lineIndex++)
 	{
 		/* run processMacroLine function */ 
-		if (!processMacroLine(line, lineContent, &isInMacro, macro, fileName, amFilePtr)) {
+		if (!processMacroLine(lineIndex, lineContent, &isInMacro, macro, fileName, amFilePtr)) {
 			macroPassSuccess = FALSE;
 		}
 	}

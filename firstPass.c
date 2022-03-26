@@ -50,7 +50,7 @@ int parseDataEntry(int lineIndex, char *lineContent, int indexInLine, int *DC, i
 		INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine);
 	}
 
-	for (indexInDataParam = 0; !IS_NULLISH_CHAR(lineContent[indexInLine]) && !IS_WHITESPACES_CHAR(lineContent[indexInLine]) && lineContent[indexInLine] != ','; indexInLine++, indexInDataParam++) {
+	for (indexInDataParam = 0; IS_TRUE_CHAR(lineContent[indexInLine]) && lineContent[indexInLine] != ','; indexInLine++, indexInDataParam++) {
 		dataParam[indexInDataParam] = lineContent[indexInLine];
 	}
 	dataParam[indexInDataParam] = '\0'; /* save the number in char array */
@@ -82,7 +82,7 @@ int parseCodeEntry(int lineIndex, char *lineContent, int indexInLine, int* IC) {
 	codeWord *secondWord;
 	char functionName[MAX_LINE_LEN];
 
-	for (indexInFunctionName = 0; !IS_NULLISH_CHAR(lineContent[indexInLine]) && !IS_WHITESPACES_CHAR(lineContent[indexInLine]); indexInLine++, indexInFunctionName++) {
+	for (indexInFunctionName = 0; IS_TRUE_CHAR(lineContent[indexInLine]); indexInLine++, indexInFunctionName++) {
 		functionName[indexInFunctionName] = lineContent[indexInLine];
 	}
 	functionName[indexInFunctionName] = '\0';
