@@ -60,8 +60,13 @@ void compileFile(char* fileName) {
 		}
 	}
 	printf("------- Finish Assembler on file: %s.as -------\n", fileName);
-	
-	fclose(assemblyFile);
-	fclose(fileAfterMacroParsing);
-	freeSymbolTable(table);
+	if(assemblyFile) {
+		fclose(assemblyFile);
+	}
+	if(fileAfterMacroParsing) {
+		fclose(fileAfterMacroParsing);
+	}
+	if(table) {
+		freeSymbolTable(table);
+	}
 }

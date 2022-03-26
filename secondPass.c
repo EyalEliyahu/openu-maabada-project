@@ -115,6 +115,7 @@ int updateCodeWords(int IC, symbolTable* table, codeInstruction codeInstructions
 				}
 				if (instruction.destinationAddress != REGISTER) {
                     operand = instruction.secondOperand;
+                    printf("\n %s", operand);
                     adressType = instruction.destinationAddress;
                     if (!updateCodeWordByType(lineIndex, instructionIndex, &i, operand, adressType, table, codeInstructionsList))
 			        	return FALSE;
