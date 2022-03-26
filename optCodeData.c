@@ -87,34 +87,17 @@ optCodeData* fetchFunctionData(char *functionName) {
 	return NULL;
 }
 
-void printMachineCode(int IC, int DC) { /* used for debugging */
-	int i;
-	printf("------------------------ CODE ---------------------\n");
-	for (i=0; i < IC - IC_INIT_VALUE; i++)
-	{
-		printf("IC: %d | ARE: %d | L: %d | opcode: %d | funct: %d | sourceRegister: %d | sourceAddress: %d | destinationRegister: %d | destinationAddress: %d | firstOperand: %s | secondOperand: %s | immediate: %d | base: %d | offset: %d\n", 
-		i+IC_INIT_VALUE, machineCodeSection[i].ARE, machineCodeSection[i].L, machineCodeSection[i].opcode, machineCodeSection[i].funct, machineCodeSection[i].sourceRegister,
-		machineCodeSection[i].sourceAddress, machineCodeSection[i].destinationRegister, machineCodeSection[i].destinationAddress, machineCodeSection[i].firstOperand, machineCodeSection[i].secondOperand,
-		machineCodeSection[i].immediate, machineCodeSection[i].base, machineCodeSection[i].offset);
-	}
-	printf("\n----------------------- DATA ---------------------\n");
-	for (i=0; i < DC; i++)
-	{
-		printf("DC: %d | data: %d\n", i, machineDataSection[i].data);
-	}	
-}
-
-int validate_address_type(int lineIndex, optCodeData *opcodeData, int address, int source_or_destination)
+int validateAddressType(int lineIndex, optCodeData *opcodeData, int address, int type)
 {
 	int i;
-	if (source_or_destination == SOURCE) {
+	if (type == SOURCE) {
 		for (i = 0; opcodeData->sourceOperandTypes[i] != -1; i++) {
 			if (opcodeData->sourceOperandTypes[i] == address) 
 				return TRUE;	
 		}
 	}
 
-	if (source_or_destination == DESTINATION) {
+	if (type == DESTINATION) {
 		for (i = 0; opcodeData->destinationOperandTypes[i] != -1; i++) {
 			if (opcodeData->destinationOperandTypes[i] == address) 
 				return TRUE;	
@@ -130,10 +113,10 @@ int validateOperands(int lineIndex, int address1, int address2, int numOfOperand
 		return FALSE;
 	}
 	if (numOfOperands == 2) {
-		return validate_address_type(lineIndex, opcodeData, address1, SOURCE) && validate_address_type(lineIndex, opcodeData, address2, DESTINATION);
+		return validateAddressType(lineIndex, opcodeData, address1, SOURCE) && validateAddressType(lineIndex, opcodeData, address2, DESTINATION);
 	}
 	else if (numOfOperands == 1) {
-		return validate_address_type(lineIndex, opcodeData, address1, DESTINATION);
+		return validateAddressType(lineIndex, opcodeData, address1, DESTINATION);
 	}
 	return TRUE;	
 }

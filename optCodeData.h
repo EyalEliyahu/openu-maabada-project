@@ -62,7 +62,6 @@ typedef struct dataWord {
 
 int isReservedWord(char *word);
 optCodeData* fetchFunctionData(char *function);
-void printMachineCode(int IC, int DC);
 int validateOperands(int line, int address1, int address2, int numOfOperands, optCodeData *opcodeData);
 
 extern optCodeData optCodeDataList[];
