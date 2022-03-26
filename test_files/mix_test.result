@@ -1,0 +1,21 @@
+------- Starting Assembler on file: mix_test.as -------
+Running First Pass on: "mix_test.am" 
+ASSEMBLER ERROR [line 5]: Invalid assembly function: ";"
+ASSEMBLER ERROR [line 14]: line exceeds the max line length
+ASSEMBLER ERROR [line 21]: Symbol is already defined: "TEST"
+ASSEMBLER ERROR [line 22]: invalid symbol name: "r2"
+ASSEMBLER ERROR [line 23]: invalid symbol name: "123456"
+ASSEMBLER ERROR [line 24]: invalid symbol name: "a1234567891234567891234567891231"
+ASSEMBLER ERROR [line 32]: Invalid data provided: "abcasd"
+ASSEMBLER ERROR [line 33]: Invalid comma
+ASSEMBLER ERROR [line 34]: Invalid comma
+ASSEMBLER ERROR [line 35]: Invalid comma
+ASSEMBLER ERROR [line 41]: string type should start with quotes
+ASSEMBLER ERROR [line 42]: Invalid string provided
+ASSEMBLER ERROR [line 43]: String should not be empty!
+ASSEMBLER ERROR [line 50]: There needs to be an operand after comma
+ASSEMBLER ERROR [line 51]: Invalid amount of operands for this assembly function. Expected: 2 | Received: 1
+ASSEMBLER ERROR [line 52]: Multiple consecutive commas.
+ASSEMBLER ERROR [line 53]: The addressing type provided is incompatible with this assembly command
+ASSEMBLER ERROR [line 54]: Invalid amount of operands for this assembly function. Expected: 0 | Received: 1
+------- Finnish Assembler on file: mix_test.as -------
