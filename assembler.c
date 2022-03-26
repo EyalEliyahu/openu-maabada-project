@@ -10,7 +10,7 @@
 
 void compileFile(char* fileName);
 
-
+/* The main function - start process for each file*/
 int main(int argc, char* argv[]) {
 	int fileIndex;
 	for (fileIndex = 1; fileIndex < argc; ++fileIndex) {
@@ -20,6 +20,7 @@ int main(int argc, char* argv[]) {
 	free(argv);
 }
 
+/* Handle the compile's process of file*/
 void compileFile(char* fileName) {
 	int isMacroParseSuccess;
 	int isFirstPassSuccess;
@@ -58,7 +59,7 @@ void compileFile(char* fileName) {
 
 		}
 	}
-	printf("------- Finnish Assembler on file: %s.as -------\n", fileName);
+	printf("------- Finish Assembler on file: %s.as -------\n", fileName);
 	
 	fclose(assemblyFile);
 	fclose(fileAfterMacroParsing);

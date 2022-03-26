@@ -17,7 +17,7 @@ int parseStringEntry(int lineIndex, char* lineContent, int indexInLine, int* DC,
 int parseDataEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, int isReadingFirstParam, dataInstruction dataInstructionsList[MAX_MACHINE_DATA_SECTION]);
 int parseCodeEntry(int lineIndex, char* lineContent, int indexInLine, int* IC, codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION]);
 
-
+/*handle first pass parsing */
 int runFirstPass(
 	FILE* fileAfterMacroParsing, symbolTable* table, int* IC, int* DC, 
 	codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION],
@@ -29,9 +29,9 @@ int runFirstPass(
 	for (lineIndex = 0; fgets(lineContent, MAX_LINE_WITH_LINEDROP_LEN, fileAfterMacroParsing); lineIndex++) {
 		if (!feof(fileAfterMacroParsing) && strchr(lineContent, '\n') == NULL)
 		{
-			printLineError(lineIndex, "line exceeds the max line length");
+			printLineError(lineIndex, "Max line length exceeded ");
 			lineParseSuccess = FALSE;
-			/* if the line is too long continue the rest of the chars to get to the new line */ 
+			/* go to next new line in case of line is over max length */ 
 			while (fgetc(fileAfterMacroParsing) != '\n');
 		} else {
 			lineParseSuccess &= parseLineForFirstPass(lineIndex, lineContent, table, IC, DC, codeInstructionsList, dataInstructionsList);
@@ -41,7 +41,7 @@ int runFirstPass(
 	return lineParseSuccess;
 }
 
-
+/* handle line parsing in first pass*/
 int parseLineForFirstPass(
 	int lineIndex, char* lineContent, symbolTable* table, int* IC, int* DC,
 	codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION],
@@ -75,7 +75,7 @@ int parseLineForFirstPass(
 
 	dataType = fetchType(lineContent, &indexInLine);
 	if (dataType == ERROR) {
-		printLineError(lineIndex, "Unable to detect label type");
+		printLineError(lineIndex, "can't recognize label type");
 		return FALSE;
 	}
 
@@ -117,7 +117,7 @@ int parseLineForFirstPass(
 				return FALSE;
 			}
 			if (!getSymbolItem(externSymbol, table)){
-				symbolTableAppend(externSymbol, EXTERN, table, *IC, *DC); /* Extern value is defaulted to 0 */
+				symbolTableAppend(externSymbol, EXTERN, table, *IC, *DC); /* 0 is default extern value */
 			}
 		}
 	}
@@ -125,21 +125,22 @@ int parseLineForFirstPass(
 	return TRUE;
 }
 
-/* recursive function that handles string line */
-int parseStringEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, dataInstruction dataInstructionsList[MAX_MACHINE_DATA_SECTION]) {
-	dataInstruction *dataToAdd;
-	dataToAdd = (dataInstruction *) safeMalloc(sizeof(dataInstruction));
+/* recursive function that handle parsing of string line */
+int parseStringEntry(int lineIndex, char* lineContent, int indexInLine, int* DC) {
+	dataWord *dataToAdd;
+	dataToAdd = (dataWord *) safeMalloc(sizeof(dataWord));
 	
 
-	if (lineContent[indexInLine] == '"') { /* reached the end of the string */
+	if (lineContent[indexInLine] == '"') { /* go to the end of string */
 		indexInLine++;
 		INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine);
-		if (!IS_NULLISH_CHAR(lineContent[indexInLine])) { /* if there is extra text after quotes */
+		if (!IS_NULLISH_CHAR(lineContent[indexInLine])) { /* check if quotes are the end of line */
 			printLineError(lineIndex, "Invalid string provided");
 			return FALSE;
 		}
 		dataToAdd->data = '\0';
 		dataInstructionsList[*DC] = *dataToAdd; /* add '\0' to the data section array because all of the chars already added */
+		machineDataSection[*DC] = *dataToAdd; /* add '\0' to the data section string because all of the chars already added */
 		free(dataToAdd);
 		(*DC)++;
 		return TRUE;	
@@ -147,6 +148,7 @@ int parseStringEntry(int lineIndex, char* lineContent, int indexInLine, int* DC,
 
 	dataToAdd->data = lineContent[indexInLine];
 	dataInstructionsList[*DC] = *dataToAdd; /* add the char to the data section array */
+	machineDataSection[*DC] = *dataToAdd; /* add the char to the machine data section string */
 	free(dataToAdd);
 	indexInLine++;
 	
@@ -154,14 +156,19 @@ int parseStringEntry(int lineIndex, char* lineContent, int indexInLine, int* DC,
 	return parseStringEntry(lineIndex, lineContent,indexInLine, DC, dataInstructionsList); /* start function again to find the next char in string */
 }
 
+/* recursive function that handle parsing of data line */
 int parseDataEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, int isReadingFirstParam, dataInstruction dataInstructionsList[MAX_MACHINE_DATA_SECTION]) {
+	return parseStringEntry(lineIndex, lineContent,indexInLine, DC); /* looking for the next char in string */
+}
+
+int parseDataEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, int isReadingFirstParam) {
 	int indexInDataParam;
 	char dataParam[MAX_LINE_LENGTH];
 	dataInstruction* dataToAdd;
 
 	INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine);
 
-	if (IS_NULLISH_CHAR(lineContent[indexInLine])) /* if we got to the end of the line/file stop adding data */
+	if (IS_NULLISH_CHAR(lineContent[indexInLine])) /* we stop to add data in case of reach nullish char */
 		return TRUE;
 
 	if(!isReadingFirstParam) {
@@ -174,27 +181,27 @@ int parseDataEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, i
 	for (indexInDataParam = 0; IS_TRUE_CHAR(lineContent[indexInLine]) && lineContent[indexInLine] != ','; indexInLine++, indexInDataParam++) {
 		dataParam[indexInDataParam] = lineContent[indexInLine];
 	}
-	dataParam[indexInDataParam] = '\0'; /* save the number in char array */
-	if(isStringInteger(dataParam)){ /* if string is valida (it's an integer) add it to the data section array */
-		dataToAdd = (dataInstruction *) safeMalloc(sizeof(dataInstruction));
+
+	dataParam[indexInDataParam] = '\0'; 
+	if(isStringInteger(dataParam)){ /* add string data section array if valid */
+		dataToAdd = (dataWord *) safeMalloc(sizeof(dataWord));
 		dataToAdd->data = atoi(dataParam);
 		dataInstructionsList[*DC] = *dataToAdd;
 		free(dataToAdd);
 		(*DC)++;
 	}
 	else {
-		if (IS_NULLISH_CHAR(dataParam[0])) { /* this happens in case of invalid comma see test2 input and output */
+		if (IS_NULLISH_CHAR(dataParam[0])) { /* case of invalid comma */
 			printLineError(lineIndex, "Invalid comma");
 			return FALSE;
 		}
-		printLineError(lineIndex, "Invalid data provided: \"%s\"", dataParam); /* this happens in case of invalid data see test2 input and output */
+		printLineError(lineIndex, "Invalid data: \"%s\"", dataParam); /* case of invalid data */
 		return FALSE;
 	}
 
 	return parseDataEntry(lineIndex, lineContent,indexInLine, DC, FALSE, dataInstructionsList); /* start function again to find the next numbers in data row */
-
 }
-
+/* function that handle parsing of code line */
 int parseCodeEntry(int lineIndex, char* lineContent, int indexInLine, int* IC, codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION]) {
 	int indexInFunctionName, numOfOperands=0;
 	char* operandsArray[2];
@@ -208,7 +215,7 @@ int parseCodeEntry(int lineIndex, char* lineContent, int indexInLine, int* IC, c
 	}
 	functionName[indexInFunctionName] = '\0';
 	opcodeData = fetchFunctionData(functionName); /* get assembly function data (opcode,funct,operands) */
-	if(!opcodeData) { /* in case of function that not exists throw error */
+	if(!opcodeData) { /*  throw error if function not exists */
 		printLineError(lineIndex, "Invalid assembly function: \"%s\"", functionName);
 		return FALSE;
 	}
