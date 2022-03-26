@@ -1,6 +1,6 @@
 #include "utils.h"
 #include "consts.h"
-#include "assemblyStructures.h"
+#include "optCodeData.h"
 #ifndef _MACROSTRUCTS_H
 #define _MACROSTRUCTS_H
 
@@ -14,9 +14,8 @@ typedef struct macroLine {
 
 void freeMacroList();
 void macroListAppend(char* macroName);
-macroLine *macroLineInList(char *macroName);
-int macroExistsInList(char *macroName);
-void printMacroList();
+macroLine *macroLineInList(char* macroName);
+int macroExistsInList(char* macroName);
 
 extern macroLine *macroHead;
 extern macroLine *macroTail;

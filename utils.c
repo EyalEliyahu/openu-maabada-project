@@ -6,102 +6,120 @@
 #include <stdarg.h>
 #include "utils.h"
 
-char *strExt(const char *s1, const char *s2)
+void printLineError(int lineIndex, char* message, ...)
 {
-    char *pointer = malloc(strlen(s1) + strlen(s2) + 1);
-
-    if (pointer == NULL)
-    {
-        perror("failed to allocate memory");
-        exit(EXIT_FAILURE);
-    } 
-
-    return strcat(strcpy(pointer, s1), s2);
+	va_list messageArgs;
+	printf("ASSEMBLER ERROR [line %d]: ", lineIndex + 1);
+	va_start(messageArgs, message);
+	vprintf(message, messageArgs);
+	va_end(messageArgs);
+	printf("\n");
 }
 
-void *safeMalloc(long size) {
+int isStringInteger(char* string)
+{
+	int i = 0;
+	if (string[0] == '-' || string[0] == '+')
+		i++; /* if string starts + or - */
+	for (; string[i]; i++)
+	{ /* validate all of the rest are digits */
+		if (!isdigit(string[i]))
+		{
+			return FALSE;
+		}
+	}
+	return i > 0; /* i will be 0 if string is empty and it's not a number */
+}
+
+void *safeMalloc(long size)
+{
 	void *ptr = malloc(size);
-	if (ptr == NULL) {
-		printf("Fatal Error: Failed allocating memory.");
+	if (ptr == NULL)
+	{
+		printf("\nFatal Error: Failed allocating memory.");
 		exit(EXIT_FAILURE);
 	}
 	return ptr;
 }
 
-char* stringsConcat(char *string1, char* string2) {
-    char* concattedString = (char*) safeMalloc(strlen(string1) + strlen(string2) + 1);
+char* stringsConcat(char* string1, char* string2)
+{
+	char* concattedString = (char* )safeMalloc(strlen(string1) + strlen(string2) + 1);
 	strcpy(concattedString, string1);
 	strcat(concattedString, string2);
 	return concattedString;
 }
 
-int openFileSafe(FILE** fileStream, char* fileName, char* fileExt, char* openMethod) {
+int openFileSafe(FILE* *fileStream, char* fileName, char* fileExt, char* openMethod)
+{
 	char* fileNameWithExt = stringsConcat(fileName, fileExt);
 	*fileStream = fopen(fileNameWithExt, openMethod);
-	if(*fileStream == NULL) {
-		printf("Error: Unable to read \"%s\". skipping it.\n", fileNameWithExt);
+	if (*fileStream == NULL)
+	{
+		printf("Error: Unable to read file: \"%s\". skipping it.\n", fileNameWithExt);
 		free(fileNameWithExt);
 		return FALSE;
-	} else {
+	}
+	else
+	{
 		return TRUE;
 	}
 }
 
-void printErrorMessage(int line, char* message, ...) {
-	va_list args; 
-
-	printf("ASSEMBLER ERROR [line %d]: ", line);
-
-	va_start(args, message);
-	vprintf(message, args);
-	va_end(args);
-	printf("\n");
-}
-
-int isInteger(char *string) {
-	if (atoi(string))
-		return TRUE;
-	return FALSE;	
-}
-
-int isIndex(char* operand, int line) {
-	char symbol[MAX_LINE_LENGTH];
+int isSymbolWithValidIndex(char* operandString, int lineIndex)
+{
+	char symbolPart[MAX_LINE_LENGTH];
 	int j;
 
-	for (j = 0; operand[j] && operand[j] != '[' && operand[j] != '\0'; j++) {
-		symbol[j] = operand[j];
+	for (j = 0; operandString[j] && operandString[j] != '[' && operandString[j] != '\0'; j++)
+	{
+		symbolPart[j] = operandString[j];
 	}
 
-    symbol[j] = '\0';
-	if (!isSymbolNameValid(symbol, line))
+	symbolPart[j] = '\0';
+	if (!isSymbolNameValid(symbolPart, lineIndex))
 		return FALSE;
 
-	if (operand[j] == '[' && operand[j+1] == 'r' && atoi(&operand[j+2]) <= 9 && operand[j+3] == ']' && operand[j+4] == '\0') /* SYMBOL[rx] */
+	if (
+		operandString[j] == '[' &&
+		operandString[j + 1] == 'r' &&
+		atoi(&operandString[j + 2]) <= 9 &&
+		operandString[j + 3] == ']' &&
+		operandString[j + 4] == '\0') /* SYMBOL[rx] */
 		return TRUE;
 
-	if (operand[j] == '[' && operand[j+1] == 'r' && atoi(&operand[j+2]) >= 10 && atoi(&operand[j+2]) <= 15 && operand[j+4] == ']' && operand[j+5] == '\0') /* SYMBOL[r1x] */
-		return TRUE;	
+	if (
+		operandString[j] == '[' &&
+		operandString[j + 1] == 'r' &&
+		atoi(&operandString[j + 2]) >= 10 &&
+		atoi(&operandString[j + 2]) <= 15 &&
+		operandString[j + 4] == ']' &&
+		operandString[j + 5] == '\0') /* SYMBOL[r1x] */
+		return TRUE;
 
 	return FALSE;
 }
 
+int getSymbolFromLine(int lineIndex, char* lineContent, char* symbolDest)
+{
+	int indexAtSymbol = 0;
+	int indexAtLine = 0;
 
-int fetchSymbol(int line, char* lineContent, char *symbolDest) {
-	int j, i;
-	i = j = 0;
+	INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexAtLine);
 
-	INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i);
-
-	for (; lineContent[i] && lineContent[i] != ':' && lineContent[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++) {
-		symbolDest[j] = lineContent[i];
+	for (; !IS_NULLISH_CHAR(lineContent[indexAtLine]) && lineContent[indexAtLine] != ':' && indexAtLine <= MAX_LINE_LENGTH; indexAtLine++, indexAtSymbol++)
+	{
+		symbolDest[indexAtSymbol] = lineContent[indexAtLine];
 	}
-	symbolDest[j] = '\0';
+	symbolDest[indexAtSymbol] = '\0';
 
-	if (lineContent[i] == ':') {
-		if (!isSymbolNameValid(symbolDest, line)) {
-			printErrorMessage(line, "invalid symbol name");
+	if (lineContent[indexAtSymbol] == ':')
+	{
+		if (!isSymbolNameValid(symbolDest, lineIndex))
+		{
+			printLineError(lineIndex, "invalid symbol name: \"%s\"", symbolDest);
 			symbolDest[0] = '\0';
-			return FALSE; 
+			return FALSE;
 		}
 		return TRUE;
 	}
@@ -109,53 +127,61 @@ int fetchSymbol(int line, char* lineContent, char *symbolDest) {
 	return TRUE;
 }
 
-int fetchOperands(int line, char* lineContent, int i, char **operandsArray, int *numOfOperands) {
+int fetchOperands(int line, char* lineContent, int indexAtLine, char* *operandsArray, int* numOfOperands)
+{
 	int j;
 	operandsArray[0] = operandsArray[1] = NULL;
 
-	if (lineContent[i] == ',') {
-		printErrorMessage(line, "Unexpected comma");
+	if (lineContent[indexAtLine] == ',')
+	{
+		printLineError(line, "Unexpected comma");
 		return FALSE;
 	}
 
-
-	for (*numOfOperands = 0; lineContent[i] != EOF && lineContent[i] != '\n' && lineContent[i];) {
-		if (*numOfOperands == 2) {
-			printErrorMessage(line, "Too many operands for this assembly command");
+	for (*numOfOperands = 0; !IS_NULLISH_CHAR(lineContent[indexAtLine]);)
+	{
+		if (*numOfOperands == 2)
+		{
+			printLineError(line, "Too many operands for this assembly command");
 			free(operandsArray[0]);
 			free(operandsArray[1]);
-			return FALSE; 
+			return FALSE;
 		}
 
-		operandsArray[*numOfOperands] = malloc(MAX_LINE_LENGTH);
-		for (j = 0; lineContent[i] && lineContent[i] != '\t' && lineContent[i] != ' ' && lineContent[i] != '\n' && lineContent[i] != EOF &&
-		            lineContent[i] != ','; i++, j++) {
-			operandsArray[*numOfOperands][j] = lineContent[i];
+		operandsArray[*numOfOperands] = safeMalloc(MAX_LINE_LENGTH);
+		for (j = 0; IS_TRUE_CHAR(lineContent[indexAtLine]) && lineContent[indexAtLine] != ',';
+			 indexAtLine++, j++)
+		{
+			operandsArray[*numOfOperands][j] = lineContent[indexAtLine];
 		}
 		operandsArray[*numOfOperands][j] = '\0';
 		(*numOfOperands)++;
-		INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i);
+		INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexAtLine);
 
-		if (lineContent[i] == '\n' || lineContent[i] == EOF || !lineContent[i]) break;
-		else if (lineContent[i] != ',') {
-			printErrorMessage(line, "There needs to be a comma between operands");
+		if (lineContent[indexAtLine] == '\n' || lineContent[indexAtLine] == EOF || !lineContent[indexAtLine])
+			break;
+		else if (lineContent[indexAtLine] != ',')
+		{
+			printLineError(line, "There needs to be a comma between operands");
 			free(operandsArray[0]);
-			if (*numOfOperands > 1) {
+			if (*numOfOperands > 1)
+			{
 				free(operandsArray[1]);
 			}
 			return FALSE;
 		}
-		i++;
-		INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i);
-		if (lineContent[i] == '\n' || lineContent[i] == EOF || !lineContent[i])
-			printErrorMessage(line, "There needs to be an operand after comma");
-		else if (lineContent[i] == ',') 
-			printErrorMessage(line, "Multiple consecutive commas.");
-		else 
+		indexAtLine++;
+		INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexAtLine);
+		if (IS_NULLISH_CHAR(lineContent[indexAtLine]))
+			printLineError(line, "There needs to be an operand after comma");
+		else if (lineContent[indexAtLine] == ',')
+			printLineError(line, "Multiple consecutive commas.");
+		else
 			continue;
 		{
 			free(operandsArray[0]);
-			if (*numOfOperands > 1) {
+			if (*numOfOperands > 1)
+			{
 				free(operandsArray[1]);
 			}
 			return FALSE;
@@ -164,157 +190,179 @@ int fetchOperands(int line, char* lineContent, int i, char **operandsArray, int 
 	return TRUE;
 }
 
-int fetchType(char *lineContent, int *i) {
+int fetchType(char* lineContent, int* indexInLine) {
+	char typeString[MAX_LINE_LENGTH];
+	int indexInThypeString = 0;
 
-	char temp[MAX_LINE_LENGTH];
-	int j;
-
-	if (lineContent[*i] != '.') {
-        return CODE;
-    }
-
-	for (j = 0; lineContent[*i] && lineContent[*i] != '\t' && lineContent[*i] != ' '; (*i)++, j++) {
-		temp[j] = lineContent[*i];
+	if (lineContent[*indexInLine] != '.'){
+		return CODE;
 	}
-    temp[j] = '\0';
-	if (strcmp(temp, ".data") == 0) {
-        return DATA;
-    }
-    if (strcmp(temp, ".string") == 0) {
-        return STRING;
-    }
-    if (strcmp(temp, ".entry") == 0) {
-        return ENTRY;
-    }
-    if (strcmp(temp, ".extern") == 0) {
-        return EXTERN;
-    }
+
+	for (; IS_TRUE_CHAR(lineContent[*indexInLine]); (*indexInLine)++, indexInThypeString++)
+	{
+		typeString[indexInThypeString] = lineContent[*indexInLine];
+	}
+	typeString[indexInThypeString] = '\0';
+	if (IS_STR_EQL(typeString, ".data"))
+	{
+		return DATA;
+	}
+	if (IS_STR_EQL(typeString, ".string"))
+	{
+		return STRING;
+	}
+	if (IS_STR_EQL(typeString, ".entry"))
+	{
+		return ENTRY;
+	}
+	if (IS_STR_EQL(typeString, ".extern"))
+	{
+		return EXTERN;
+	}
 	return ERROR;
 }
 
-int fetchAddressType(char *operand, int line) {
+int fetchAddressType(char* operand, int line) {
 	if (operand[0] == '\0')
 		return NO_ADDRESS;
 	if (operand[0] == 'r' && isdigit(operand[1]) && operand[2] == '\0')
 		return REGISTER;
 	if (operand[0] == 'r' && atoi(&operand[1]) >= 10 && atoi(&operand[1]) <= 15 && operand[3] == '\0')
 		return REGISTER;
-	if (operand[0] == '#' && isInteger(operand + 1))
+	if (operand[0] == '#' && isStringInteger(operand + 1))
 		return IMMEDIATE;
-	if (operand[0] && isIndex(operand, line))
+	if (operand[0] && isSymbolWithValidIndex(operand, line))
 		return INDEX;
 	if (isSymbolNameValid(operand, line))
 		return DIRECT;
-
 	return NO_ADDRESS;
 }
 
-unsigned int fetchRegister(char *operand) {
+unsigned int fetchRegister(char* operand) {
 	unsigned int reg;
-	int index=0, j;
+	int index = 0, j;
 	char temp[MAX_LINE_LENGTH];
 
-	if (operand[0] == 'r' && isdigit(operand[1]) && operand[2] == '\0') {
+	if (operand[0] == 'r' && isdigit(operand[1]) && operand[2] == '\0')
+	{
 		reg = atoi(&operand[1]);
 		if (reg >= 0 && reg <= 9)
 			return reg;
 	}
 
-	if (operand[0] == 'r' && atoi(&operand[1]) >= 10 && atoi(&operand[1]) <= 15 && operand[3] == '\0') {
+	if (operand[0] == 'r' && atoi(&operand[1]) >= 10 && atoi(&operand[1]) <= 15 && operand[3] == '\0')
+	{
 		reg = atoi(&operand[1]);
 		return reg;
 	}
 
-	INCREASE_I_UNTILL_CHAR(operand, '[', index);
+	INCREASE_INDEX_UNTILL_CHAR(operand, '[', index);
 	index++;
-	for (j=0; operand[index] && operand[index] != ']'; index++, j++) {
-            temp[j] = operand[index];
-        }
+	for (j = 0; operand[index] && operand[index] != ']'; index++, j++)
+	{
+		temp[j] = operand[index];
+	}
 	temp[j] = '\0';
 
 	return atoi(temp);
 }
 
-codeWord *generateFirstCodeWord(assemblyStructure *opcodeData) {
+codeWord *generateFirstCodeWord(optCodeData *opcodeData) {
 	codeWord *resWord;
-	resWord = (codeWord *) malloc(sizeof(codeWord));
+	resWord = (codeWord *)safeMalloc(sizeof(codeWord));
 	resWord->ARE = 4;
 	resWord->L = 1;
 	resWord->sourceAddress = resWord->sourceRegister = resWord->destinationAddress = resWord->destinationRegister = resWord->opcode = resWord->funct = 0;
-	
+
 	resWord->opcode = opcodeData->opcode;
 	return resWord;
 }
 
-codeWord *generateSecondCodeWord(int line, char* lineContent, assemblyStructure *opcodeData, char **operandsArray, int numOfOperands) {
+codeWord *generateSecondCodeWord(int lineIndex, char* lineContent, optCodeData *opcodeData, char* *operandsArray, int numOfOperands) {
 	codeWord *resWord;
 	int address1 = NO_ADDRESS;
 	int address2 = NO_ADDRESS;
 
-	resWord = (codeWord *) malloc(sizeof(codeWord));
+	resWord = (codeWord *)safeMalloc(sizeof(codeWord));
 	resWord->sourceAddress = resWord->sourceRegister = resWord->destinationAddress = resWord->destinationRegister = resWord->opcode = 0;
 	resWord->L = 1;
-	resWord->line = line;
+	resWord->lineIndex = lineIndex;
 	resWord->ARE = 4;
 	resWord->funct = opcodeData->funct;
-
-	if ( numOfOperands > 0) {
-		address1 = fetchAddressType(operandsArray[0], line);
+	if (numOfOperands > 0)
+	{
+		address1 = fetchAddressType(operandsArray[0], lineIndex);
 	}
-	if ( numOfOperands > 1) {
-		address2 = fetchAddressType(operandsArray[1], line);
+	if (numOfOperands > 1)
+	{
+		address2 = fetchAddressType(operandsArray[1], lineIndex);
 	}
 
 	/* validate the operands against the given function */
-	if (!validateOperands(line, address1, address2, numOfOperands, opcodeData)) {
+	if (!validateOperands(lineIndex, address1, address2, numOfOperands, opcodeData))
+	{
 		return NULL;
 	}
-	
-	if (opcodeData->numOfOperandsPerFunction == 2) {
+
+	if (opcodeData->numOfOperandsPerFunction == 2)
+	{
 		resWord->firstOperand = operandsArray[0];
 		resWord->secondOperand = operandsArray[1];
 		resWord->sourceAddress = address1;
 		resWord->destinationAddress = address2;
-		if ( address1 == REGISTER) {
+		if (address1 == REGISTER)
+		{
 			resWord->sourceRegister = fetchRegister(operandsArray[0]);
 		}
-		if ( address2 == REGISTER) {
+		if (address2 == REGISTER)
+		{
 			resWord->destinationRegister = fetchRegister(operandsArray[1]);
 		}
-		if ( address1 == IMMEDIATE) {
+		if (address1 == IMMEDIATE)
+		{
 			resWord->L += 1;
 		}
-		if ( address2 == IMMEDIATE) {
+		if (address2 == IMMEDIATE)
+		{
 			resWord->L += 1;
 		}
-		if ( address1 == DIRECT ) {
+		if (address1 == DIRECT)
+		{
 			resWord->L += 2;
 		}
-		if (address1 == INDEX) {
+		if (address1 == INDEX)
+		{
 			resWord->L += 2;
 			resWord->sourceRegister = fetchRegister(operandsArray[0]);
 		}
-		if ( address2 == DIRECT ) {
+		if (address2 == DIRECT)
+		{
 			resWord->L += 2;
 		}
-		if (address2 == INDEX) {
+		if (address2 == INDEX)
+		{
 			resWord->L += 2;
 			resWord->destinationRegister = fetchRegister(operandsArray[1]);
 		}
 	}
-	else if (opcodeData->numOfOperandsPerFunction == 1) {
+	else if (opcodeData->numOfOperandsPerFunction == 1)
+	{
 		resWord->firstOperand = operandsArray[0];
 		resWord->destinationAddress = address1;
-		if ( address1 == REGISTER) {
+		if (address1 == REGISTER)
+		{
 			resWord->destinationRegister = fetchRegister(operandsArray[0]);
 		}
-		if ( address1 == IMMEDIATE) {
+		if (address1 == IMMEDIATE)
+		{
 			resWord->L += 1;
 		}
-		if ( address1 == DIRECT) {
+		if (address1 == DIRECT)
+		{
 			resWord->L += 2;
 		}
-		if  (address1 == INDEX) {
+		if (address1 == INDEX)
+		{
 			resWord->L += 2;
 			resWord->destinationRegister = fetchRegister(operandsArray[0]);
 		}
@@ -323,33 +371,37 @@ codeWord *generateSecondCodeWord(int line, char* lineContent, assemblyStructure 
 	return resWord;
 }
 
-int calculateBase(int ic) {
-    int i;
-    for (i = ic; i > 0; i--)
-    {
-        if (i % 16 == 0)
-        {
-            return i;
-        }
-    }
-    return 0;   
+int calcIcBase(int ic) {
+	return ic - (ic % 16);
 }
 
-int calculateOffset(int ic) {
-    return ic - calculateBase(ic);
+int calcIcOffset(int ic) {
+	return ic % 16;
 }
 
-int validateString(int line, char *lineContent, int i) {
+int validateStringEntry(int line, char* lineContent, int indexAtLine ){
 
-	if (lineContent[i] != '"') {
-		printErrorMessage(line, "string type should start with quotes!");
+	if (lineContent[indexAtLine] != '"')
+	{
+		printLineError(line, "String type should start with quotes");
 		return FALSE;
 	}
-	i++;
+	indexAtLine++;
 
-	for (; lineContent[i] != '"' && lineContent[i] != EOF && lineContent[i] != '\n'; i++);
-	if (lineContent[i] == '"')
-		return TRUE;
+	if (lineContent[indexAtLine] == '"')
+	{
+		printLineError(line, "String should not be empty!");
+		return FALSE;
+	}
+
+	while (lineContent[indexAtLine] != '"' && !IS_NULLISH_CHAR(lineContent[indexAtLine]))
+		indexAtLine++;
+
+	if (lineContent[indexAtLine] != '"') {
+		printLineError(line, "String type should end with quotes");
+		return FALSE;
+
+	}
 
 	return TRUE;
 }

@@ -2,98 +2,110 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "assemblyStructures.h"
+#include "optCodeData.h"
 #include "utils.h"
 #include "symbolTable.h"
 
-#define FOUR_LSB(value) ((value) & 0x000F) /* get 4 last bits from number */
+
+
+#define MAST_EXCEPT_LAST_FOUR_BITS(value) ((value) & 0x000F) /* get 4 last bits from number */
+#define VALUE_TO_MASKED_BITS(value)\
+					MAST_EXCEPT_LAST_FOUR_BITS(value >> 12),\
+					MAST_EXCEPT_LAST_FOUR_BITS(value >> 8),\
+					MAST_EXCEPT_LAST_FOUR_BITS(value >> 4),\
+					MAST_EXCEPT_LAST_FOUR_BITS(value)
+
 #define IS_SYMBOL_OF_ENTRY_TYPE(symbolTableItemIterator) (symbolTableItemIterator->symbolType == CODE_AND_ENTRY || symbolTableItemIterator->symbolType == DATA_AND_ENTRY)
 
 /* function that generates the .ob file */
-void generateObFile(char *fileName, int IC, int DC) {
-	int i;
-	FILE *obFile = NULL;
+void generateObFile(char* fileName, int IC, int DC) {
+	int indexInSection;
+	FILE* obFile = NULL;
 	int hasFileOpened;
-
+	codeWord currentInstruction;
+	char* WORD_FORMAT = "\n%.4d A4-B%x-C%x-D%x-E%x";
+	char* WORD_WITH_BASE_FORMAT = "\n%.4d A%x-B%x-C%x-D%x-E%x";
+	int instructionAmount = IC - IC_INIT_VALUE;
 	hasFileOpened = openFileSafe(&obFile, fileName, ".ob", "w");
 	if(!hasFileOpened) {
 		return;
 	}
 
-	fprintf(obFile, "%d %d", IC - IC_INIT_VALUE, DC);
+	fprintf(obFile, "%d %d", instructionAmount, DC);
 
-	for (i = 0; i < IC - IC_INIT_VALUE; i++) {
+	for (indexInSection = 0; indexInSection < instructionAmount; indexInSection++) {
+		currentInstruction = machineCodeSection[indexInSection];
 		/* OPCODE WORD */
-		if (machineCodeSection[i].opcode > 0) { 
-				fprintf(obFile, "\n%.4d A4-B%x-C%x-D%x-E%x",
-				i+IC_INIT_VALUE,
-				FOUR_LSB(machineCodeSection[i].opcode >> 12), 
-				FOUR_LSB(machineCodeSection[i].opcode >> 8), 
-				FOUR_LSB(machineCodeSection[i].opcode >> 4), 
-				FOUR_LSB(machineCodeSection[i].opcode))
+		if (currentInstruction.opcode > 0) { 
+				fprintf(
+					obFile,
+					WORD_FORMAT,
+					indexInSection+IC_INIT_VALUE,
+					VALUE_TO_MASKED_BITS(currentInstruction.opcode)
+				);
 			;
 		}
 		/* SECOND CODE WORD (funct, regs, addresses) */
-		else if (machineCodeSection[i].L > 0) { 
-				fprintf(obFile, "\n%.4d A4-B%x-C%x-D%x-E%x",
-				i+IC_INIT_VALUE,
-				machineCodeSection[i].funct,
-				machineCodeSection[i].sourceRegister,
-				machineCodeSection[i].sourceAddress << 2 | machineCodeSection[i].destinationRegister >> 2,
-				((machineCodeSection[i].destinationRegister & 3) << 2) | machineCodeSection[i].destinationAddress)
-			;
+		else if (currentInstruction.L > 0) { 
+				fprintf(
+					obFile,
+					WORD_FORMAT,
+					indexInSection+IC_INIT_VALUE,
+					currentInstruction.funct,
+					currentInstruction.sourceRegister,
+					currentInstruction.sourceAddress << 2 | currentInstruction.destinationRegister >> 2,
+					((currentInstruction.destinationRegister & 3) << 2) | currentInstruction.destinationAddress
+				);
 		}
 		/* IMMEDIATE ADDRESS TYPE DATA */
-		else if (machineCodeSection[i].immediate > 0) { 
-				fprintf(obFile, "\n%.4d A4-B%x-C%x-D%x-E%x",
-				i+IC_INIT_VALUE,
-				FOUR_LSB(machineCodeSection[i].immediate >> 12), 
-				FOUR_LSB(machineCodeSection[i].immediate >> 8), 
-				FOUR_LSB(machineCodeSection[i].immediate >> 4), 
-				FOUR_LSB(machineCodeSection[i].immediate))
+		else if (currentInstruction.immediate > 0) { 
+				fprintf(
+					obFile,
+					WORD_FORMAT,
+					indexInSection+IC_INIT_VALUE,
+					VALUE_TO_MASKED_BITS(currentInstruction.immediate)
+				)
 			;
 		}
 		/* BASE + OFFSET (DIRECT & INDEX) */
 		else {  /* BASE */
-				fprintf(obFile, "\n%.4d A%x-B%x-C%x-D%x-E%x",
-				i+IC_INIT_VALUE,
-				machineCodeSection[i].ARE,
-				FOUR_LSB(machineCodeSection[i].base >> 12), 
-				FOUR_LSB(machineCodeSection[i].base >> 8), 
-				FOUR_LSB(machineCodeSection[i].base >> 4), 
-				FOUR_LSB(machineCodeSection[i].base))
-			;
-				i++;
+				fprintf(
+					obFile,
+					WORD_WITH_BASE_FORMAT,
+					indexInSection+IC_INIT_VALUE,
+					currentInstruction.ARE,
+					VALUE_TO_MASKED_BITS(currentInstruction.base)
+				);
+
+				indexInSection++;
+				currentInstruction = machineCodeSection[indexInSection];
 				/* OFFSET */
-				fprintf(obFile, "\n%.4d A%x-B%x-C%x-D%x-E%x",
-				i+IC_INIT_VALUE,
-				machineCodeSection[i].ARE,
-				FOUR_LSB(machineCodeSection[i].offset >> 12), 
-				FOUR_LSB(machineCodeSection[i].offset >> 8), 
-				FOUR_LSB(machineCodeSection[i].offset >> 4), 
-				FOUR_LSB(machineCodeSection[i].offset))
-			;	
+				fprintf(
+					obFile,
+					WORD_WITH_BASE_FORMAT,
+					indexInSection+IC_INIT_VALUE,
+					currentInstruction.ARE,
+					VALUE_TO_MASKED_BITS(currentInstruction.offset)
+			);	
 		}
 		
 	}
 	/* ALL DATA SECTION */
-	for (i = 0; i < DC; i++) {
+	for (indexInSection = 0; indexInSection < DC; indexInSection++) {
         fprintf(
-			obFile, "\n%.4d A4-B%x-C%x-D%x-E%x",
-			IC + i,
-			FOUR_LSB(machineDataSection[i].data >> 12), 
-			FOUR_LSB(machineDataSection[i].data >> 8), 
-			FOUR_LSB(machineDataSection[i].data >> 4), 
-			FOUR_LSB(machineDataSection[i].data)
+			obFile,
+			WORD_FORMAT,
+			IC + indexInSection,
+			VALUE_TO_MASKED_BITS(machineDataSection[indexInSection].data)
 		);
 	}
     
 	fclose(obFile);
 }
 
-/* function that generates the .ent file */
-void generateEntFile(char *fileName, symbolTable* table) {
-	FILE *entFile;
+/* function that generates the .ent FILE */
+void generateEntFile(char* fileName, symbolTable* table) {
+	FILE* entFile;
 	int entrySymbolsCount = 0;
 	int hasFileOpened;
 	symbolItem *symbolTableItemIterator = table->symbolHead;
@@ -125,8 +137,8 @@ void generateEntFile(char *fileName, symbolTable* table) {
 }
 
 /* function that generates the .ext file */
-void generateExtFile(char *fileName, symbolTable* table, int IC) {
-	FILE *extFile = NULL;
+void generateExtFile(char* fileName, symbolTable* table, int IC) {
+	FILE* extFile = NULL;
 	int externSymbolsCount = 0;
 	int i, hasFileOpened;
 	symbolItem *temp = table->symbolHead;
@@ -155,7 +167,7 @@ void generateExtFile(char *fileName, symbolTable* table, int IC) {
 			{
 				if ( machineCodeSection[i].ARE == 1)
 				{
-					if (strcmp(temp->symbol, machineCodeSection[i].firstOperand) == 0) {
+					if (IS_STR_EQL(temp->symbol, machineCodeSection[i].firstOperand)) {
 						fprintf(extFile, "%s BASE %d\n", temp->symbol, i+IC_INIT_VALUE);
 						fprintf(extFile, "%s OFFSET %d\n\n", temp->symbol, i+IC_INIT_VALUE+1);
 						i++;
@@ -170,7 +182,7 @@ void generateExtFile(char *fileName, symbolTable* table, int IC) {
 }
 
 /* function that trigger all of the generate files functions */
-void generateOutputFiles(char *fileName, symbolTable* table, int IC, int DC) {
+void generateOutputFiles(char* fileName, symbolTable* table, int IC, int DC) {
 	generateObFile(fileName, IC, DC);
 	generateEntFile(fileName, table);
 	generateExtFile(fileName, table, IC);

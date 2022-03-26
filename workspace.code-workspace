@@ -12,9 +12,9 @@
 			"globalstructs.h": "c",
 			"string.h": "c",
 			"stdlib.h": "c",
-			"assemblystructures.h": "c",
+			"optCodeData.h": "c",
 			"consts.h": "c",
-			"firstphase.h": "c",
+			"firstpass.h": "c",
 			"stdio.h": "c",
 			"string": "c",
 			"iosfwd": "c",
@@ -41,7 +41,9 @@
 			"tuple": "c",
 			"type_traits": "c",
 			"vector": "c",
-			"memory": "c"
+			"memory": "c",
+			"stdarg.h": "c",
+			"macrostructs.h": "c"
 		}
 	}
 }

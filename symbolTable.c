@@ -6,7 +6,7 @@
 #include "stdint.h"
 #include "symbolTable.h"
 #include "utils.h"
-#include "assemblyStructures.h"
+#include "optCodeData.h"
 
 
 void freeSymbolTable(symbolTable* table)
@@ -22,12 +22,12 @@ void freeSymbolTable(symbolTable* table)
 	free(table);
 }
 
-int isSymbolExistsInTable(char *symbolName, symbolTable* table)
+int isSymbolExistsInTable(char* symbolName, symbolTable* table)
 {
     symbolItem *temp = table->symbolHead;
     while (temp)
     {
-        if (strcmp(temp->symbol, symbolName) == 0)
+        if (IS_STR_EQL(temp->symbol, symbolName))
             return TRUE;
         else
             temp = temp->next;
@@ -35,12 +35,12 @@ int isSymbolExistsInTable(char *symbolName, symbolTable* table)
     return FALSE;
 }
 
-symbolItem *symbolItemInTable(char *symbolName, symbolTable* table)
+symbolItem *symbolItemInTable(char* symbolName, symbolTable* table)
 {
     symbolItem *temp = table->symbolHead;
     while (temp)
     {
-        if (strcmp(temp->symbol, symbolName) == 0)
+        if (IS_STR_EQL(temp->symbol, symbolName))
             return temp;
         else
             temp = temp->next;
@@ -48,22 +48,10 @@ symbolItem *symbolItemInTable(char *symbolName, symbolTable* table)
     return NULL;
 }
 
-void printSymbolTable(symbolTable* table) /* Used for debugging */
-{
-    symbolItem *temp = table->symbolHead;
-	printf("----------------------- SYMBOL TABLE START ---------------------\n");
-    while (temp)
-    {
-		printf("Symbol: %s | Value: %d | Base: %d | Offset: %d | Attribute: %d\n", temp->symbol, temp->value, temp->base, temp->offset, temp->symbolType);
-		temp = temp->next;
-    }
-	printf("----------------------- SYMBOL TABLE END ---------------------\n");
-}
-
-symbolItem * getSymbolItemFromSymbolTable(char * symbol, symbolTable* table) {
+symbolItem * getSymbolItemFromSymbolTable(char*  symbol, symbolTable* table) {
     symbolItem * sl = table->symbolHead;
     while (sl) {
-        if (strcmp(sl->symbol, symbol) == 0) {
+        if (IS_STR_EQL(sl->symbol, symbol)) {
             return sl;
         }
         sl = sl->next;
@@ -86,8 +74,8 @@ void symbolTableAppend(char* symbolName, int symbolType, symbolTable* table, int
 	new_symbol->offset = 0;
 	if (symbolType == CODE) {
 		new_symbol->value = IC;
-		new_symbol->base = calculateBase(IC);
-		new_symbol->offset = calculateOffset(IC);
+		new_symbol->base = calcIcBase(IC);
+		new_symbol->offset = calcIcOffset(IC);
 	}
 	else if (symbolType == DATA) {
 		new_symbol->value = DC;
@@ -107,7 +95,7 @@ void symbolTableAppend(char* symbolName, int symbolType, symbolTable* table, int
 	return;
 }
 
-int isAlphanumericStr(char *string) {
+int isAlphanumericStr(char* string) {
 	int i;
 	/*check for every char in string if it is non alphanumeric char if it is function returns TRUE*/
 	for (i = 0; string[i]; i++) {
@@ -116,10 +104,10 @@ int isAlphanumericStr(char *string) {
 	return TRUE;
 }
 
-int isSymbolNameValid(char *name, int line) {
+int isSymbolNameValid(char* name, int line) {
 	/* Check length, first char is alpha and all the others are alphanumeric, and not saved word */
 	return name[0] && strlen(name) <= MAX_SYMBOL_SIZE && isalpha(name[0]) && isAlphanumericStr(name + 1) &&
-	       !isReservedWord(name, line);
+	       !isReservedWord(name);
 }
 
 void updateSymbolTableDataTypes(symbolTable* table, int IC) {
@@ -129,20 +117,20 @@ void updateSymbolTableDataTypes(symbolTable* table, int IC) {
     {
         if (temp->symbolType == DATA) {
 			temp->value += IC;
-			temp->base = calculateBase(temp->value);
-			temp->offset = calculateOffset(temp->value);
+			temp->base = calcIcBase(temp->value);
+			temp->offset = calcIcOffset(temp->value);
 		}
 		temp = temp->next;
     }
 	
 }
 
-int updateSymbolWithEntryAttribute(char *symbolName, int line, symbolTable* table)
+int updateSymbolWithEntryAttribute(char* symbolName, int line, symbolTable* table)
 {
     symbolItem *temp = table->symbolHead;
     while (temp)
     {
-        if (strcmp(temp->symbol, symbolName) == 0) {
+        if (IS_STR_EQL(temp->symbol, symbolName)) {
 			if (temp->symbolType == DATA) {
 				temp->symbolType = DATA_AND_ENTRY;
             	return TRUE;
@@ -152,13 +140,13 @@ int updateSymbolWithEntryAttribute(char *symbolName, int line, symbolTable* tabl
             	return TRUE;
 			}
 			else {
-				printErrorMessage(line, "A symbol can be either entry or extern but not both");
+				printLineError(line, "A symbol can be either entry or extern but not both");
 				return FALSE;
 			}	
 		}
 		temp = temp->next;
     }
 	
-	printErrorMessage(line, "Could not find a symbol in symbol table for this entry");
+	printLineError(line, "Could not find a symbol in symbol table for this entry");
     return FALSE;
 }

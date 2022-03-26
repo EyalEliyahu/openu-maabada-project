@@ -6,92 +6,86 @@
 #include "macroStructs.h"
 
 /* This function handles the macro replacement */
-int processMacroLine(int line, char *lineContent, int *inMacro, char *macro, char *file, FILE *amFilePtr) {
-	int i=0, j=0, k=0;
-	char firstWord[MAX_LINE_LENGTH];
-	macroLine *temp;
+int processMacroLine(char* lineContent, int* isInMacro, char* macroString, char* file, FILE* amFilePtr) {
+	int indexInLine=0, indexInWord=0, indexInMacroLine=0;
+	char firstWord[MAX_LINE_LENGTH + 2];
+	macroLine *currentMacroLine;
 	char* lineInMacro = "";
 	/* look for the next char that is not whitespace/tab/newline */
-	INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i); 
-	if (lineContent[i] == ';' || lineContent[i] == '\n')
-		return TRUE;
+	INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine);
 	/* Get the line content after removing spaces and tabs from the beginning until reach whitespace/tab/newline */
-	for (; lineContent[i] && lineContent[i] != '\n' && lineContent[i] != '\t' && lineContent[i] != ' ' && lineContent[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++) {
-		firstWord[j] = lineContent[i];
-	}
-	firstWord[j] = '\0';
+	for (; IS_TRUE_CHAR(lineContent[indexInLine]) && indexInLine <= MAX_LINE_LENGTH; indexInLine++, indexInWord++)
+		firstWord[indexInWord] = lineContent[indexInLine];
+	firstWord[indexInWord] = '\0';
 
 	/* Check if the line contains macro that we already saved */
-	if(macroExistsInList(firstWord) && !*inMacro) {
-		temp = macroLineInList(firstWord);
+	if(macroExistsInList(firstWord) && !*isInMacro) {
+		currentMacroLine = macroLineInList(firstWord);
 		/* replace macro name with macro content */
-		while (k < temp->numOfContentLines)
-		{
-			fprintf(amFilePtr, "%s", temp->contentLines[k++]);
+		while (indexInMacroLine < currentMacroLine->numOfContentLines) {
+			fprintf(amFilePtr, "%s", currentMacroLine->contentLines[indexInMacroLine++]);
 		}
 		return TRUE;
 	}
 
-	i = 0;
-	j = 0;
-	INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i); 
+	indexInLine = 0;
+	indexInWord = 0;
+	INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine); 
 	/* Checks if this line is start of new macro */
-    if (strncmp("macro", lineContent+i, 5) == 0 && !*inMacro) {
+    if (strncmp("macro", lineContent+indexInLine, 5) == 0 && !*isInMacro) {
 		/* go to the end of the word: macro */
-		INCREASE_I_UNTILL_CHAR(lineContent, 'o', i);
-		INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i);
-		for (; lineContent[i] && lineContent[i] != ' ' && lineContent[i] != '\n' && lineContent[i] != '\t' && lineContent[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++) {
-			macro[j] = lineContent[i];
-		}
-		macro[j] = '\0';
+		INCREASE_INDEX_UNTILL_CHAR(lineContent, 'o', indexInLine);
+		INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine);
+		for (; IS_TRUE_CHAR(lineContent[indexInLine]) && indexInLine <= MAX_LINE_LENGTH; indexInLine++, indexInWord++)
+			macroString[indexInWord] = lineContent[indexInLine];
+			
+		macroString[indexInWord] = '\0';
 
-		*inMacro = TRUE;
-		macroListAppend(macro);
+		*isInMacro = TRUE;
+		macroListAppend(macroString);
 		return TRUE;
 	}
 
 	/* Checks if this line is end of a macro */
-	if (strncmp("endm", lineContent+i, 4) == 0 && *inMacro) {
-		*inMacro = FALSE;
-		i=0;
-		while (i < MAX_LINE_LENGTH)
+	if (strncmp("endm", lineContent+indexInLine, 4) == 0 && *isInMacro) {
+		*isInMacro = FALSE;
+		indexInLine=0;
+		while (indexInLine < MAX_LINE_LENGTH)
 		{
-			macro[i] = '\0';
-			++i;
+			macroString[indexInLine] = '\0';
+			indexInLine++;
 		}
 		
 		return TRUE;
 	}
 
-	/* write regular line to am file */
-	if (!*inMacro)	
-		fprintf(amFilePtr, "%s", lineContent);
 	/* the line is part of a macro so we added it to macro content */
-	else {
-		temp = macroLineInList(macro);
-		temp->numOfContentLines += 1;
-		temp->contentLines = realloc(temp->contentLines, temp->numOfContentLines*sizeof(lineContent));
-		lineInMacro = malloc(sizeof(char) * (strlen(lineContent) + 1));
+	if (*isInMacro)	{
+		currentMacroLine = macroLineInList(macroString);
+		currentMacroLine->numOfContentLines += 1;
+		currentMacroLine->contentLines = realloc(currentMacroLine->contentLines, currentMacroLine->numOfContentLines*sizeof(lineContent));
+		lineInMacro = safeMalloc(sizeof(char) * (strlen(lineContent) + 1));
 		strcpy(lineInMacro,lineContent);
-		temp->contentLines[temp->numOfContentLines-1] = lineInMacro;
-		return TRUE;
+		currentMacroLine->contentLines[currentMacroLine->numOfContentLines-1] = lineInMacro;
+	}
+	/* write regular line to the .am file */
+	else {
+		fprintf(amFilePtr, "%s", lineContent);
 	}	
 
     return TRUE;
 }
 
 
-int translateMacros(FILE *assemblyFile, char* fileName)
+int translateMacros(FILE* assemblyFile, char* fileName)
 {
-	char *temp_string = "";
-	int macroPhaseSuccess = TRUE;
+	int macroPassSuccess = TRUE;
 	char macro[MAX_LINE_LENGTH];
-	int inMacro = FALSE;
+	int isInMacro = FALSE;
 	char lineContent[MAX_LINE_LENGTH + 2];
-	int line = 1;
 
-	FILE *assemblyFilePtr;
-	FILE *amFilePtr;
+	FILE* assemblyFilePtr;
+	FILE* amFilePtr;
 
 	int hasFilesOpend = openFileSafe(&amFilePtr, fileName, ".am", "w") && openFileSafe(&assemblyFilePtr, fileName, ".as", "r");
 	if(!hasFilesOpend) {
@@ -99,25 +93,11 @@ int translateMacros(FILE *assemblyFile, char* fileName)
 	}
 
 	/* run the macroProcessLine function on every line in .as file */
-	for (; fgets(lineContent, MAX_LINE_LENGTH + 2, assemblyFilePtr) != NULL; line++)
+	while (fgets(lineContent, MAX_LINE_LENGTH + 2, assemblyFilePtr))
 	{
-		/* check if line no reach the max length */ 
-		if (!feof(assemblyFilePtr) && strchr(lineContent, '\n') == NULL)
-		{
-			printErrorMessage(line, "line exceeds the max line length");
-			macroPhaseSuccess = FALSE;
-			/* if the line is too long continue the rest of the chars to get to the new line */ 
-			while (*temp_string != '\n' && *temp_string != EOF)
-			{
-				*temp_string = fgetc(assemblyFile);
-			}
-		}
-		else
-		{
-			/* run processMacroLine function */ 
-			if (!processMacroLine(line, lineContent, &inMacro, macro, fileName, amFilePtr)) {
-				macroPhaseSuccess = FALSE;
-			}
+		/* run processMacroLine function */ 
+		if (!processMacroLine(lineContent, &isInMacro, macro, fileName, amFilePtr)) {
+			macroPassSuccess = FALSE;
 		}
 	}
 	
@@ -125,5 +105,5 @@ int translateMacros(FILE *assemblyFile, char* fileName)
 	fclose(amFilePtr);
 	fclose(assemblyFilePtr);
 	freeMacroList();
-	return macroPhaseSuccess;
+	return macroPassSuccess;
 }
