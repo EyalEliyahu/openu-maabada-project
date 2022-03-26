@@ -6,15 +6,27 @@ prefix_of_extension="expected"
 tests_folder="$PWD/test_files"
 make
 cd $tests_folder
-  as_file="valid_input.as"
-  file_prefix=${as_file/.as/}
-  echo "FILE: $as_file:"
-  ../assembler $file_prefix > "$file_prefix.result"
-    for i in "${file_extensions[@]}"
-    do
-      echo "  $file_prefix.$i:"
-      diff "$file_prefix.$i" "$file_prefix.$prefix_of_extension.$i"
-    done
+as_file="valid_input.as"
+file_prefix=${as_file/.as/}
+echo "FILE: $as_file:"
+../assembler $file_prefix > "$file_prefix.result"
+  for i in "${file_extensions[@]}"
+  do
+    echo "  $file_prefix.$i:"
+    diff "$file_prefix.$i" "$file_prefix.$prefix_of_extension.$i"
+  done
+
+printf "\n"
+
+as_file="test_macro.as"
+file_prefix=${as_file/.as/}
+echo "FILE: $as_file:"
+../assembler $file_prefix > "$file_prefix.result"
+  for i in "${file_extensions[@]}"
+  do
+    echo "  $file_prefix.$i:"
+    diff "$file_prefix.$i" "$file_prefix.$prefix_of_extension.$i"
+  done
 
   printf "\n"
   as_file="mix_test.as"
