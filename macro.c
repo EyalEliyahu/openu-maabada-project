@@ -6,7 +6,7 @@
 #include "macroStructs.h"
 
 /* This function handles the macro replacement */
-int processMacroLine(int line, char *lineContent, int *isInMacro, char *macroString, char *file, FILE *amFilePtr) {
+int processMacroLine(char* lineContent, int* isInMacro, char* macroString, char* file, FILE* amFilePtr) {
 	int indexInLine=0, indexInWord=0, indexInMacroLine=0;
 	char firstWord[MAX_LINE_LENGTH + 2];
 	macroLine *currentMacroLine;
@@ -59,34 +59,33 @@ int processMacroLine(int line, char *lineContent, int *isInMacro, char *macroStr
 		return TRUE;
 	}
 
-	/* write regular line to am file */
-	if (!*isInMacro)	
-		fprintf(amFilePtr, "%s", lineContent);
 	/* the line is part of a macro so we added it to macro content */
-	else {
+	if (*isInMacro)	{
 		currentMacroLine = macroLineInList(macroString);
 		currentMacroLine->numOfContentLines += 1;
 		currentMacroLine->contentLines = realloc(currentMacroLine->contentLines, currentMacroLine->numOfContentLines*sizeof(lineContent));
 		lineInMacro = safeMalloc(sizeof(char) * (strlen(lineContent) + 1));
 		strcpy(lineInMacro,lineContent);
 		currentMacroLine->contentLines[currentMacroLine->numOfContentLines-1] = lineInMacro;
-		return TRUE;
+	}
+	/* write regular line to the .am file */
+	else {
+		fprintf(amFilePtr, "%s", lineContent);
 	}	
 
     return TRUE;
 }
 
 
-int translateMacros(FILE *assemblyFile, char* fileName)
+int translateMacros(FILE* assemblyFile, char* fileName)
 {
 	int macroPassSuccess = TRUE;
 	char macro[MAX_LINE_LENGTH];
 	int isInMacro = FALSE;
 	char lineContent[MAX_LINE_LENGTH + 2];
-	int lineIndex = 1;
 
-	FILE *assemblyFilePtr;
-	FILE *amFilePtr;
+	FILE* assemblyFilePtr;
+	FILE* amFilePtr;
 
 	int hasFilesOpend = openFileSafe(&amFilePtr, fileName, ".am", "w") && openFileSafe(&assemblyFilePtr, fileName, ".as", "r");
 	if(!hasFilesOpend) {
@@ -94,10 +93,10 @@ int translateMacros(FILE *assemblyFile, char* fileName)
 	}
 
 	/* run the macroProcessLine function on every line in .as file */
-	for (; fgets(lineContent, MAX_LINE_LENGTH + 2, assemblyFilePtr) != NULL; lineIndex++)
+	while (fgets(lineContent, MAX_LINE_LENGTH + 2, assemblyFilePtr))
 	{
 		/* run processMacroLine function */ 
-		if (!processMacroLine(lineIndex, lineContent, &isInMacro, macro, fileName, amFilePtr)) {
+		if (!processMacroLine(lineContent, &isInMacro, macro, fileName, amFilePtr)) {
 			macroPassSuccess = FALSE;
 		}
 	}

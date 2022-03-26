@@ -12,7 +12,7 @@
 			"globalstructs.h": "c",
 			"string.h": "c",
 			"stdlib.h": "c",
-			"assemblystructures.h": "c",
+			"optCodeData.h": "c",
 			"consts.h": "c",
 			"firstpass.h": "c",
 			"stdio.h": "c",

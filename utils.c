@@ -6,7 +6,7 @@
 #include <stdarg.h>
 #include "utils.h"
 
-void printLineError(int lineIndex, char *message, ...)
+void printLineError(int lineIndex, char* message, ...)
 {
 	va_list messageArgs;
 	printf("ASSEMBLER ERROR [line %d]: ", lineIndex + 1);
@@ -16,7 +16,7 @@ void printLineError(int lineIndex, char *message, ...)
 	printf("\n");
 }
 
-int isStringInteger(char *string)
+int isStringInteger(char* string)
 {
 	int i = 0;
 	if (string[0] == '-' || string[0] == '+')
@@ -42,17 +42,17 @@ void *safeMalloc(long size)
 	return ptr;
 }
 
-char *stringsConcat(char *string1, char *string2)
+char* stringsConcat(char* string1, char* string2)
 {
-	char *concattedString = (char *)safeMalloc(strlen(string1) + strlen(string2) + 1);
+	char* concattedString = (char* )safeMalloc(strlen(string1) + strlen(string2) + 1);
 	strcpy(concattedString, string1);
 	strcat(concattedString, string2);
 	return concattedString;
 }
 
-int openFileSafe(FILE **fileStream, char *fileName, char *fileExt, char *openMethod)
+int openFileSafe(FILE* *fileStream, char* fileName, char* fileExt, char* openMethod)
 {
-	char *fileNameWithExt = stringsConcat(fileName, fileExt);
+	char* fileNameWithExt = stringsConcat(fileName, fileExt);
 	*fileStream = fopen(fileNameWithExt, openMethod);
 	if (*fileStream == NULL)
 	{
@@ -66,7 +66,7 @@ int openFileSafe(FILE **fileStream, char *fileName, char *fileExt, char *openMet
 	}
 }
 
-int isSymbolWithValidIndex(char *operandString, int lineIndex)
+int isSymbolWithValidIndex(char* operandString, int lineIndex)
 {
 	char symbolPart[MAX_LINE_LENGTH];
 	int j;
@@ -100,7 +100,7 @@ int isSymbolWithValidIndex(char *operandString, int lineIndex)
 	return FALSE;
 }
 
-int getSymbolFromLine(int lineIndex, char *lineContent, char *symbolDest)
+int getSymbolFromLine(int lineIndex, char* lineContent, char* symbolDest)
 {
 	int indexAtSymbol = 0;
 	int indexAtLine = 0;
@@ -127,7 +127,7 @@ int getSymbolFromLine(int lineIndex, char *lineContent, char *symbolDest)
 	return TRUE;
 }
 
-int fetchOperands(int line, char *lineContent, int indexAtLine, char **operandsArray, int *numOfOperands)
+int fetchOperands(int line, char* lineContent, int indexAtLine, char* *operandsArray, int* numOfOperands)
 {
 	int j;
 	operandsArray[0] = operandsArray[1] = NULL;
@@ -190,7 +190,7 @@ int fetchOperands(int line, char *lineContent, int indexAtLine, char **operandsA
 	return TRUE;
 }
 
-int fetchType(char *lineContent, int *indexInLine) {
+int fetchType(char* lineContent, int* indexInLine) {
 	char typeString[MAX_LINE_LENGTH];
 	int indexInThypeString = 0;
 
@@ -222,7 +222,7 @@ int fetchType(char *lineContent, int *indexInLine) {
 	return ERROR;
 }
 
-int fetchAddressType(char *operand, int line) {
+int fetchAddressType(char* operand, int line) {
 	if (operand[0] == '\0')
 		return NO_ADDRESS;
 	if (operand[0] == 'r' && isdigit(operand[1]) && operand[2] == '\0')
@@ -238,7 +238,7 @@ int fetchAddressType(char *operand, int line) {
 	return NO_ADDRESS;
 }
 
-unsigned int fetchRegister(char *operand) {
+unsigned int fetchRegister(char* operand) {
 	unsigned int reg;
 	int index = 0, j;
 	char temp[MAX_LINE_LENGTH];
@@ -267,7 +267,7 @@ unsigned int fetchRegister(char *operand) {
 	return atoi(temp);
 }
 
-codeWord *generateFirstCodeWord(assemblyStructure *opcodeData) {
+codeWord *generateFirstCodeWord(optCodeData *opcodeData) {
 	codeWord *resWord;
 	resWord = (codeWord *)safeMalloc(sizeof(codeWord));
 	resWord->ARE = 4;
@@ -278,7 +278,7 @@ codeWord *generateFirstCodeWord(assemblyStructure *opcodeData) {
 	return resWord;
 }
 
-codeWord *generateSecondCodeWord(int line, char *lineContent, assemblyStructure *opcodeData, char **operandsArray, int numOfOperands) {
+codeWord *generateSecondCodeWord(int lineIndex, char* lineContent, optCodeData *opcodeData, char* *operandsArray, int numOfOperands) {
 	codeWord *resWord;
 	int address1 = NO_ADDRESS;
 	int address2 = NO_ADDRESS;
@@ -286,20 +286,20 @@ codeWord *generateSecondCodeWord(int line, char *lineContent, assemblyStructure 
 	resWord = (codeWord *)safeMalloc(sizeof(codeWord));
 	resWord->sourceAddress = resWord->sourceRegister = resWord->destinationAddress = resWord->destinationRegister = resWord->opcode = 0;
 	resWord->L = 1;
-	resWord->line = line;
+	resWord->lineIndex = lineIndex;
 	resWord->ARE = 4;
 	resWord->funct = opcodeData->funct;
 	if (numOfOperands > 0)
 	{
-		address1 = fetchAddressType(operandsArray[0], line);
+		address1 = fetchAddressType(operandsArray[0], lineIndex);
 	}
 	if (numOfOperands > 1)
 	{
-		address2 = fetchAddressType(operandsArray[1], line);
+		address2 = fetchAddressType(operandsArray[1], lineIndex);
 	}
 
 	/* validate the operands against the given function */
-	if (!validateOperands(line, address1, address2, numOfOperands, opcodeData))
+	if (!validateOperands(lineIndex, address1, address2, numOfOperands, opcodeData))
 	{
 		return NULL;
 	}
@@ -379,7 +379,7 @@ int calcIcOffset(int ic) {
 	return ic % 16;
 }
 
-int validateStringEntry(int line, char *lineContent, int indexAtLine ){
+int validateStringEntry(int line, char* lineContent, int indexAtLine ){
 
 	if (lineContent[indexAtLine] != '"')
 	{

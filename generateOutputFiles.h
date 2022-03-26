@@ -3,6 +3,6 @@
 
 #include "symbolTable.h"
 
-void generateOutputFiles(char *fileName, symbolTable* table, int IC, int DC);
+void generateOutputFiles(char* fileName, symbolTable* table, int IC, int DC);
 
 #endif

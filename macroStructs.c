@@ -42,7 +42,7 @@ void macroListAppend(char* macroName)
 	return;
 }
 
-macroLine *macroLineInList(char *macroName)
+macroLine *macroLineInList(char* macroName)
 {
     macroLine *temp = macroHead;
     while (temp)
@@ -55,7 +55,7 @@ macroLine *macroLineInList(char *macroName)
     return NULL;
 }
 
-int macroExistsInList(char *macroName)
+int macroExistsInList(char* macroName)
 {
     macroLine *temp = macroHead;
     while (temp)

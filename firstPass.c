@@ -5,7 +5,7 @@
 #include "utils.h"
 
 /* recursive function that handles string line */
-int parseStringEntry(int lineIndex, char *lineContent, int indexInLine, int* DC) {
+int parseStringEntry(int lineIndex, char* lineContent, int indexInLine, int* DC) {
 	dataWord *dataToAdd;
 	dataToAdd = (dataWord *) safeMalloc(sizeof(dataWord));
 	
@@ -33,7 +33,7 @@ int parseStringEntry(int lineIndex, char *lineContent, int indexInLine, int* DC)
 	return parseStringEntry(lineIndex, lineContent,indexInLine, DC); /* start function again to find the next char in string */
 }
 
-int parseDataEntry(int lineIndex, char *lineContent, int indexInLine, int *DC, int isReadingFirstParam) {
+int parseDataEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, int isReadingFirstParam) {
 	int indexInDataParam;
 	char dataParam[MAX_LINE_LEN];
 	dataWord* dataToAdd;
@@ -74,10 +74,10 @@ int parseDataEntry(int lineIndex, char *lineContent, int indexInLine, int *DC, i
 
 }
 
-int parseCodeEntry(int lineIndex, char *lineContent, int indexInLine, int* IC) {
+int parseCodeEntry(int lineIndex, char* lineContent, int indexInLine, int* IC) {
 	int indexInFunctionName, numOfOperands=0;
-	char *operandsArray[2];
-	assemblyStructure *opcodeData;
+	char* operandsArray[2];
+	optCodeData *opcodeData;
 	codeWord *firstWord;
 	codeWord *secondWord;
 	char functionName[MAX_LINE_LEN];
@@ -122,7 +122,7 @@ int parseCodeEntry(int lineIndex, char *lineContent, int indexInLine, int* IC) {
 }
 
 
-int parseLineForFirstPass(int lineIndex, char *lineContent, symbolTable* table, int *IC, int *DC) {
+int parseLineForFirstPass(int lineIndex, char* lineContent, symbolTable* table, int* IC, int* DC) {
     char externSymbol[MAX_LINE_LEN];
 	int dataType;
 	int indexInLine=0, indexInExternSymbol;

@@ -2,7 +2,7 @@
 CC = gcc # GCC Compiler
 CFLAGS = -ansi -Wall -pedantic # Flags
 GLOBAL_DEPS = consts.h globalStructs.h utils.h  # Dependencies for everything
-EXE_DEPS = assembler.o macro.o firstPass.o secondPass.o generateOutputFiles.o macroStructs.o utils.o symbolTable.o assemblyStructures.o  # Deps for exe
+EXE_DEPS = assembler.o macro.o firstPass.o secondPass.o generateOutputFiles.o macroStructs.o utils.o symbolTable.o optCodeData.o  # Deps for exe
 
 ## Executable
 assembler: $(EXE_DEPS) $(GLOBAL_DEPS)
@@ -33,8 +33,8 @@ utils.o: utils.c utils.h $(GLOBAL_DEPS)
 symbolTable.o: symbolTable.c symbolTable.h $(GLOBAL_DEPS)
 	$(CC) -c -g symbolTable.c $(CFLAGS) -o $@
 
-assemblyStructures.o: assemblyStructures.c assemblyStructures.h $(GLOBAL_DEPS)
-	$(CC) -c -g assemblyStructures.c $(CFLAGS) -o $@
+optCodeData.o: optCodeData.c optCodeData.h $(GLOBAL_DEPS)
+	$(CC) -c -g optCodeData.c $(CFLAGS) -o $@
 
 # Clean Target (remove leftovers)
 clean:

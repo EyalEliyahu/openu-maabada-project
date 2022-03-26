@@ -13,7 +13,7 @@
             machineCodeSection[*indexInLine+instructionIndex].ARE = 2;\
         }
 
-int updateCodeWordByType(int line, int instructionIndex, int *indexInLine, char* operand, int addressType, symbolTable* table) {
+int updateCodeWordByType(int line, int instructionIndex, int* indexInLine, char* operand, int addressType, symbolTable* table) {
     int symbolNameIndex;
     char* symbolName;
     if (addressType == IMMEDIATE) {
@@ -58,7 +58,7 @@ int updateCodeWordByType(int line, int instructionIndex, int *indexInLine, char*
     return TRUE;
 }
 
-int parseLineForSecondPass(int lineIndex, char *lineContent, symbolTable* table) {
+int parseLineForSecondPass(int lineIndex, char* lineContent, symbolTable* table) {
 	int indexInLine=0, j;
     int dataType;
 	char symbolName[MAX_LINE_WITH_LINEDROP_LEN];

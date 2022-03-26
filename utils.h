@@ -4,21 +4,21 @@
 #include "consts.h"
 #include "globalStructs.h"
 #include "symbolTable.h"
-#include "assemblyStructures.h"
+#include "optCodeData.h"
 
-int fetchType(char *lineContent, int *i);
-int fetchOperands(int line, char* lineContent, int i, char **operandsArray, int *numOfOperands);
+int fetchType(char* lineContent, int* i);
+int fetchOperands(int line, char* lineContent, int i, char* *operandsArray, int* numOfOperands);
 void *safeMalloc(long size);
-char* stringsConcat(char *string1, char* string2);
+char* stringsConcat(char* string1, char* string2);
 int openFileSafe(FILE** fileStream, char* fileName, char* fileExt, char* openMethod);
-int getSymbolFromLine(int line, char* lineContent, char *symbolDest);
+int getSymbolFromLine(int line, char* lineContent, char* symbolDest);
 void printLineError(int line, char* message, ...);
-codeWord *generateFirstCodeWord(assemblyStructure *opcodeData);
-codeWord *generateSecondCodeWord(int line, char* lineContent, assemblyStructure *opcodeData, char **operandsArray, int numOfOperands);
+codeWord *generateFirstCodeWord(optCodeData *opcodeData);
+codeWord *generateSecondCodeWord(int line, char* lineContent, optCodeData *opcodeData, char* *operandsArray, int numOfOperands);
 int calcIcBase(int ic);
 int calcIcOffset(int ic);
-int validateStringEntry(int line, char *lineContent, int i);
-int isStringInteger(char *string);
+int validateStringEntry(int line, char* lineContent, int i);
+int isStringInteger(char* string);
 
 #define INCREASE_INDEX_UNTILL_NEXT_CHAR(string, index) \
         while (string[index] == ' ' || string[index] == '\t'|| string[index] == '\n')\

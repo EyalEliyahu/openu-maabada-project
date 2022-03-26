@@ -6,7 +6,7 @@
 #include "stdint.h"
 #include "symbolTable.h"
 #include "utils.h"
-#include "assemblyStructures.h"
+#include "optCodeData.h"
 
 
 void freeSymbolTable(symbolTable* table)
@@ -22,7 +22,7 @@ void freeSymbolTable(symbolTable* table)
 	free(table);
 }
 
-int isSymbolExistsInTable(char *symbolName, symbolTable* table)
+int isSymbolExistsInTable(char* symbolName, symbolTable* table)
 {
     symbolItem *temp = table->symbolHead;
     while (temp)
@@ -35,7 +35,7 @@ int isSymbolExistsInTable(char *symbolName, symbolTable* table)
     return FALSE;
 }
 
-symbolItem *symbolItemInTable(char *symbolName, symbolTable* table)
+symbolItem *symbolItemInTable(char* symbolName, symbolTable* table)
 {
     symbolItem *temp = table->symbolHead;
     while (temp)
@@ -48,7 +48,7 @@ symbolItem *symbolItemInTable(char *symbolName, symbolTable* table)
     return NULL;
 }
 
-symbolItem * getSymbolItemFromSymbolTable(char * symbol, symbolTable* table) {
+symbolItem * getSymbolItemFromSymbolTable(char*  symbol, symbolTable* table) {
     symbolItem * sl = table->symbolHead;
     while (sl) {
         if (IS_STR_EQL(sl->symbol, symbol)) {
@@ -95,7 +95,7 @@ void symbolTableAppend(char* symbolName, int symbolType, symbolTable* table, int
 	return;
 }
 
-int isAlphanumericStr(char *string) {
+int isAlphanumericStr(char* string) {
 	int i;
 	/*check for every char in string if it is non alphanumeric char if it is function returns TRUE*/
 	for (i = 0; string[i]; i++) {
@@ -104,10 +104,10 @@ int isAlphanumericStr(char *string) {
 	return TRUE;
 }
 
-int isSymbolNameValid(char *name, int line) {
+int isSymbolNameValid(char* name, int line) {
 	/* Check length, first char is alpha and all the others are alphanumeric, and not saved word */
 	return name[0] && strlen(name) <= MAX_SYMBOL_SIZE && isalpha(name[0]) && isAlphanumericStr(name + 1) &&
-	       !isReservedWord(name, line);
+	       !isReservedWord(name);
 }
 
 void updateSymbolTableDataTypes(symbolTable* table, int IC) {
@@ -125,7 +125,7 @@ void updateSymbolTableDataTypes(symbolTable* table, int IC) {
 	
 }
 
-int updateSymbolWithEntryAttribute(char *symbolName, int line, symbolTable* table)
+int updateSymbolWithEntryAttribute(char* symbolName, int line, symbolTable* table)
 {
     symbolItem *temp = table->symbolHead;
     while (temp)

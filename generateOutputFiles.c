@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "assemblyStructures.h"
+#include "optCodeData.h"
 #include "utils.h"
 #include "symbolTable.h"
 
@@ -18,9 +18,9 @@
 #define IS_SYMBOL_OF_ENTRY_TYPE(symbolTableItemIterator) (symbolTableItemIterator->symbolType == CODE_AND_ENTRY || symbolTableItemIterator->symbolType == DATA_AND_ENTRY)
 
 /* function that generates the .ob file */
-void generateObFile(char *fileName, int IC, int DC) {
+void generateObFile(char* fileName, int IC, int DC) {
 	int indexInSection;
-	FILE *obFile = NULL;
+	FILE* obFile = NULL;
 	int hasFileOpened;
 	codeWord currentInstruction;
 	char* WORD_FORMAT = "\n%.4d A4-B%x-C%x-D%x-E%x";
@@ -103,9 +103,9 @@ void generateObFile(char *fileName, int IC, int DC) {
 	fclose(obFile);
 }
 
-/* function that generates the .ent file */
-void generateEntFile(char *fileName, symbolTable* table) {
-	FILE *entFile;
+/* function that generates the .ent FILE */
+void generateEntFile(char* fileName, symbolTable* table) {
+	FILE* entFile;
 	int entrySymbolsCount = 0;
 	int hasFileOpened;
 	symbolItem *symbolTableItemIterator = table->symbolHead;
@@ -137,8 +137,8 @@ void generateEntFile(char *fileName, symbolTable* table) {
 }
 
 /* function that generates the .ext file */
-void generateExtFile(char *fileName, symbolTable* table, int IC) {
-	FILE *extFile = NULL;
+void generateExtFile(char* fileName, symbolTable* table, int IC) {
+	FILE* extFile = NULL;
 	int externSymbolsCount = 0;
 	int i, hasFileOpened;
 	symbolItem *temp = table->symbolHead;
@@ -182,7 +182,7 @@ void generateExtFile(char *fileName, symbolTable* table, int IC) {
 }
 
 /* function that trigger all of the generate files functions */
-void generateOutputFiles(char *fileName, symbolTable* table, int IC, int DC) {
+void generateOutputFiles(char* fileName, symbolTable* table, int IC, int DC) {
 	generateObFile(fileName, IC, DC);
 	generateEntFile(fileName, table);
 	generateExtFile(fileName, table, IC);
