@@ -22,12 +22,23 @@ symbolItem* getSymbolItem(char* symbolName, symbolTable* table)
     return NULL;
 }
 
+ symbolItem*  getSymbolItemFromSymbolTable(char*  symbol, symbolTable* table) {
+    symbolItem*  currentSymbol = table->symbolHead;
+    while (currentSymbol) {
+        if (IS_STR_EQL(currentSymbol->symbol, symbol)) {
+            return currentSymbol;
+        }
+        currentSymbol = currentSymbol->next;
+    }
+	return NULL;
+}
+
 symbolTable* initSymbolTable() {
 	symbolTable* newTable = (symbolTable*)malloc(sizeof(symbolTable));
 	return newTable;
 }
 
-void appendToSymbolTable(char* symbolName, int symbolType, symbolTable* table, int IC, int DC)
+void symbolTableAppend(char* symbolName, int symbolType, symbolTable* table, int IC, int DC)
 {
 	symbolItem* newSymbol = (symbolItem*)safeMalloc(sizeof(symbolItem));
 	strcpy(newSymbol->symbol, symbolName);
@@ -56,15 +67,6 @@ void appendToSymbolTable(char* symbolName, int symbolType, symbolTable* table, i
 	table->symbolTail->next = NULL;
 
 	return;
-}
-
-int isAlphanumericStr(char* string) {
-	int i;
-	/*check for every char in string if it is non alphanumeric char if it is function returns TRUE*/
-	for (i = 0; string[i]; i++) {
-		if (!isalpha(string[i]) && !isdigit(string[i])) return FALSE;
-	}
-	return TRUE;
 }
 
 int isSymbolNameValid(char* name, int line) {

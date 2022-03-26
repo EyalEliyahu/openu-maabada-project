@@ -67,7 +67,7 @@ int parseLineForFirstPass(int lineIndex, char* lineContent, symbolTable* table, 
 	INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine);
 	if ( dataType == CODE ) {
 		if (IS_STRING_EXISTS(symbolName)) {
-			appendToSymbolTable(symbolName, CODE, table, *IC, *DC);
+			symbolTableAppend(symbolName, CODE, table, *IC, *DC);
 		}
 		if (!parseCodeEntry(lineIndex, lineContent, indexInLine, IC)) {
 			return FALSE;
@@ -77,7 +77,7 @@ int parseLineForFirstPass(int lineIndex, char* lineContent, symbolTable* table, 
 	else {
 		if (dataType == DATA || dataType == STRING) {
 			if (IS_STRING_EXISTS(symbolName)){
-				appendToSymbolTable(symbolName, DATA, table, *IC, *DC);
+				symbolTableAppend(symbolName, DATA, table, *IC, *DC);
 			}
 			if (dataType == DATA) {
 				if (!parseDataEntry(lineIndex, lineContent,indexInLine, DC, TRUE))
@@ -102,7 +102,7 @@ int parseLineForFirstPass(int lineIndex, char* lineContent, symbolTable* table, 
 				return FALSE;
 			}
 			if (!getSymbolItem(externSymbol, table)){
-				appendToSymbolTable(externSymbol, EXTERN, table, *IC, *DC); /* Extern value is defaulted to 0 */
+				symbolTableAppend(externSymbol, EXTERN, table, *IC, *DC); /* Extern value is defaulted to 0 */
 			}
 		}
 	}

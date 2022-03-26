@@ -6,19 +6,22 @@
 #include "symbolTable.h"
 #include "optCodeData.h"
 
-int fetchType(char* lineContent, int* i);
-int fetchOperands(int line, char* lineContent, int i, char* *operandsArray, int* numOfOperands);
+int isStringInteger(char* string);
+int isAlphanumericStr(char* string);
 void *safeMalloc(long size);
 char* stringsConcat(char* string1, char* string2);
+void printLineError(int lineIndex, char* message, ...);
+
+int fetchType(char* lineContent, int* i);
+int fetchOperands(int lineIndex, char* lineContent, int i, char* *operandsArray, int* numOfOperands);
 int openFileSafe(FILE** fileStream, char* fileName, char* fileExt, char* openMethod);
-int getSymbolFromLine(int line, char* lineContent, char* symbolDest);
-void printLineError(int line, char* message, ...);
 codeWord *generateFirstCodeWord(optCodeData *opcodeData);
-codeWord *generateSecondCodeWord(int line, char* lineContent, optCodeData *opcodeData, char* *operandsArray, int numOfOperands);
+codeWord *generateSecondCodeWord(int lineIndex, char* lineContent, optCodeData *opcodeData, char* *operandsArray, int numOfOperands);
+int getSymbolFromLine(int lineIndex, char* lineContent, char* symbolDest);
 int calcIcBase(int ic);
 int calcIcOffset(int ic);
-int validateStringEntry(int line, char* lineContent, int i);
-int isStringInteger(char* string);
+int validateStringEntry(int lineIndex, char* lineContent, int i);
+
 
 #define INCREASE_INDEX_UNTILL_NEXT_CHAR(string, index) \
         while (string[index] == ' ' || string[index] == '\t'|| string[index] == '\n')\

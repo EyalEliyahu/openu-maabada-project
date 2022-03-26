@@ -19,7 +19,7 @@ typedef struct symbolTable {
 } symbolTable;
 
  symbolItem* getSymbolItem(char* symbolName, symbolTable* table);
-void appendToSymbolTable(char* symbolName, int symbolType, symbolTable* table, int IC, int DC);
+void symbolTableAppend(char* symbolName, int symbolType, symbolTable* table, int IC, int DC);
 void freeSymbolTable(symbolTable* table);
 int isSymbolNameValid(char* name, int line);
 void updateSymbolTableDataTypes(symbolTable* table, int IC);
