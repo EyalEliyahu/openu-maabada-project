@@ -158,16 +158,15 @@ int fetchOperands(int line, char* lineContent, int indexAtLine, char* *operandsA
 		(*numOfOperands)++;
 		INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexAtLine);
 
-		if (lineContent[indexAtLine] == '\n' || lineContent[indexAtLine] == EOF || !lineContent[indexAtLine])
+		if (IS_NULLISH_CHAR(lineContent[indexAtLine]))
 			break;
 		else if (lineContent[indexAtLine] != ',')
 		{
 			printLineError(line, "There needs to be a comma between operands");
 			free(operandsArray[0]);
 			if (*numOfOperands > 1)
-			{
 				free(operandsArray[1]);
-			}
+				
 			return FALSE;
 		}
 		indexAtLine++;

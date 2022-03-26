@@ -17,6 +17,7 @@ int main(int argc, char* argv[]) {
 		compileFile(argv[fileIndex]);
 	}
 	return EXIT_SUCCESS;
+	free(argv);
 }
 
 void compileFile(char* fileName) {
@@ -56,4 +57,8 @@ void compileFile(char* fileName) {
 		}
 	}
 	printf("------- Finnish Assembler on file: %s.as -------\n", fileName);
+	
+	fclose(assemblyFile);
+	fclose(fileAfterMacroParsing);
+	freeSymbolTable(table);
 }

@@ -108,7 +108,7 @@ void generateEntFile(char* fileName, symbolTable* table) {
 	FILE* entFile;
 	int entrySymbolsCount = 0;
 	int hasFileOpened;
-	symbolItem *symbolTableItemIterator = table->symbolHead;
+	 symbolItem* symbolTableItemIterator = table->symbolHead;
 
 	while (symbolTableItemIterator)
     {
@@ -141,13 +141,13 @@ void generateExtFile(char* fileName, symbolTable* table, int IC) {
 	FILE* extFile = NULL;
 	int externSymbolsCount = 0;
 	int i, hasFileOpened;
-	symbolItem *temp = table->symbolHead;
+	 symbolItem* currentSymbol = table->symbolHead;
 
-	while (temp)
+	while (currentSymbol)
     {
-        if (temp->symbolType == EXTERN)
+        if (currentSymbol->symbolType == EXTERN)
             externSymbolsCount++;
-		temp = temp->next;	
+		currentSymbol = currentSymbol->next;	
     }
 	
 	if (externSymbolsCount == 0)
@@ -159,23 +159,23 @@ void generateExtFile(char* fileName, symbolTable* table, int IC) {
 		return;
 	}
 
-    temp = table->symbolHead;
-	while (temp)
+    currentSymbol = table->symbolHead;
+	while (currentSymbol)
     {
-        if (temp->symbolType == EXTERN) {
+        if (currentSymbol->symbolType == EXTERN) {
 			for (i = 0; i < IC - IC_INIT_VALUE; i++)
 			{
 				if ( machineCodeSection[i].ARE == 1)
 				{
-					if (IS_STR_EQL(temp->symbol, machineCodeSection[i].firstOperand)) {
-						fprintf(extFile, "%s BASE %d\n", temp->symbol, i+IC_INIT_VALUE);
-						fprintf(extFile, "%s OFFSET %d\n\n", temp->symbol, i+IC_INIT_VALUE+1);
+					if (IS_STR_EQL(currentSymbol->symbol, machineCodeSection[i].firstOperand)) {
+						fprintf(extFile, "%s BASE %d\n", currentSymbol->symbol, i+IC_INIT_VALUE);
+						fprintf(extFile, "%s OFFSET %d\n\n", currentSymbol->symbol, i+IC_INIT_VALUE+1);
 						i++;
 					}
 				}
 			}
 		}
-		temp = temp->next;
+		currentSymbol = currentSymbol->next;
     }
 
 	fclose(extFile);

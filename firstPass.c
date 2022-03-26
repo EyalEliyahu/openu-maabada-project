@@ -32,10 +32,10 @@ int runFirstPass(FILE* fileAfterMacroParsing, symbolTable* table, int* IC, int* 
 
 
 int parseLineForFirstPass(int lineIndex, char* lineContent, symbolTable* table, int* IC, int* DC) {
-    char externSymbol[MAX_LINE_LEN];
+    char externSymbol[MAX_LINE_LENGTH];
 	int dataType;
 	int indexInLine=0, indexInExternSymbol;
-	char symbolName[MAX_LINE_LEN];
+	char symbolName[MAX_LINE_LENGTH];
 	INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine); 
 
 	if (IS_NULLISH_CHAR(lineContent[indexInLine]) || lineContent[0] == ';')
@@ -45,7 +45,7 @@ int parseLineForFirstPass(int lineIndex, char* lineContent, symbolTable* table, 
 		return FALSE;
 	}
 	if (IS_STRING_EXISTS(symbolName)) {
-		if (isSymbolExistsInTable(symbolName, table)) {
+		if (getSymbolItem(symbolName, table)) {
 			printLineError(lineIndex, "Symbol is already defined: \"%s\"", symbolName);
 			return FALSE;
 		}
@@ -67,7 +67,7 @@ int parseLineForFirstPass(int lineIndex, char* lineContent, symbolTable* table, 
 	INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine);
 	if ( dataType == CODE ) {
 		if (IS_STRING_EXISTS(symbolName)) {
-			symbolTableAppend(symbolName, CODE, table, *IC, *DC);
+			appendToSymbolTable(symbolName, CODE, table, *IC, *DC);
 		}
 		if (!parseCodeEntry(lineIndex, lineContent, indexInLine, IC)) {
 			return FALSE;
@@ -77,7 +77,7 @@ int parseLineForFirstPass(int lineIndex, char* lineContent, symbolTable* table, 
 	else {
 		if (dataType == DATA || dataType == STRING) {
 			if (IS_STRING_EXISTS(symbolName)){
-				symbolTableAppend(symbolName, DATA, table, *IC, *DC);
+				appendToSymbolTable(symbolName, DATA, table, *IC, *DC);
 			}
 			if (dataType == DATA) {
 				if (!parseDataEntry(lineIndex, lineContent,indexInLine, DC, TRUE))
@@ -101,8 +101,8 @@ int parseLineForFirstPass(int lineIndex, char* lineContent, symbolTable* table, 
 				printLineError(lineIndex, "Invalid symbol for extern type");
 				return FALSE;
 			}
-			if (!isSymbolExistsInTable(externSymbol, table)){
-				symbolTableAppend(externSymbol, EXTERN, table, *IC, *DC); /* Extern value is defaulted to 0 */
+			if (!getSymbolItem(externSymbol, table)){
+				appendToSymbolTable(externSymbol, EXTERN, table, *IC, *DC); /* Extern value is defaulted to 0 */
 			}
 		}
 	}
@@ -141,7 +141,7 @@ int parseStringEntry(int lineIndex, char* lineContent, int indexInLine, int* DC)
 
 int parseDataEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, int isReadingFirstParam) {
 	int indexInDataParam;
-	char dataParam[MAX_LINE_LEN];
+	char dataParam[MAX_LINE_LENGTH];
 	dataWord* dataToAdd;
 
 	INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine);
@@ -186,7 +186,7 @@ int parseCodeEntry(int lineIndex, char* lineContent, int indexInLine, int* IC) {
 	optCodeData *opcodeData;
 	codeWord *firstWord;
 	codeWord *secondWord;
-	char functionName[MAX_LINE_LEN];
+	char functionName[MAX_LINE_LENGTH];
 
 	for (indexInFunctionName = 0; IS_TRUE_CHAR(lineContent[indexInLine]); indexInLine++, indexInFunctionName++) {
 		functionName[indexInFunctionName] = lineContent[indexInLine];
