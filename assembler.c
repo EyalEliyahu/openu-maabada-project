@@ -29,32 +29,31 @@ void compileFile(char* fileName) {
 	FILE* fileAfterMacroParsing = NULL;
 	symbolTable* table = NULL;
 
-	if(!openFileSafe(&assemblyFile, fileName, ".as", "r")) {
-		return;
+	printf("------- Starting Assembler on file: %s.as -------\n", fileName);
+
+	if(openFileSafe(&assemblyFile, fileName, ".as", "r")) {
+		isMacroParseSuccess = translateMacros(assemblyFile, fileName); 
+		if(isMacroParseSuccess) {
+			/* Reading the new assembly file - after the macros parsing */
+			if(openFileSafe(&fileAfterMacroParsing, fileName, ".am", "r")) {
+				/* Running First Pass */
+				table = initSymbolTable();
+				printf("Running First Pass on: \"%s.am\" \n", fileName);
+				isFirstPassSuccess = runFirstPass(fileAfterMacroParsing, table, &IC, &DC);
+				if(isFirstPassSuccess)  {
+					/* move the .am file back to the begining for second pass and start from first line */
+					rewind(fileAfterMacroParsing);
+					printf("Running Second Pass on: \"%s.am\" \n", fileName);
+					isSecondPassSuccess = runSecondPass(fileAfterMacroParsing, table, IC, DC);
+					if(isSecondPassSuccess) {
+						generateOutputFiles(fileName, table, IC, DC);
+					}
+
+				}
+
+			}
+
+		}
 	}
-
-	isMacroParseSuccess = translateMacros(assemblyFile, fileName); 
-	if(!isMacroParseSuccess)
-		return;
-
-	/* Reading the new assembly file - after the macros parsing */
-	if(!openFileSafe(&fileAfterMacroParsing, fileName, ".am", "r")) 
-		return;
-
-	/* Running First Pass */
-	table = initSymbolTable();
-	printf("Running First Pass on: \"%s.am\" \n", fileName);
-
-	isFirstPassSuccess = runFirstPass(fileAfterMacroParsing, table, &IC, &DC);
-	if(!isFirstPassSuccess) 
-		return;
-
-	/* move the .am file back to the begining for second pass and start from first line */
-	rewind(fileAfterMacroParsing);
-	printf("Running Second Pass on: \"%s.am\" \n", fileName);
-	isSecondPassSuccess = runSecondPass(fileAfterMacroParsing, table, IC, DC);
-	if(!isSecondPassSuccess)
-		return;
-
-	generateOutputFiles(fileName, table, IC, DC);
+	printf("------- Finnish Assembler on file: %s.as -------\n", fileName);
 }

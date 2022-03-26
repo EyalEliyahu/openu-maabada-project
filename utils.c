@@ -22,7 +22,7 @@ char *strExt(const char *s1, const char *s2)
 void *safeMalloc(long size) {
 	void *ptr = malloc(size);
 	if (ptr == NULL) {
-		printf("Fatal Error: Failed allocating memory.");
+		printf("\nFatal Error: Failed allocating memory.");
 		exit(EXIT_FAILURE);
 	}
 	return ptr;
@@ -50,7 +50,7 @@ int openFileSafe(FILE** fileStream, char* fileName, char* fileExt, char* openMet
 void printErrorMessage(int line, char* message, ...) {
 	va_list args; 
 
-	printf("ASSEMBLER ERROR [line %d]: ", line);
+	printf("ASSEMBLER ERROR [line %d]: ", line+1);
 
 	va_start(args, message);
 	vprintf(message, args);
@@ -59,9 +59,14 @@ void printErrorMessage(int line, char* message, ...) {
 }
 
 int isInteger(char *string) {
-	if (atoi(string))
-		return TRUE;
-	return FALSE;	
+	int i = 0;
+	if (string[0] == '-' || string[0] == '+') string++; /* if string starts + or - */
+	for (; string[i]; i++) { /* validate all of the rest are digits */
+		if (!isdigit(string[i])) {
+			return FALSE;
+		}
+	}
+	return i > 0; /* i will be 0 if string is empty and it's not a number */ 
 }
 
 int isIndex(char* operand, int line) {
@@ -99,7 +104,7 @@ int fetchSymbol(int line, char* lineContent, char *symbolDest) {
 
 	if (lineContent[i] == ':') {
 		if (!isSymbolNameValid(symbolDest, line)) {
-			printErrorMessage(line, "invalid symbol name");
+			printErrorMessage(line, "invalid symbol name: \"%s\"" , symbolDest);
 			symbolDest[0] = '\0';
 			return FALSE; 
 		}
@@ -128,7 +133,7 @@ int fetchOperands(int line, char* lineContent, int i, char **operandsArray, int 
 		}
 
 		operandsArray[*numOfOperands] = malloc(MAX_LINE_LENGTH);
-		for (j = 0; lineContent[i] && lineContent[i] != '\t' && lineContent[i] != ' ' && lineContent[i] != '\n' && lineContent[i] != EOF &&
+		for (j = 0; lineContent[i] && lineContent[i] != '\n' && lineContent[i] != EOF &&
 		            lineContent[i] != ','; i++, j++) {
 			operandsArray[*numOfOperands][j] = lineContent[i];
 		}
@@ -342,7 +347,12 @@ int calculateOffset(int ic) {
 int validateString(int line, char *lineContent, int i) {
 
 	if (lineContent[i] != '"') {
-		printErrorMessage(line, "string type should start with quotes!");
+		printErrorMessage(line, "string type should start with quotes");
+		return FALSE;
+	}
+
+	if (lineContent[i+1] == '"') {
+		printErrorMessage(line, "String should not be empty!");
 		return FALSE;
 	}
 	i++;

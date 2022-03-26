@@ -127,7 +127,7 @@ int validate_address_type(int line, assemblyStructure *opcodeData, int address, 
 
 int validateOperands(int line, int address1, int address2, int numOfOperands, assemblyStructure *opcodeData) {
 	if (opcodeData->numOfOperandsPerFunction != numOfOperands) {
-		printErrorMessage(line, "Invalid amount of operands for this assembly command");
+		printErrorMessage(line, "Invalid amount of operands for this assembly function. Expected: %d | Received: %d", opcodeData->numOfOperandsPerFunction, numOfOperands);
 		return FALSE;
 	}
 	if (numOfOperands == 2) {

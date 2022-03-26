@@ -25,13 +25,13 @@ int fetchSymbol(int line, char* lineContent, char *symbolDest);
 #define INCREASE_I_UNTILL_NEXT_CHAR(string, index) \
         while (string[index] == ' ' || string[index] == '\t'|| string[index] == '\n')\
         {\
-                ++index;\
+                index++;\
         }
 
 #define INCREASE_I_UNTILL_CHAR(string, char, index) \
         for (;string[(index)] != char; (++(index)))\
         ;\
-        (++(index));
+        index++;
 
 #define IS_STRING_EXISTS(symbolName)\
         symbolName[0] != '\0'
@@ -46,5 +46,5 @@ codeWord *generateSecondCodeWord(int line, char* lineContent, assemblyStructure 
 int calculateBase(int ic);
 int calculateOffset(int ic);
 int validateString(int line, char *lineContent, int i);
-
+int isInteger(char *string);
 #endif

@@ -14,7 +14,7 @@ int processMacroLine(int line, char *lineContent, int *inMacro, char *macro, cha
 	/* look for the next char that is not whitespace/tab/newline */
 	INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i);
 	/* Get the line content after removing spaces and tabs from the beginning until reach whitespace/tab/newline */
-	for (; lineContent[i] && lineContent[i] != '\n' && lineContent[i] != '\t' && lineContent[i] != ' ' && lineContent[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++) {
+	for (; lineContent[i] && lineContent[i] != '\n' && lineContent[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++) {
 		firstWord[j] = lineContent[i];
 	}
 	firstWord[j] = '\0';
@@ -38,7 +38,7 @@ int processMacroLine(int line, char *lineContent, int *inMacro, char *macro, cha
 		/* go to the end of the word: macro */
 		INCREASE_I_UNTILL_CHAR(lineContent, 'o', i);
 		INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i);
-		for (; lineContent[i] && lineContent[i] != ' ' && lineContent[i] != '\n' && lineContent[i] != '\t' && lineContent[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++) {
+		for (; lineContent[i] && lineContent[i] != '\n' && lineContent[i] != EOF && i <= MAX_LINE_LENGTH; i++, j++) {
 			macro[j] = lineContent[i];
 		}
 		macro[j] = '\0';
@@ -98,21 +98,10 @@ int translateMacros(FILE *assemblyFile, char* fileName)
 	/* run the macroProcessLine function on every line in .as file */
 	for (; fgets(lineContent, MAX_LINE_LENGTH + 2, assemblyFilePtr) != NULL; line++)
 	{
-		/* check if line no reach the max length */ 
-		// if (!feof(assemblyFilePtr) && strchr(lineContent, '\n') == NULL)
-		// {
-			// printErrorMessage(line, "line exceeds the max line length");
-			// macroPassSuccess = FALSE;
-			// /* if the line is too long continue the rest of the chars to get to the new line */ 
-			// while (fgetc(assemblyFilePtr) != '\n');
-		// }
-		// else
-		// {
-			/* run processMacroLine function */ 
-			if (!processMacroLine(line, lineContent, &inMacro, macro, fileName, amFilePtr)) {
-				macroPassSuccess = FALSE;
-			}
-		// }
+		/* run processMacroLine function */ 
+		if (!processMacroLine(line, lineContent, &inMacro, macro, fileName, amFilePtr)) {
+			macroPassSuccess = FALSE;
+		}
 	}
 	
 	/* free dynamic allocated memory used for macro and close am and assembly files */
