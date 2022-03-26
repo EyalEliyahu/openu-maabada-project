@@ -19,4 +19,4 @@ ASSEMBLER ERROR [line 52]: Invalid amount of operands for this assembly function
 ASSEMBLER ERROR [line 53]: Multiple consecutive commas.
 ASSEMBLER ERROR [line 54]: The addressing type provided is incompatible with this assembly command
 ASSEMBLER ERROR [line 55]: Invalid amount of operands for this assembly function. Expected: 0 | Received: 1
-------- Finnish Assembler on file: mix_test.as -------
+------- Finish Assembler on file: mix_test.as -------
