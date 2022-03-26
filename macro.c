@@ -9,7 +9,7 @@
 int processMacroLine(char* lineContent, int* isInMacro, char* macroString, char* file, FILE* amFilePtr) {
 	int indexInLine=0, indexInWord=0, indexInMacroLine=0;
 	char firstWord[MAX_LINE_LENGTH + 2];
-	macroLine *currentMacroLine;
+	macroLine* currentMacroLine;
 	char* lineInMacro = "";
 	/* look for the next char that is not whitespace/tab/newline */
 	INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine);
@@ -19,8 +19,8 @@ int processMacroLine(char* lineContent, int* isInMacro, char* macroString, char*
 	firstWord[indexInWord] = '\0';
 
 	/* Check if the line contains macro that we already saved */
-	if(macroExistsInList(firstWord) && !*isInMacro) {
-		currentMacroLine = macroLineInList(firstWord);
+	if(getMacroLine(firstWord) && !*isInMacro) {
+		currentMacroLine = getMacroLine(firstWord);
 		/* replace macro name with macro content */
 		while (indexInMacroLine < currentMacroLine->numOfContentLines) {
 			fprintf(amFilePtr, "%s", currentMacroLine->contentLines[indexInMacroLine++]);
@@ -42,7 +42,7 @@ int processMacroLine(char* lineContent, int* isInMacro, char* macroString, char*
 		macroString[indexInWord] = '\0';
 
 		*isInMacro = TRUE;
-		macroListAppend(macroString);
+		appendToMacroList(macroString);
 		return TRUE;
 	}
 
@@ -61,7 +61,7 @@ int processMacroLine(char* lineContent, int* isInMacro, char* macroString, char*
 
 	/* the line is part of a macro so we added it to macro content */
 	if (*isInMacro)	{
-		currentMacroLine = macroLineInList(macroString);
+		currentMacroLine = getMacroLine(macroString);
 		currentMacroLine->numOfContentLines += 1;
 		currentMacroLine->contentLines = realloc(currentMacroLine->contentLines, currentMacroLine->numOfContentLines*sizeof(lineContent));
 		lineInMacro = safeMalloc(sizeof(char) * (strlen(lineContent) + 1));

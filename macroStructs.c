@@ -5,25 +5,25 @@
 #include <string.h>
 #include "macroStructs.h"
 
-macroLine *macroHead = NULL;
-macroLine *macroTail = NULL;
+macroLine* macroHead = NULL;
+macroLine* macroTail = NULL;
 
 void freeMacroList()
 {
-    macroLine *temp;
+    macroLine* currentLine;
 
     while (macroHead)
     {
-        temp = macroHead->next;
+        currentLine = macroHead->next;
         free(macroHead->contentLines);
         free(macroHead);
-        macroHead = temp;
+        macroHead = currentLine;
     }
 }
 
-void macroListAppend(char* macroName)
+void appendToMacroList(char* macroName)
 {
-	macroLine* newMacro = (macroLine*)malloc(sizeof(macroLine));
+	macroLine* newMacro = (macroLine*)safeMalloc(sizeof(macroLine));
     
 	strcpy(newMacro->macro,macroName);
     newMacro->numOfContentLines = 0;
@@ -42,28 +42,15 @@ void macroListAppend(char* macroName)
 	return;
 }
 
-macroLine *macroLineInList(char* macroName)
+macroLine* getMacroLine(char* macroName)
 {
-    macroLine *temp = macroHead;
-    while (temp)
+    macroLine* currentLine = macroHead;
+    while (currentLine)
     {
-        if (IS_STR_EQL(temp->macro, macroName))
-            return temp;
+        if (IS_STR_EQL(currentLine->macro, macroName))
+            return currentLine;
         else
-            temp = temp->next;
+            currentLine = currentLine->next;
     }
     return NULL;
-}
-
-int macroExistsInList(char* macroName)
-{
-    macroLine *temp = macroHead;
-    while (temp)
-    {
-        if (IS_STR_EQL(temp->macro, macroName))
-            return TRUE;
-        else
-            temp = temp->next;
-    }
-    return FALSE;
 }

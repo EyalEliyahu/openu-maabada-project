@@ -54,16 +54,11 @@ int openFileSafe(FILE* *fileStream, char* fileName, char* fileExt, char* openMet
 {
 	char* fileNameWithExt = stringsConcat(fileName, fileExt);
 	*fileStream = fopen(fileNameWithExt, openMethod);
-	if (*fileStream == NULL)
-	{
+	if (*fileStream == NULL) {
 		printf("Error: Unable to read file: \"%s\". skipping it.\n", fileNameWithExt);
-		free(fileNameWithExt);
-		return FALSE;
 	}
-	else
-	{
-		return TRUE;
-	}
+	free(fileNameWithExt);
+	return *fileStream != NULL;
 }
 
 int isSymbolWithValidIndex(char* operandString, int lineIndex)
@@ -72,9 +67,7 @@ int isSymbolWithValidIndex(char* operandString, int lineIndex)
 	int indexInSymbolPart;
 
 	for (indexInSymbolPart = 0; operandString[indexInSymbolPart] && operandString[indexInSymbolPart] != '[' && operandString[indexInSymbolPart] != '\0'; indexInSymbolPart++)
-	{
 		symbolPart[indexInSymbolPart] = operandString[indexInSymbolPart];
-	}
 
 	symbolPart[indexInSymbolPart] = '\0';
 	if (!isSymbolNameValid(symbolPart, lineIndex))

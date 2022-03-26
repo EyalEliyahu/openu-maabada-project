@@ -34,7 +34,7 @@ symbolItem* getSymbolItem(char* symbolName, symbolTable* table)
 }
 
 symbolTable* initSymbolTable() {
-	symbolTable* newTable = (symbolTable*)malloc(sizeof(symbolTable));
+	symbolTable* newTable = (symbolTable*)safeMalloc(sizeof(symbolTable));
 	return newTable;
 }
 
