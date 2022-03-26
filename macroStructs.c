@@ -47,7 +47,7 @@ macroLine *macroLineInList(char *macroName)
     macroLine *temp = macroHead;
     while (temp)
     {
-        if (strcmp(temp->macro, macroName) == 0)
+        if (IS_STR_EQL(temp->macro, macroName))
             return temp;
         else
             temp = temp->next;
@@ -60,7 +60,7 @@ int macroExistsInList(char *macroName)
     macroLine *temp = macroHead;
     while (temp)
     {
-        if (strcmp(temp->macro, macroName) == 0)
+        if (IS_STR_EQL(temp->macro, macroName))
             return TRUE;
         else
             temp = temp->next;

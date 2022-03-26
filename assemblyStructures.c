@@ -66,58 +66,60 @@ char *reserved_words[NUM_OF_RESERVED_WORDS] = {
 	"r15"};
 
 int isReservedWord(char *word, int line) {
-	int i; 
+	int indexInWord; 
 
-	for(i = 0; i < NUM_OF_RESERVED_WORDS; i++) 
+	for(indexInWord = 0; indexInWord < NUM_OF_RESERVED_WORDS; indexInWord++) 
 	{	
-		if (strcmp(word,reserved_words[i]) == 0) {
+		if (IS_STR_EQL(word,reserved_words[indexInWord])) {
 		return TRUE;
 		}
 	}	
 	return FALSE;
 }	
 
-assemblyStructure* fetchFunctionData(char *functionName) {
-	int i;
-	for (i = 0; i < NUM_OF_OPCODES; i++)
-	{
-		if (strcmp(functionName, assemblyStructureTable[i].name) == 0) {
-			return &assemblyStructureTable[i];
-		}
-	}
-	return NULL;
-}
-
 int validate_address_type(int line, assemblyStructure *opcodeData, int addressType, int source_or_destination)
 {
-	int i;
+	int operandIndex;
 	if (source_or_destination == SOURCE) {
-		for (i = 0; opcodeData->sourceOperandTypes[i] != -1; i++) {
-			if (opcodeData->sourceOperandTypes[i] == addressType) 
+		for (operandIndex = 0; opcodeData->sourceOperandTypes[operandIndex] != -1; operandIndex++) {
+			if (opcodeData->sourceOperandTypes[operandIndex] == addressType) 
 				return TRUE;	
 		}
 	}
 
 	if (source_or_destination == DESTINATION) {
-		for (i = 0; opcodeData->destinationOperandTypes[i] != -1; i++) {
-			if (opcodeData->destinationOperandTypes[i] == addressType) 
+		for (operandIndex = 0; opcodeData->destinationOperandTypes[operandIndex] != -1; operandIndex++) {
+			if (opcodeData->destinationOperandTypes[operandIndex] == addressType) 
 				return TRUE;	
 		}
 	}
-	printErrorMessage(line, "The addressing type provided is incompatible with this assembly command");
+	printLineError(line, "The addressing type provided is incompatible with this assembly command");
 	return FALSE;
 }
 
 int validateOperands(int line, int address1, int address2, int numOfOperands, assemblyStructure *opcodeData) {
 	if (opcodeData->numOfOperandsPerFunction != numOfOperands) {
-		printErrorMessage(line, "Invalid amount of operands for this assembly function. Expected: %d | Received: %d", opcodeData->numOfOperandsPerFunction, numOfOperands);
+		printLineError(line, "Invalid amount of operands for this assembly function. Expected: %d | Received: %d", opcodeData->numOfOperandsPerFunction, numOfOperands);
 		return FALSE;
 	}
-	if (numOfOperands == 2) {
+	if (numOfOperands == 1) {
+		return validate_address_type(line, opcodeData, address1, DESTINATION);
+
+	}
+	else if (numOfOperands == 2) {
 		return validate_address_type(line, opcodeData, address1, SOURCE) && validate_address_type(line, opcodeData, address2, DESTINATION);
 	}
-	else if (numOfOperands == 1) {
-		return validate_address_type(line, opcodeData, address1, DESTINATION);
-	}
+	
 	return TRUE;	
+}
+
+assemblyStructure* fetchFunctionData(char *functionName) {
+	int opcodeIndex;
+	for (opcodeIndex = 0; opcodeIndex < NUM_OF_OPCODES; opcodeIndex++)
+	{
+		if (IS_STR_EQL(functionName, assemblyStructureTable[opcodeIndex].name)) {
+			return &assemblyStructureTable[opcodeIndex];
+		}
+	}
+	return NULL;
 }

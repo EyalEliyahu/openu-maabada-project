@@ -6,34 +6,34 @@
 
 #define ADD_ARE(addressType, operand) \
         if (addressType == EXTERN) {\
-            machineCodeSection[*i+instructionIndex].ARE = 1;\
-            machineCodeSection[*i+instructionIndex].firstOperand = operand;\
+            machineCodeSection[*indexInLine+instructionIndex].ARE = 1;\
+            machineCodeSection[*indexInLine+instructionIndex].firstOperand = operand;\
         }\
         else {\
-            machineCodeSection[*i+instructionIndex].ARE = 2;\
+            machineCodeSection[*indexInLine+instructionIndex].ARE = 2;\
         }
 
-int updateCodeWordByType(int line, int instructionIndex, int *i, char* operand, int addressType, symbolTable* table) {
+int updateCodeWordByType(int line, int instructionIndex, int *indexInLine, char* operand, int addressType, symbolTable* table) {
     int symbolNameIndex;
     char* symbolName;
     if (addressType == IMMEDIATE) {
-        machineCodeSection[*i+instructionIndex].immediate = atoi(&operand[1]); 
-        machineCodeSection[*i+instructionIndex].ARE = 3;
-         (*i)++;
+        machineCodeSection[*indexInLine+instructionIndex].immediate = atoi(&operand[1]); 
+        machineCodeSection[*indexInLine+instructionIndex].ARE = 3;
+         (*indexInLine)++;
     }
     else if (addressType == DIRECT) {
         symbolItem *temp;
         temp = symbolItemInTable(operand, table);
         if(!temp) {
-            printErrorMessage(machineCodeSection[instructionIndex].line, "Could not find symbol: %s in the symbol table", operand);
+            printLineError(machineCodeSection[instructionIndex].line, "Could not find symbol: %s in the symbol table", operand);
             return FALSE;
         }
-        machineCodeSection[instructionIndex+*i].base = temp->base;
+        machineCodeSection[instructionIndex+*indexInLine].base = temp->base;
         ADD_ARE(temp->symbolType, operand);
-        (*i)++;
-        machineCodeSection[instructionIndex+*i].offset = temp->offset;
+        (*indexInLine)++;
+        machineCodeSection[instructionIndex+*indexInLine].offset = temp->offset;
         ADD_ARE(temp->symbolType, operand);
-        (*i)++;
+        (*indexInLine)++;
     }
     else if (addressType == INDEX) {
         symbolItem *temp;
@@ -44,42 +44,42 @@ int updateCodeWordByType(int line, int instructionIndex, int *i, char* operand, 
         symbolName[symbolNameIndex] = '\0';
         temp = symbolItemInTable(symbolName, table);
         if(!temp) {
-            printErrorMessage(machineCodeSection[instructionIndex].line, "Could not find symbol: %s in the symbol table", symbolName);
+            printLineError(machineCodeSection[instructionIndex].line, "Could not find symbol: %s in the symbol table", symbolName);
             return FALSE;
         }
-        machineCodeSection[instructionIndex+*i].base = temp->base;
+        machineCodeSection[instructionIndex+*indexInLine].base = temp->base;
         ADD_ARE(temp->symbolType, symbolName);
-        (*i)++;
-        machineCodeSection[instructionIndex+*i].offset = temp->offset;
+        (*indexInLine)++;
+        machineCodeSection[instructionIndex+*indexInLine].offset = temp->offset;
         ADD_ARE(temp->symbolType, symbolName);
-        (*i)++;
+        (*indexInLine)++;
     }
 
     return TRUE;
 }
 
 int parseLineForSecondPass(int lineIndex, char *lineContent, symbolTable* table) {
-	int i=0, j;
+	int indexInLine=0, j;
     int dataType;
 	char symbolName[MAX_LINE_WITH_LINEDROP_LEN];
     char entrySymbol[MAX_LINE_WITH_LINEDROP_LEN];
 
-	INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i); 
-    if (!lineContent[i] || lineContent[i] == '\n' || lineContent[i] == EOF || lineContent[i] == ';')
+	INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine);
+    if (IS_NULLISH_CHAR(lineContent[indexInLine]) || lineContent[indexInLine] == ';')
 		return TRUE; 
 
-    fetchSymbol(lineIndex, lineContent, symbolName);
+    getSymbolFromLine(lineIndex, lineContent, symbolName);
 	
-	if (IS_STRING_EXISTS(symbolName) || lineContent[i] == '\n')
+	if (IS_STRING_EXISTS(symbolName))
         return TRUE;
 
-    INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i)
-	dataType = fetchType(lineContent, &i);
-    INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i)
+    INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine)
+	dataType = fetchType(lineContent, &indexInLine);
+    INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine)
 	
     if (dataType == ENTRY) {
-        for (j = 0; lineContent[i+j] && lineContent[i+j] != '\n' && lineContent[i+j] != EOF;j++) {
-            entrySymbol[j] = lineContent[i+j];
+        for (j = 0; !IS_NULLISH_CHAR(lineContent[indexInLine+j]);j++) {
+            entrySymbol[j] = lineContent[indexInLine+j];
         }
         entrySymbol[j] = '\0';
         if (!updateSymbolWithEntryAttribute(entrySymbol, lineIndex, table))
@@ -129,7 +129,7 @@ int updateCodeWords(int IC, symbolTable* table) {
 }
 void validateMachineCodeLimitation(int IC, int DC, int lineIndex) {
 	if (IC - IC_INIT_VALUE + DC > MAX_MACHINE_CODE_SECTION){
-		printErrorMessage(lineIndex, "The machine code is too big and can only include %d words", MAX_MACHINE_CODE_SECTION);
+		printLineError(lineIndex, "The machine code is too big and can only include %d words", MAX_MACHINE_CODE_SECTION);
         exit(EXIT_FAILURE);
     }
 }

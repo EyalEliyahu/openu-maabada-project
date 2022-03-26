@@ -27,7 +27,7 @@ int isSymbolExistsInTable(char *symbolName, symbolTable* table)
     symbolItem *temp = table->symbolHead;
     while (temp)
     {
-        if (strcmp(temp->symbol, symbolName) == 0)
+        if (IS_STR_EQL(temp->symbol, symbolName))
             return TRUE;
         else
             temp = temp->next;
@@ -40,7 +40,7 @@ symbolItem *symbolItemInTable(char *symbolName, symbolTable* table)
     symbolItem *temp = table->symbolHead;
     while (temp)
     {
-        if (strcmp(temp->symbol, symbolName) == 0)
+        if (IS_STR_EQL(temp->symbol, symbolName))
             return temp;
         else
             temp = temp->next;
@@ -51,7 +51,7 @@ symbolItem *symbolItemInTable(char *symbolName, symbolTable* table)
 symbolItem * getSymbolItemFromSymbolTable(char * symbol, symbolTable* table) {
     symbolItem * sl = table->symbolHead;
     while (sl) {
-        if (strcmp(sl->symbol, symbol) == 0) {
+        if (IS_STR_EQL(sl->symbol, symbol)) {
             return sl;
         }
         sl = sl->next;
@@ -74,8 +74,8 @@ void symbolTableAppend(char* symbolName, int symbolType, symbolTable* table, int
 	new_symbol->offset = 0;
 	if (symbolType == CODE) {
 		new_symbol->value = IC;
-		new_symbol->base = calculateBase(IC);
-		new_symbol->offset = calculateOffset(IC);
+		new_symbol->base = calcIcBase(IC);
+		new_symbol->offset = calcIcOffset(IC);
 	}
 	else if (symbolType == DATA) {
 		new_symbol->value = DC;
@@ -117,8 +117,8 @@ void updateSymbolTableDataTypes(symbolTable* table, int IC) {
     {
         if (temp->symbolType == DATA) {
 			temp->value += IC;
-			temp->base = calculateBase(temp->value);
-			temp->offset = calculateOffset(temp->value);
+			temp->base = calcIcBase(temp->value);
+			temp->offset = calcIcOffset(temp->value);
 		}
 		temp = temp->next;
     }
@@ -130,7 +130,7 @@ int updateSymbolWithEntryAttribute(char *symbolName, int line, symbolTable* tabl
     symbolItem *temp = table->symbolHead;
     while (temp)
     {
-        if (strcmp(temp->symbol, symbolName) == 0) {
+        if (IS_STR_EQL(temp->symbol, symbolName)) {
 			if (temp->symbolType == DATA) {
 				temp->symbolType = DATA_AND_ENTRY;
             	return TRUE;
@@ -140,13 +140,13 @@ int updateSymbolWithEntryAttribute(char *symbolName, int line, symbolTable* tabl
             	return TRUE;
 			}
 			else {
-				printErrorMessage(line, "A symbol can be either entry or extern but not both");
+				printLineError(line, "A symbol can be either entry or extern but not both");
 				return FALSE;
 			}	
 		}
 		temp = temp->next;
     }
 	
-	printErrorMessage(line, "Could not find a symbol in symbol table for this entry");
+	printLineError(line, "Could not find a symbol in symbol table for this entry");
     return FALSE;
 }

@@ -41,7 +41,9 @@
 			"tuple": "c",
 			"type_traits": "c",
 			"vector": "c",
-			"memory": "c"
+			"memory": "c",
+			"stdarg.h": "c",
+			"macrostructs.h": "c"
 		}
 	}
 }

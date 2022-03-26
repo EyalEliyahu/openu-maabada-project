@@ -5,16 +5,16 @@
 #include "utils.h"
 
 /* recursive function that handles string line */
-int handleString(int lineIndex, char *LineContent, int i, int* DC) {
+int parseStringEntry(int lineIndex, char *lineContent, int indexInLine, int* DC) {
 	dataWord *dataToAdd;
 	dataToAdd = (dataWord *) safeMalloc(sizeof(dataWord));
 	
 
-	if (LineContent[i] == '"') { /* reached the end of the string */
-		i++;
-		INCREASE_I_UNTILL_NEXT_CHAR(LineContent, i);
-		if (LineContent[i] != '\0' && LineContent[i] != '\n' && LineContent[i] != EOF) { /* if there is extra text after quotes */
-			printErrorMessage(lineIndex, "Invalid string provided");
+	if (lineContent[indexInLine] == '"') { /* reached the end of the string */
+		indexInLine++;
+		INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine);
+		if (!IS_NULLISH_CHAR(lineContent[indexInLine])) { /* if there is extra text after quotes */
+			printLineError(lineIndex, "Invalid string provided");
 			return FALSE;
 		}
 		dataToAdd->data = '\0';
@@ -24,37 +24,37 @@ int handleString(int lineIndex, char *LineContent, int i, int* DC) {
 		return TRUE;	
 	}
 
-	dataToAdd->data = LineContent[i];
+	dataToAdd->data = lineContent[indexInLine];
 	machineDataSection[*DC] = *dataToAdd; /* add the char to the data section array */
 	free(dataToAdd);
-	i++;
+	indexInLine++;
 	
 	(*DC)++;
-	return handleString(lineIndex, LineContent, i, DC); /* start function again to find the next char in string */
+	return parseStringEntry(lineIndex, lineContent,indexInLine, DC); /* start function again to find the next char in string */
 }
 
-int handleData(int lineIndex, char *lineContent, int i, int *DC, int isReadingFirstParam) {
-	int j;
+int parseDataEntry(int lineIndex, char *lineContent, int indexInLine, int *DC, int isReadingFirstParam) {
+	int indexInDataParam;
 	char dataParam[MAX_LINE_LEN];
 	dataWord* dataToAdd;
 
-	INCREASE_I_UNTILL_NEXT_CHAR(lineContent,i);
+	INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine);
 
-	if (lineContent[i] == '\0' || lineContent[i] == '\n' || lineContent[i] == EOF) /* if we got to the end of the line/file stop adding data */
+	if (IS_NULLISH_CHAR(lineContent[indexInLine])) /* if we got to the end of the line/file stop adding data */
 		return TRUE;
 
 	if(!isReadingFirstParam) {
-		if (lineContent[i] == ',') /* continue after comma */
-			i++;
+		if (lineContent[indexInLine] == ',') /* continue after comma */
+			indexInLine++;
 
-		INCREASE_I_UNTILL_NEXT_CHAR(lineContent,i);
+		INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine);
 	}
 
-	for (j = 0; lineContent[i] && lineContent[i] != ',' && lineContent[i] != '\n' && lineContent[i] != '\t' && lineContent[i] != ' ' && lineContent[i] != EOF; i++, j++) {
-		dataParam[j] = lineContent[i];
+	for (indexInDataParam = 0; !IS_NULLISH_CHAR(lineContent[indexInLine]) && !IS_WHITESPACES_CHAR(lineContent[indexInLine]) && lineContent[indexInLine] != ','; indexInLine++, indexInDataParam++) {
+		dataParam[indexInDataParam] = lineContent[indexInLine];
 	}
-	dataParam[j] = '\0'; /* save the number in char array */
-	if(isInteger(dataParam)){ /* if string is valida (it's an integer) add it to the data section array */
+	dataParam[indexInDataParam] = '\0'; /* save the number in char array */
+	if(isStringInteger(dataParam)){ /* if string is valida (it's an integer) add it to the data section array */
 		dataToAdd = (dataWord *) safeMalloc(sizeof(dataWord));
 		dataToAdd->data = atoi(dataParam);
 		machineDataSection[*DC] = *dataToAdd;
@@ -62,39 +62,39 @@ int handleData(int lineIndex, char *lineContent, int i, int *DC, int isReadingFi
 		(*DC)++;
 	}
 	else {
-		if (dataParam[0] == '\0') { /* this happens in case of invalid comma see test2 input and output */
-			printErrorMessage(lineIndex, "Invalid comma");
+		if (IS_NULLISH_CHAR(dataParam[0])) { /* this happens in case of invalid comma see test2 input and output */
+			printLineError(lineIndex, "Invalid comma");
 			return FALSE;
 		}
-		printErrorMessage(lineIndex, "Invalid data provided: \"%s\"", dataParam); /* this happens in case of invalid data see test2 input and output */
+		printLineError(lineIndex, "Invalid data provided: \"%s\"", dataParam); /* this happens in case of invalid data see test2 input and output */
 		return FALSE;
 	}
 
-	return handleData(lineIndex, lineContent, i, DC, FALSE); /* start function again to find the next numbers in data row */
+	return parseDataEntry(lineIndex, lineContent,indexInLine, DC, FALSE); /* start function again to find the next numbers in data row */
 
 }
 
-int handleCode(int lineIndex, char *lineContent, int i, int* IC) {
-	int j, numOfOperands=0;
+int parseCodeEntry(int lineIndex, char *lineContent, int indexInLine, int* IC) {
+	int indexInFunctionName, numOfOperands=0;
 	char *operandsArray[2];
 	assemblyStructure *opcodeData;
 	codeWord *firstWord;
 	codeWord *secondWord;
 	char functionName[MAX_LINE_LEN];
 
-	for (j = 0; lineContent[i] && lineContent[i] != '\n' && lineContent[i] != '\t' && lineContent[i] != ' '  && lineContent[i] != EOF; i++, j++) {
-		functionName[j] = lineContent[i];
+	for (indexInFunctionName = 0; !IS_NULLISH_CHAR(lineContent[indexInLine]) && !IS_WHITESPACES_CHAR(lineContent[indexInLine]); indexInLine++, indexInFunctionName++) {
+		functionName[indexInFunctionName] = lineContent[indexInLine];
 	}
-	functionName[j] = '\0';
+	functionName[indexInFunctionName] = '\0';
 	opcodeData = fetchFunctionData(functionName); /* get assembly function data (opcode,funct,operands) */
 	if(!opcodeData) { /* in case of function that not exists throw error */
-		printErrorMessage(lineIndex, "Invalid assembly function: \"%s\"", functionName);
+		printLineError(lineIndex, "Invalid assembly function: \"%s\"", functionName);
 		return FALSE;
 	}
 
-	INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i); 
+	INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine); 
 
-	if (!fetchOperands(lineIndex, lineContent, i, operandsArray, &numOfOperands))  {
+	if (!fetchOperands(lineIndex, lineContent,indexInLine, operandsArray, &numOfOperands))  {
 		return FALSE;
 	}
 
@@ -125,42 +125,42 @@ int handleCode(int lineIndex, char *lineContent, int i, int* IC) {
 int parseLineForFirstPass(int lineIndex, char *lineContent, symbolTable* table, int *IC, int *DC) {
     char externSymbol[MAX_LINE_LEN];
 	int dataType;
-	int i=0, j;
+	int indexInLine=0, indexInExternSymbol;
 	char symbolName[MAX_LINE_LEN];
-	INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i); 
+	INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine); 
 
-	if (!lineContent[0] || lineContent[0] == '\n' || lineContent[0] == EOF || lineContent[0] == ';')
+	if (IS_NULLISH_CHAR(lineContent[indexInLine]) || lineContent[0] == ';')
 		return TRUE; 
 
-	if (!fetchSymbol(lineIndex, lineContent, symbolName)) {
+	if (!getSymbolFromLine(lineIndex, lineContent, symbolName)) {
 		return FALSE;
 	}
 	if (IS_STRING_EXISTS(symbolName)) {
 		if (isSymbolExistsInTable(symbolName, table)) {
-			printErrorMessage(lineIndex, "Symbol is already defined: \"%s\"", symbolName);
+			printLineError(lineIndex, "Symbol is already defined: \"%s\"", symbolName);
 			return FALSE;
 		}
-		INCREASE_I_UNTILL_CHAR(lineContent, ':', i);
+		INCREASE_INDEX_UNTILL_CHAR(lineContent, ':', indexInLine);
 	}
 
-	if (lineContent[i] == '\n' || !lineContent[i]) {
+	if (IS_NULLISH_CHAR(lineContent[indexInLine])) {
 		return TRUE; 
 	}
 
-	INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i);
+	INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine);
 
-	dataType = fetchType(lineContent, &i);
+	dataType = fetchType(lineContent, &indexInLine);
 	if (dataType == ERROR) {
-		printErrorMessage(lineIndex, "Unable to detect label type");
+		printLineError(lineIndex, "Unable to detect label type");
 		return FALSE;
 	}
 
-	INCREASE_I_UNTILL_NEXT_CHAR(lineContent, i);
+	INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine);
 	if ( dataType == CODE ) {
 		if (IS_STRING_EXISTS(symbolName)) {
 			symbolTableAppend(symbolName, CODE, table, *IC, *DC);
 		}
-		if (!handleCode(lineIndex, lineContent, i, IC)) {
+		if (!parseCodeEntry(lineIndex, lineContent, indexInLine, IC)) {
 			return FALSE;
 		}
 
@@ -171,25 +171,25 @@ int parseLineForFirstPass(int lineIndex, char *lineContent, symbolTable* table, 
 				symbolTableAppend(symbolName, DATA, table, *IC, *DC);
 			}
 			if (dataType == DATA) {
-				if (!handleData(lineIndex, lineContent, i, DC, TRUE))
+				if (!parseDataEntry(lineIndex, lineContent,indexInLine, DC, TRUE))
 					return FALSE;
 			}
 			else {
-				if (!validateString(lineIndex, lineContent, i)) {
+				if (!validateStringEntry(lineIndex, lineContent, indexInLine)) {
 					return FALSE;
 				}
-				if (!handleString(lineIndex, lineContent, i+1, DC))
+				if (!parseStringEntry(lineIndex, lineContent, indexInLine+1, DC))
 					return FALSE;
 			}	
 		}
 		else if (dataType == EXTERN) {
-			for (j = 0; lineContent[i] && lineContent[i] != '\n' && lineContent[i] != ' ' && lineContent[i] != '\t' && lineContent[i] != EOF; i++, j++) {
-				externSymbol[j] = lineContent[i];
+			for (indexInExternSymbol = 0; !IS_NULLISH_CHAR(lineContent[indexInLine]) && !IS_WHITESPACES_CHAR(lineContent[indexInLine]); indexInLine++, indexInExternSymbol++) {
+				externSymbol[indexInExternSymbol] = lineContent[indexInLine];
 			}
-			externSymbol[j] = '\0';
+			externSymbol[indexInExternSymbol] = '\0';
 			/* If invalid external label name, it's an error */
 			if (!isSymbolNameValid(externSymbol, lineIndex)) {
-				printErrorMessage(lineIndex, "Invalid symbol for extern type");
+				printLineError(lineIndex, "Invalid symbol for extern type");
 				return FALSE;
 			}
 			if (!isSymbolExistsInTable(externSymbol, table)){
@@ -208,7 +208,7 @@ int runFirstPass(FILE* fileAfterMacroParsing, symbolTable* table, int* IC, int* 
 	for (lineIndex = 0; fgets(lineContent, MAX_LINE_WITH_LINEDROP_LEN, fileAfterMacroParsing); lineIndex++) {
 		if (!feof(fileAfterMacroParsing) && strchr(lineContent, '\n') == NULL)
 		{
-			printErrorMessage(lineIndex, "line exceeds the max line length");
+			printLineError(lineIndex, "line exceeds the max line length");
 			lineParseSuccess = FALSE;
 			/* if the line is too long continue the rest of the chars to get to the new line */ 
 			while (fgetc(fileAfterMacroParsing) != '\n');

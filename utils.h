@@ -11,26 +11,37 @@ int fetchOperands(int line, char* lineContent, int i, char **operandsArray, int 
 void *safeMalloc(long size);
 char* stringsConcat(char *string1, char* string2);
 int openFileSafe(FILE** fileStream, char* fileName, char* fileExt, char* openMethod);
-int fetchSymbol(int line, char* lineContent, char *symbolDest);
-void printErrorMessage(int line, char* message, ...);
+int getSymbolFromLine(int line, char* lineContent, char *symbolDest);
+void printLineError(int line, char* message, ...);
 codeWord *generateFirstCodeWord(assemblyStructure *opcodeData);
 codeWord *generateSecondCodeWord(int line, char* lineContent, assemblyStructure *opcodeData, char **operandsArray, int numOfOperands);
-int calculateBase(int ic);
-int calculateOffset(int ic);
-int validateString(int line, char *lineContent, int i);
-int isInteger(char *string);
+int calcIcBase(int ic);
+int calcIcOffset(int ic);
+int validateStringEntry(int line, char *lineContent, int i);
+int isStringInteger(char *string);
 
-#define INCREASE_I_UNTILL_NEXT_CHAR(string, index) \
+#define INCREASE_INDEX_UNTILL_NEXT_CHAR(string, index) \
         while (string[index] == ' ' || string[index] == '\t'|| string[index] == '\n')\
         {\
                 index++;\
         }
 
-#define INCREASE_I_UNTILL_CHAR(string, char, index) \
+#define INCREASE_INDEX_UNTILL_CHAR(string, char, index) \
         for (;string[(index)] != char; (++(index)))\
         ;\
         index++;
 
-#define IS_STRING_EXISTS(symbolName)\
-        symbolName[0] != '\0'
+
+#define IS_WHITESPACES_CHAR(c)\
+        (c == ' ' || c == '\t')
+
+#define IS_NULLISH_CHAR(c)\
+        (!c || c == '\n' || c == '\0'  || c == EOF)
+        
+#define IS_STRING_EXISTS(string)\
+       string[0] != '\0'
+
+#define IS_STR_EQL(stringA, stringB)\
+       strcmp(stringA, stringB) == 0
+
 #endif

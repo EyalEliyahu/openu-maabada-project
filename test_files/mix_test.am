@@ -39,6 +39,7 @@ TEST2: .data 0,5,6,7
 ; string validations
 ; not good
 .string 123456
+.string "123456
 .string "123456","sdaffdsasadf"
 .string ""
 ; good
