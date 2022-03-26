@@ -1,7 +1,7 @@
 
-/* Maximum length of a single source line  */
+/* Single source line maximum length */
 #define MAX_LINE_LENGTH 80
 
-/* TODO: fill */
+/* define boolean values */
 #define TRUE 1
 #define FALSE 0
