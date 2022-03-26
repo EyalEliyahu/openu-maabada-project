@@ -27,7 +27,7 @@ assemblyStructure assemblyStructureTable[] = {
 	{ "stop", -32768, 0, 0, {-1}, {-1}} /* opcode = 1000000000000000 = -32768 */
 };
 
-char *reserved_words[NUM_OF_RESERVED_WORDS] = {
+char *reservedWords[NUM_OF_RESERVED_WORDS] = {
 	".extern",
 	".entry", 
 	".data", 
@@ -70,7 +70,7 @@ int isReservedWord(char *word, int line) {
 
 	for(indexInWord = 0; indexInWord < NUM_OF_RESERVED_WORDS; indexInWord++) 
 	{	
-		if (IS_STR_EQL(word,reserved_words[indexInWord])) {
+		if (IS_STR_EQL(word,reservedWords[indexInWord])) {
 		return TRUE;
 		}
 	}	
