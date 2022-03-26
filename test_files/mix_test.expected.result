@@ -1,12 +1,12 @@
 ------- Starting Assembler on file: mix_test.as -------
 Running First Pass on: "mix_test.am" 
 ASSEMBLER ERROR [line 5]: Invalid assembly function: ";"
-ASSEMBLER ERROR [line 14]: line exceeds the max line length
+ASSEMBLER ERROR [line 14]: Max line length exceeded
 ASSEMBLER ERROR [line 21]: Symbol is already defined: "TEST"
 ASSEMBLER ERROR [line 22]: invalid symbol name: "r2"
 ASSEMBLER ERROR [line 23]: invalid symbol name: "123456"
 ASSEMBLER ERROR [line 24]: invalid symbol name: "a1234567891234567891234567891231"
-ASSEMBLER ERROR [line 32]: Invalid data provided: "abcasd"
+ASSEMBLER ERROR [line 32]: Invalid data: "abcasd"
 ASSEMBLER ERROR [line 33]: Invalid comma
 ASSEMBLER ERROR [line 34]: Invalid comma
 ASSEMBLER ERROR [line 35]: Invalid comma
