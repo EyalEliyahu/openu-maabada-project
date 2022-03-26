@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-declare -a file_extensions=("ob" "ext" "ent")
+declare -a file_extensions=("ob" "ext" "ent" "result")
 prefix_of_extension="expected"
 
 tests_folder=$PWD
@@ -9,20 +9,20 @@ make
 cd $tests_folder
   as_file="valid_input.as"
   file_prefix=${as_file/.as/}
-  echo "Running assembler on $as_file:"
-  printf "\n"
-  echo "-------------------------- Assembler Output: --------------------------"
-  ../assembler $file_prefix > "$as_file.result"
-  echo "-------------------------- End Of Assembler Output --------------------------"
-  printf "\n"
-  echo "Loking for diff in $as_file:"
+  echo "FILE: $as_file:"
+  ../assembler $file_prefix > "$file_prefix.result"
     for i in "${file_extensions[@]}"
     do
-      echo "  Loking for diff in $file_prefix.$i:"
+      echo "  $file_prefix.$i:"
       diff "$file_prefix.$i" "$file_prefix.$prefix_of_extension.$i"
     done
-      printf "\n\n"
 
+  printf "\n"
+  as_file="mix_test.as"
+  file_prefix=${as_file/.as/}
+  echo "FILE: $as_file:"
+  ../assembler $file_prefix > "$file_prefix.result"
+  diff "$file_prefix.result" "$file_prefix.$prefix_of_extension.result"
 
 # declare -a file_extensions=("ob" "ext" "ent")
 # prefix_of_extension="expected"

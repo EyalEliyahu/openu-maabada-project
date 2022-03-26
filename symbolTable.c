@@ -48,18 +48,6 @@ symbolItem *symbolItemInTable(char *symbolName, symbolTable* table)
     return NULL;
 }
 
-void printSymbolTable(symbolTable* table) /* Used for debugging */
-{
-    symbolItem *temp = table->symbolHead;
-	printf("----------------------- SYMBOL TABLE START ---------------------\n");
-    while (temp)
-    {
-		printf("Symbol: %s | Value: %d | Base: %d | Offset: %d | Attribute: %d\n", temp->symbol, temp->value, temp->base, temp->offset, temp->symbolType);
-		temp = temp->next;
-    }
-	printf("----------------------- SYMBOL TABLE END ---------------------\n");
-}
-
 symbolItem * getSymbolItemFromSymbolTable(char * symbol, symbolTable* table) {
     symbolItem * sl = table->symbolHead;
     while (sl) {

@@ -21,7 +21,6 @@ typedef struct symbolTable {
 int isSymbolExistsInTable(char *symbolName, symbolTable* table);
 symbolItem *symbolItemInTable(char *symbolName, symbolTable* table);
 void symbolTableAppend(char* symbolName, int symbolType, symbolTable* table, int IC, int DC);
-void printSymbolTable(symbolTable* table);
 void freeSymbolTable(symbolTable* table);
 int isSymbolNameValid(char *name, int line);
 void updateSymbolTableDataTypes(symbolTable* table, int IC);

@@ -62,7 +62,6 @@ typedef struct dataWord {
 
 int isReservedWord(char *word, int line);
 assemblyStructure* fetchFunctionData(char *function);
-void printMachineCode(int IC, int DC);
 int validateOperands(int line, int address1, int address2, int numOfOperands, assemblyStructure *opcodeData);
 
 extern assemblyStructure assemblyStructureTable[];

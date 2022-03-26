@@ -88,42 +88,17 @@ assemblyStructure* fetchFunctionData(char *functionName) {
 	return NULL;
 }
 
-void printMachineCode(int IC, int DC) { /* used for debugging */
-	int i;
-	printf("------------------------ CODE ---------------------\n");
-	for (i=0; i < IC - IC_INIT_VALUE; i++)
-	{
-		printf("IC: %d | ARE: %d | L: %d | opcode: %d | funct: %d | sourceRegister: %d | sourceAddress: %d | destinationRegister: %d | destinationAddress: %d | firstOperand: %s | secondOperand: %s | immediate: %d | base: %d | offset: %d\n", 
-		i+IC_INIT_VALUE, machineCodeSection[i].ARE, machineCodeSection[i].L, machineCodeSection[i].opcode, machineCodeSection[i].funct, machineCodeSection[i].sourceRegister,
-		machineCodeSection[i].sourceAddress, machineCodeSection[i].destinationRegister, machineCodeSection[i].destinationAddress, machineCodeSection[i].firstOperand, machineCodeSection[i].secondOperand,
-		machineCodeSection[i].immediate, machineCodeSection[i].base, machineCodeSection[i].offset);
-	}
-	printf("\n----------------------- DATA ---------------------\n");
-	for (i=0; i < DC; i++)
-	{
-		printf("DC: %d | data: %d\n", i, machineDataSection[i].data);
-	}	
-}
-
 int validate_address_type(int line, assemblyStructure *opcodeData, int address, int source_or_destination)
 {
 	int i;
 	if (source_or_destination == SOURCE) {
-		if(line == 14)
-			printf("HERE!");
 		for (i = 0; opcodeData->sourceOperandTypes[i] != -1; i++) {
-			if(line == 14) {
-				printf("\n opcodeData->sourceOperandTypes[i]: %d, address: %d",opcodeData->sourceOperandTypes[i] ,address);
-			}
-			
 			if (opcodeData->sourceOperandTypes[i] == address) 
 				return TRUE;	
 		}
 	}
 
 	if (source_or_destination == DESTINATION) {
-		if(line == 14)
-			printf("THERE!");
 		for (i = 0; opcodeData->destinationOperandTypes[i] != -1; i++) {
 			if (opcodeData->destinationOperandTypes[i] == address) 
 				return TRUE;	

@@ -72,22 +72,3 @@ int macroExistsInList(char *macroName)
     }
     return FALSE;
 }
-
-void printMacroList() /* Used for debugging */
-{
-    int i = 0;
-    macroLine *temp = macroHead;
-    printf("----------------------- MACRO list START ---------------------\n");
-    while (temp)
-    {
-		printf("Macro: %s\n", temp->macro);
-        printf("Content:\n");
-        while (i < temp->numOfContentLines)
-		{
-			printf("\t%s", temp->contentLines[i++]);
-		}
-		temp = temp->next;
-        i = 0;
-    }
-    printf("----------------------- MACRO list END ---------------------\n");
-}

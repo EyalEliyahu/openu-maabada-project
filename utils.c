@@ -133,7 +133,7 @@ int fetchOperands(int line, char* lineContent, int i, char **operandsArray, int 
 		}
 
 		operandsArray[*numOfOperands] = malloc(MAX_LINE_LENGTH);
-		for (j = 0; lineContent[i] && lineContent[i] != '\n' && lineContent[i] != EOF &&
+		for (j = 0; lineContent[i] && lineContent[i] != '\t' && lineContent[i] != ' ' && lineContent[i] != '\n' && lineContent[i] != EOF &&
 		            lineContent[i] != ','; i++, j++) {
 			operandsArray[*numOfOperands][j] = lineContent[i];
 		}
@@ -208,9 +208,8 @@ int fetchAddressType(char *operand, int line) {
 		return IMMEDIATE;
 	if (operand[0] && isIndex(operand, line))
 		return INDEX;
-	if (isSymbolNameValid(operand, line))
+	if (isSymbolNameValid(operand, line)) 
 		return DIRECT;
-
 	return NO_ADDRESS;
 }
 
@@ -262,7 +261,6 @@ codeWord *generateSecondCodeWord(int line, char* lineContent, assemblyStructure 
 	resWord->line = line;
 	resWord->ARE = 4;
 	resWord->funct = opcodeData->funct;
-
 	if ( numOfOperands > 0) {
 		address1 = fetchAddressType(operandsArray[0], line);
 	}
