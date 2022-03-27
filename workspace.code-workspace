@@ -43,7 +43,13 @@
 			"vector": "c",
 			"memory": "c",
 			"stdarg.h": "c",
-			"macrostructs.h": "c"
+			"macrostructs.h": "c",
+			"__config": "c",
+			"__hash_table": "c",
+			"array": "c",
+			"ios": "c",
+			"ostream": "c",
+			"string_view": "c"
 		}
 	}
 }

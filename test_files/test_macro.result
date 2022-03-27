@@ -1,7 +1,0 @@
-------- Starting Assembler on file: test_macro.as -------
-Running First Pass on: "test_macro.am" 
-Running Second Pass on: "test_macro.am" 
-
- LIST
- W
- #-6------- Finish Assembler on file: test_macro.as -------
