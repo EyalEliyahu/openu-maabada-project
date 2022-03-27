@@ -3,7 +3,7 @@
 
 #define MAX_SYMBOL_SIZE 31
 
-
+/* define symbol item Struct */
 typedef struct symbolItem {
 	char symbol[MAX_SYMBOL_SIZE];
 	int value;
@@ -13,6 +13,7 @@ typedef struct symbolItem {
 	struct symbolItem* next;
 } symbolItem;
 
+/* define symbol table Struct */
 typedef struct symbolTable {
 	symbolItem* symbolHead;
 	symbolItem* symbolTail;

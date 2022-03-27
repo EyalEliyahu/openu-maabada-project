@@ -4,6 +4,7 @@
 #include "optCodeData.h"
 #include "utils.h"
 
+/* define opt code data list*/
 optCodeData optCodeDataList[] = {
 	{ "mov", 1, 0, 2, {0,1,2,3,-1}, {1,2,3,-1}}, /* opcode = 0000000000000001 = 1 */
 	{ "cmp", 2, 0, 2, {0,1,2,3,-1}, {0,1,2,3,-1}}, /* opcode = 0000000000000010 = 2 */
@@ -23,6 +24,7 @@ optCodeData optCodeDataList[] = {
 	{ "stop", -32768, 0, 0, {-1}, {-1}} /* opcode = 1000000000000000 = -32768 */
 };
 
+/* define reserved words*/
 char *reservedWords[NUM_OF_RESERVED_WORDS] = {
 	".extern",
 	".entry", 
@@ -61,6 +63,7 @@ char *reservedWords[NUM_OF_RESERVED_WORDS] = {
 	"r14",
 	"r15"};
 
+/*This function return true if the given word is reserved , else false*/
 int isReservedWord(char *word) {
 	int indexInWord; 
 
@@ -73,6 +76,7 @@ int isReservedWord(char *word) {
 	return FALSE;
 }	
 
+/* This function responsible to fetch function data*/
 optCodeData* fetchFunctionData(char *functionName) {
 	int optCodeIndex;
 	for (optCodeIndex = 0; optCodeIndex < NUM_OF_OPCODES; optCodeIndex++)
@@ -84,6 +88,7 @@ optCodeData* fetchFunctionData(char *functionName) {
 	return NULL;
 }
 
+/* This function validate address type*/
 int validateAddressType(int lineIndex, optCodeData *opcodeData, int address, int type)
 {
 	int i;
@@ -100,13 +105,14 @@ int validateAddressType(int lineIndex, optCodeData *opcodeData, int address, int
 				return TRUE;	
 		}
 	}
-	printLineError(lineIndex, "The addressing type provided is incompatible with this assembly command");
+	printLineError(lineIndex, "The provided address type is not valid to this assembly command");
 	return FALSE;
 }
 
+/* This function validate operands*/
 int validateOperands(int lineIndex, int address1, int address2, int numOfOperands, optCodeData *opcodeData) {
 	if (opcodeData->numOfOperandsPerFunction != numOfOperands) {
-		printLineError(lineIndex, "Invalid amount of operands for this assembly function. Expected: %d | Received: %d", opcodeData->numOfOperandsPerFunction,  numOfOperands);
+		printLineError(lineIndex, "The amount of received operands don't compatible with the expected for this assembly function. Expected: %d | Received: %d", opcodeData->numOfOperandsPerFunction,  numOfOperands);
 		return FALSE;
 	}
 	if (numOfOperands == 2) {

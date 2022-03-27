@@ -6,7 +6,7 @@ enum dataTypes {CODE, DATA, STRING, ENTRY, EXTERN, DATA_AND_ENTRY, CODE_AND_ENTR
 enum addressesTypes {IMMEDIATE, DIRECT, INDEX, REGISTER, NO_ADDRESS};
 enum {SOURCE, DESTINATION};
 
-/* struct for holding an opcode and it's binary value */
+/* define opcode data struct */
 typedef struct optCodeData {
 	char* name;
 	unsigned int opcode;
@@ -16,7 +16,7 @@ typedef struct optCodeData {
 	int destinationOperandTypes[5];
 } optCodeData;
 
-/* Code Word Struct */
+/* define code instruction Struct */
 typedef struct codeInstruction {
 	/* shared to all words */
 	unsigned int ARE: 3;
@@ -46,7 +46,7 @@ typedef struct codeInstruction {
 
 } codeInstruction;
 
-/* DATA Word Struct */
+/* define data instruction Struct */
 typedef struct dataInstruction {
 	int data;
 } dataInstruction;

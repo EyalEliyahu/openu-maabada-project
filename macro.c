@@ -11,7 +11,7 @@ int processMacroLine(char* lineContent, int* isInMacro, char* macroString, char*
 	char firstWord[MAX_LINE_LENGTH + 2];
 	macroLine* currentMacroLine;
 	char* lineInMacro = "";
-	/* look for the next char that is not whitespace/tab/newline */
+	/* increase index until is not whitespace/tab/newline */
 	INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine);
 	/* Get the line content after removing spaces and tabs from the beginning until reach whitespace/tab/newline */
 	for (; IS_TRUE_CHAR(lineContent[indexInLine]) && indexInLine <= MAX_LINE_LENGTH; indexInLine++, indexInWord++)
@@ -33,7 +33,7 @@ int processMacroLine(char* lineContent, int* isInMacro, char* macroString, char*
 	INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine); 
 	/* Checks if this line is start of new macro */
     if (strncmp("macro", lineContent+indexInLine, 5) == 0 && !*isInMacro) {
-		/* go to the end of the word: macro */
+		/* go to the end of the word "macro" */
 		INCREASE_INDEX_UNTILL_CHAR(lineContent, 'o', indexInLine);
 		INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine);
 		for (; IS_TRUE_CHAR(lineContent[indexInLine]) && indexInLine <= MAX_LINE_LENGTH; indexInLine++, indexInWord++)

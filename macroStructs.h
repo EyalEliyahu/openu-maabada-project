@@ -4,7 +4,7 @@
 #ifndef _MACROSTRUCTS_H
 #define _MACROSTRUCTS_H
 
-
+/* define macro line type*/
 typedef struct macroLine {
 	char macro[MAX_SYMBOL_SIZE];
 	int numOfContentLines;

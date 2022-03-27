@@ -8,7 +8,7 @@
 #include "utils.h"
 #include "optCodeData.h"
 
-
+/* This function return symbol item if exist, else NULL */
 symbolItem* getSymbolItem(char* symbolName, symbolTable* table)
 {
     symbolItem* currentSymbol = table->symbolHead;
@@ -22,22 +22,13 @@ symbolItem* getSymbolItem(char* symbolName, symbolTable* table)
     return NULL;
 }
 
- symbolItem*  getSymbolItemFromSymbolTable(char*  symbol, symbolTable* table) {
-    symbolItem*  currentSymbol = table->symbolHead;
-    while (currentSymbol) {
-        if (IS_STR_EQL(currentSymbol->symbol, symbol)) {
-            return currentSymbol;
-        }
-        currentSymbol = currentSymbol->next;
-    }
-	return NULL;
-}
-
+/* This function initialize symbol table */
 symbolTable* initSymbolTable() {
 	symbolTable* newTable = (symbolTable*)safeMalloc(sizeof(symbolTable));
 	return newTable;
 }
 
+/* This function append symbol item to symbol table*/
 void symbolTableAppend(char* symbolName, int symbolType, symbolTable* table, int IC, int DC)
 {
 	symbolItem* newSymbol = (symbolItem*)safeMalloc(sizeof(symbolItem));
@@ -69,12 +60,14 @@ void symbolTableAppend(char* symbolName, int symbolType, symbolTable* table, int
 	return;
 }
 
+/* This function validate symbol name*/
 int isSymbolNameValid(char* name, int line) {
 	/* Check length, first char is alpha and all the others are alphanumeric, and not saved word */
 	return name[0] && strlen(name) <= MAX_SYMBOL_SIZE && isalpha(name[0]) && isAlphanumericStr(name + 1) &&
 	       !isReservedWord(name);
 }
 
+/* This function update symbol data types*/
 void updateSymbolTableDataTypes(symbolTable* table, int IC) {
 	
 	symbolItem* currentSymbol = table->symbolHead;
@@ -90,6 +83,7 @@ void updateSymbolTableDataTypes(symbolTable* table, int IC) {
 	
 }
 
+/* This function update symbol with entry attribute */
 int updateSymbolWithEntryAttribute(char* symbolName, int line, symbolTable* table)
 {
     symbolItem* currentSymbol = table->symbolHead;
@@ -116,6 +110,8 @@ int updateSymbolWithEntryAttribute(char* symbolName, int line, symbolTable* tabl
     return FALSE;
 }
 
+
+/* This function free dynamic allocated memory used for symbol table */
 void freeSymbolTable(symbolTable* table)
 {
     symbolItem* currentSymbol;
