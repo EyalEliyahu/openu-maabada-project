@@ -13,9 +13,10 @@
             codeInstructionsList[*indexInLine+instructionIndex].ARE = 2;\
         }
 
+/* This function update the code word by the provided type*/
 int updateCodeWordByType(
     int line, int instructionIndex, int* indexInLine, char* operand, int addressType,
-    symbolTable* table, codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION]
+    symbolTable* table, codeInstruction codeInstructionsList[MAX_CODE_INSTRUCTIONS_AMOUNT]
 ) {
     int symbolNameIndex;
     char* symbolName;
@@ -28,7 +29,7 @@ int updateCodeWordByType(
         symbolItem* currentSymbol;
         currentSymbol = getSymbolItem(operand, table);
         if(!currentSymbol) {
-            printLineError(codeInstructionsList[instructionIndex].lineIndex, "Could not find symbol: %s in the symbol table", operand);
+            printLineError(codeInstructionsList[instructionIndex].lineIndex, "The symbol: %s does not exist in the symbol table", operand);
             return FALSE;
         }
         codeInstructionsList[instructionIndex+*indexInLine].base = currentSymbol->base;
@@ -47,8 +48,7 @@ int updateCodeWordByType(
         symbolName[symbolNameIndex] = '\0';
         currentSymbol = getSymbolItem(symbolName, table);
         if(!currentSymbol) {
-            printLineError(codeInstructionsList[instructionIndex].lineIndex, "Could not find symbol: %s in the symbol table", symbolName);
-            return FALSE;
+            printLineError(codeInstructionsList[instructionIndex].lineIndex, "The symbol: %s does not exist in the symbol table", symbolName);            return FALSE;
         }
         codeInstructionsList[instructionIndex+*indexInLine].base = currentSymbol->base;
         APPEND_ARE_TO_SYMBOL(currentSymbol->symbolType, symbolName);
@@ -61,6 +61,7 @@ int updateCodeWordByType(
     return TRUE;
 }
 
+/* This function handle line parsing in second pass*/
 int parseLineForSecondPass(int lineIndex, char* lineContent, symbolTable* table) {
 	int indexInLine=0, j;
     int dataType;
@@ -92,7 +93,8 @@ int parseLineForSecondPass(int lineIndex, char* lineContent, symbolTable* table)
     return TRUE;
 }
 
-int updateCodeWords(int IC, symbolTable* table, codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION]) {
+/* This function update the code word*/
+int updateCodeWords(int IC, symbolTable* table, codeInstruction codeInstructionsList[MAX_CODE_INSTRUCTIONS_AMOUNT]) {
     int lineIndex, instructionIndex, i, adressType;
     char* operand = NULL;
     codeInstruction instruction;
@@ -115,7 +117,6 @@ int updateCodeWords(int IC, symbolTable* table, codeInstruction codeInstructions
 				}
 				if (instruction.destinationAddress != REGISTER) {
                     operand = instruction.secondOperand;
-                    printf("\n %s", operand);
                     adressType = instruction.destinationAddress;
                     if (!updateCodeWordByType(lineIndex, instructionIndex, &i, operand, adressType, table, codeInstructionsList))
 			        	return FALSE;
@@ -131,16 +132,19 @@ int updateCodeWords(int IC, symbolTable* table, codeInstruction codeInstructions
 	}
     return TRUE;
 }
+
+/* This function validate the machine code limitation*/
 void validateMachineCodeLimitation(int IC, int DC, int lineIndex) {
-	if (IC - IC_INIT_VALUE + DC > MAX_MACHINE_CODE_SECTION){
-		printLineError(lineIndex, "The machine code is too big and can only include %d words", MAX_MACHINE_CODE_SECTION);
+	if (IC - IC_INIT_VALUE + DC > MAX_CODE_INSTRUCTIONS_AMOUNT){
+		printLineError(lineIndex, "The machine code can only include %d words", MAX_CODE_INSTRUCTIONS_AMOUNT);
         exit(EXIT_FAILURE);
     }
 }
 
+/* This function handle second pass parsing */
 int runSecondPass(
     FILE* fileAfterMacroParsing, symbolTable* table, int IC, int DC, 
-    codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION]
+    codeInstruction codeInstructionsList[MAX_CODE_INSTRUCTIONS_AMOUNT]
 ) {
     int lineIndex;
 	char lineContent[MAX_LINE_WITH_LINEDROP_LEN];

@@ -99,7 +99,7 @@ void generateObFile(
 			obFile,
 			WORD_FORMAT,
 			IC + indexInSection,
-			VALUE_TO_MASKED_BITS(dataInstructionsList[indexInSection].data)
+			VALUE_TO_MASKED_BITS(dataInstructionsList[indexInSection].payload)
 		);
 	}
     
@@ -140,7 +140,7 @@ void generateEntFile(char* fileName, symbolTable* table) {
 }
 
 /* function that generates the .ext file */
-void generateExtFile(char* fileName, symbolTable* table, int IC, codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION]) {
+void generateExtFile(char* fileName, symbolTable* table, int IC, codeInstruction codeInstructionsList[MAX_CODE_INSTRUCTIONS_AMOUNT]) {
 	FILE* extFile = NULL;
 	int externSymbolsCount = 0;
 	int i, hasFileOpened;
@@ -187,8 +187,8 @@ void generateExtFile(char* fileName, symbolTable* table, int IC, codeInstruction
 /* function that trigger all of the generate files functions */
 void generateOutputFiles(
 	char* fileName, symbolTable* table, int IC, int DC,
-	codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION],
-	dataInstruction dataInstructionsList[MAX_MACHINE_DATA_SECTION]
+	codeInstruction codeInstructionsList[MAX_CODE_INSTRUCTIONS_AMOUNT],
+	dataInstruction dataInstructionsList[MAX_DATA_INSTRUCTIONS_AMOUNT]
 ) {
 	generateObFile(fileName, IC, DC, codeInstructionsList, dataInstructionsList);
 	generateEntFile(fileName, table);

@@ -6,23 +6,23 @@
 
 /*handle first pass parsing */
 int runFirstPass(FILE* fileAfterMacroParsing, symbolTable* table, int* IC, int* DC,
-	codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION],
-	dataInstruction dataInstructionsList[MAX_MACHINE_DATA_SECTION]
+	codeInstruction codeInstructionsList[MAX_CODE_INSTRUCTIONS_AMOUNT],
+	dataInstruction dataInstructionsList[MAX_DATA_INSTRUCTIONS_AMOUNT]
 );
 int parseLineForFirstPass(
 	int lineIndex, char* lineContent, symbolTable* table, int* IC, int* DC,
-	codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION],
-	dataInstruction dataInstructionsList[MAX_MACHINE_DATA_SECTION]
+	codeInstruction codeInstructionsList[MAX_CODE_INSTRUCTIONS_AMOUNT],
+	dataInstruction dataInstructionsList[MAX_DATA_INSTRUCTIONS_AMOUNT]
 );
-int parseStringEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, dataInstruction dataInstructionsList[MAX_MACHINE_DATA_SECTION]);
-int parseDataEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, int isReadingFirstParam, dataInstruction dataInstructionsList[MAX_MACHINE_DATA_SECTION]);
-int parseCodeEntry(int lineIndex, char* lineContent, int indexInLine, int* IC, codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION]);
+int parseStringEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, dataInstruction dataInstructionsList[MAX_DATA_INSTRUCTIONS_AMOUNT]);
+int parseDataEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, int isReadingFirstParam, dataInstruction dataInstructionsList[MAX_DATA_INSTRUCTIONS_AMOUNT]);
+int parseCodeEntry(int lineIndex, char* lineContent, int indexInLine, int* IC, codeInstruction codeInstructionsList[MAX_CODE_INSTRUCTIONS_AMOUNT]);
 
 
 int runFirstPass(
 	FILE* fileAfterMacroParsing, symbolTable* table, int* IC, int* DC, 
-	codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION],
-	dataInstruction dataInstructionsList[MAX_MACHINE_DATA_SECTION]
+	codeInstruction codeInstructionsList[MAX_CODE_INSTRUCTIONS_AMOUNT],
+	dataInstruction dataInstructionsList[MAX_DATA_INSTRUCTIONS_AMOUNT]
 ) {
 	int lineIndex;
 	char lineContent[MAX_LINE_WITH_LINEDROP_LEN];
@@ -45,8 +45,8 @@ int runFirstPass(
 /* handle line parsing in first pass*/
 int parseLineForFirstPass(
 	int lineIndex, char* lineContent, symbolTable* table, int* IC, int* DC,
-	codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION],
-	dataInstruction dataInstructionsList[MAX_MACHINE_DATA_SECTION]
+	codeInstruction codeInstructionsList[MAX_CODE_INSTRUCTIONS_AMOUNT],
+	dataInstruction dataInstructionsList[MAX_DATA_INSTRUCTIONS_AMOUNT]
 ) {
     char externSymbol[MAX_LINE_LENGTH];
 	int dataType;
@@ -127,7 +127,7 @@ int parseLineForFirstPass(
 }
 
 /* recursive function that handle parsing of string line */
-int parseStringEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, dataInstruction dataInstructionsList[MAX_MACHINE_DATA_SECTION]) {
+int parseStringEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, dataInstruction dataInstructionsList[MAX_DATA_INSTRUCTIONS_AMOUNT]) {
 	dataInstruction *dataToAdd;
 	dataToAdd = (dataInstruction *) safeMalloc(sizeof(dataInstruction));
 	
@@ -139,14 +139,14 @@ int parseStringEntry(int lineIndex, char* lineContent, int indexInLine, int* DC,
 			printLineError(lineIndex, "Invalid string provided");
 			return FALSE;
 		}
-		dataToAdd->data = '\0';
+		dataToAdd->payload = '\0';
 		dataInstructionsList[*DC] = *dataToAdd; /* add '\0' to the data section string because all of the chars already added */
 		free(dataToAdd);
 		(*DC)++;
 		return TRUE;	
 	}
 
-	dataToAdd->data = lineContent[indexInLine];
+	dataToAdd->payload = lineContent[indexInLine];
 	dataInstructionsList[*DC] = *dataToAdd; /* add the char to the machine data section string */
 	free(dataToAdd);
 	indexInLine++;
@@ -156,7 +156,7 @@ int parseStringEntry(int lineIndex, char* lineContent, int indexInLine, int* DC,
 }
 
 /* recursive function that handle parsing of data line */
-int parseDataEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, int isReadingFirstParam, dataInstruction dataInstructionsList[MAX_MACHINE_DATA_SECTION]) {
+int parseDataEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, int isReadingFirstParam, dataInstruction dataInstructionsList[MAX_DATA_INSTRUCTIONS_AMOUNT]) {
 	int indexInDataParam;
 	char dataParam[MAX_LINE_LENGTH];
 	dataInstruction* dataToAdd;
@@ -179,7 +179,7 @@ int parseDataEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, i
 	dataParam[indexInDataParam] = '\0';
 	if(isStringInteger(dataParam)){ /* add string data section array if valid */
 		dataToAdd = (dataInstruction *) safeMalloc(sizeof(dataInstruction));
-		dataToAdd->data = atoi(dataParam);
+		dataToAdd->payload = atoi(dataParam);
 		dataInstructionsList[*DC] = *dataToAdd;
 		free(dataToAdd);
 		(*DC)++;
@@ -198,7 +198,7 @@ int parseDataEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, i
 }
 
 /* function that handle parsing of code line */
-int parseCodeEntry(int lineIndex, char* lineContent, int indexInLine, int* IC, codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION]) {
+int parseCodeEntry(int lineIndex, char* lineContent, int indexInLine, int* IC, codeInstruction codeInstructionsList[MAX_CODE_INSTRUCTIONS_AMOUNT]) {
 	int indexInFunctionName, numOfOperands=0;
 	char* operandsArray[2];
 	optCodeData *opcodeData;

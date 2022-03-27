@@ -1,7 +1,14 @@
 ------- Starting Assembler on file: valid_input.as -------
 Running First Pass on: "valid_input.am" 
-Running Second Pass on: "valid_input.am" 
-
- LIST
- W
- #-6------- Finish Assembler on file: valid_input.as -------
+ASSEMBLER ERROR [line 4]: Invalid amount of operands for this assembly function. Expected: 4 | Received: 2
+ASSEMBLER ERROR [line 5]: Invalid amount of operands for this assembly function. Expected: 8192 | Received: 1
+ASSEMBLER ERROR [line 6]: Invalid amount of operands for this assembly function. Expected: 16 | Received: 2
+ASSEMBLER ERROR [line 7]: Invalid amount of operands for this assembly function. Expected: 32 | Received: 1
+ASSEMBLER ERROR [line 8]: Invalid amount of operands for this assembly function. Expected: 1 | Received: 2
+ASSEMBLER ERROR [line 9]: Invalid amount of operands for this assembly function. Expected: 4 | Received: 2
+ASSEMBLER ERROR [line 10]: Invalid amount of operands for this assembly function. Expected: 512 | Received: 1
+ASSEMBLER ERROR [line 12]: Invalid amount of operands for this assembly function. Expected: 512 | Received: 1
+ASSEMBLER ERROR [line 13]: Invalid amount of operands for this assembly function. Expected: 32 | Received: 1
+ASSEMBLER ERROR [line 15]: Invalid amount of operands for this assembly function. Expected: 4 | Received: 2
+ASSEMBLER ERROR [line 16]: Invalid amount of operands for this assembly function. Expected: -32768 | Received: 0
+------- Finish Assembler on file: valid_input.as -------

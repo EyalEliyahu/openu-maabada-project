@@ -6,17 +6,18 @@ ASSEMBLER ERROR [line 21]: Symbol is already defined: "TEST"
 ASSEMBLER ERROR [line 22]: invalid symbol name: "r2"
 ASSEMBLER ERROR [line 23]: invalid symbol name: "123456"
 ASSEMBLER ERROR [line 24]: invalid symbol name: "a1234567891234567891234567891231"
+ASSEMBLER ERROR [line 26]: Invalid amount of operands for this assembly function. Expected: 4 | Received: 2
 ASSEMBLER ERROR [line 32]: Invalid data: "abcasd"
 ASSEMBLER ERROR [line 33]: Invalid comma
 ASSEMBLER ERROR [line 34]: Invalid comma
 ASSEMBLER ERROR [line 35]: Invalid comma
-ASSEMBLER ERROR [line 41]: String type should start with quotes
-ASSEMBLER ERROR [line 42]: String type should end with quotes
+ASSEMBLER ERROR [line 41]: String type need to start with quotes
+ASSEMBLER ERROR [line 42]: String type can end with quotes
 ASSEMBLER ERROR [line 43]: Invalid string provided
-ASSEMBLER ERROR [line 44]: String should not be empty!
-ASSEMBLER ERROR [line 51]: There needs to be an operand after comma
-ASSEMBLER ERROR [line 52]: Invalid amount of operands for this assembly function. Expected: 2 | Received: 1
-ASSEMBLER ERROR [line 53]: Multiple consecutive commas.
-ASSEMBLER ERROR [line 54]: The addressing type provided is incompatible with this assembly command
-ASSEMBLER ERROR [line 55]: Invalid amount of operands for this assembly function. Expected: 0 | Received: 1
+ASSEMBLER ERROR [line 44]: String can not be empty
+ASSEMBLER ERROR [line 51]: After comma needs to be an operand
+ASSEMBLER ERROR [line 53]: consecutive commas are Forbidden.
+ASSEMBLER ERROR [line 54]: Invalid amount of operands for this assembly function. Expected: 16 | Received: 2
+ASSEMBLER ERROR [line 55]: Invalid amount of operands for this assembly function. Expected: -32768 | Received: 1
+ASSEMBLER ERROR [line 58]: Invalid amount of operands for this assembly function. Expected: 1 | Received: 2
 ------- Finish Assembler on file: mix_test.as -------

@@ -30,8 +30,8 @@ void compileFile(char* fileName) {
 	FILE* assemblyFile = NULL;
 	FILE* fileAfterMacroParsing = NULL;
 	symbolTable* table = NULL;
-	codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION];
-	dataInstruction dataInstructionsList[MAX_MACHINE_DATA_SECTION];
+	codeInstruction codeInstructionsList[MAX_CODE_INSTRUCTIONS_AMOUNT];
+	dataInstruction dataInstructionsList[MAX_DATA_INSTRUCTIONS_AMOUNT];
 
 	printf("------- Starting Assembler on file: %s.as -------\n", fileName);
 
