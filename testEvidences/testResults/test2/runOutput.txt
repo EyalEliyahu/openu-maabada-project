@@ -1,12 +1,11 @@
-** Running Assembler On File: testEvidences/testResults/test2/test2.as
-Running First Pass on: "testEvidences/testResults/test2/test2.am" 
+** Running Assembler On File: testEvidences/testFiles/test2.as
+Running First Pass on: "testEvidences/testFiles/test2.am" 
 ASSEMBLER ERROR [line 6]: Invalid assembly function: ";"
 ASSEMBLER ERROR [line 12]: Max line length exceeded
 ASSEMBLER ERROR [line 16]: Invalid comma
 ASSEMBLER ERROR [line 21]: After comma needs to be an operand
-
-opcodeData->numOfOperandsPerFunction != numOfOperands, (2 != 1)ASSEMBLER ERROR [line 22]: The amount of received operands don't compatible with the expected for this assembly function. Expected: 2 | Received: 1
+ASSEMBLER ERROR [line 22]: The amount of received operands don't compatible with the expected for this assembly function. Expected: 2 | Received: 1
 ASSEMBLER ERROR [line 23]: consecutive commas are Forbidden.
 ASSEMBLER ERROR [line 27]: Symbol is already defined: "A"
 ASSEMBLER ERROR [line 28]: invalid symbol name: "r2"
-** Finish Assembler On File: testEvidences/testResults/test2/test2.as 
+** Finish Assembler On File: testEvidences/testFiles/test2.as 
