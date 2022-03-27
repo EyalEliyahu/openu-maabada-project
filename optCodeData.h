@@ -13,32 +13,29 @@ typedef struct dataInstruction {
 /* define opcode data struct */
 typedef struct optCodeData {
 	char* name;
-	int numOfOperandsPerFunction;
 	unsigned int opcode;
     unsigned int funct;
-	int destinationOperandTypes[5];
+	int numOfOperandsPerFunction;
 	int sourceOperandTypes[5];
+	int destinationOperandTypes[5];
 } optCodeData;
 
 /* define data instruction Struct */
-typedef struct codeInstruction {
+typedef struct codeInstruction {	/* shared to all words */
+	unsigned int ARE: 3;
+	int L;
+	int lineIndex;
 	unsigned int opcode: 16;
-
-	unsigned int destinationRegister: 4;
-	unsigned int destinationAddress: 2;
+	unsigned int funct: 4;
 	unsigned int sourceRegister: 4;
 	unsigned int sourceAddress: 2;
-	unsigned int funct: 4;
+	unsigned int destinationRegister: 4;
+	unsigned int destinationAddress: 2;
 	char *firstOperand;
 	char *secondOperand;
-
-	unsigned int ARE: 3;
-	int lineIndex;
-	int L;
-
-	unsigned int offset: 16;
-	unsigned int base: 16;
 	unsigned int immediate: 16;
+	unsigned int base: 16;
+	unsigned int offset: 16;
 } codeInstruction;
 
 

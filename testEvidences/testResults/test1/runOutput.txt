@@ -1,0 +1,4 @@
+** Running Assembler On File: testEvidences/testFiles/test1.as
+Running First Pass on: "testEvidences/testFiles/test1.am" 
+Running Second Pass on: "testEvidences/testFiles/test1.am" 
+** Finish Assembler On File: testEvidences/testFiles/test1.as 

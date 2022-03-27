@@ -101,6 +101,7 @@ int validateAddressType(int lineIndex, optCodeData *opcodeData, int address, int
 /* This function validate operands*/
 int validateOperands(int lineIndex, int address1, int address2, int numOfOperands, optCodeData *opcodeData) {
 	if (opcodeData->numOfOperandsPerFunction != numOfOperands) {
+		printf("\nopcodeData->numOfOperandsPerFunction != numOfOperands, (%d != %d)", opcodeData->numOfOperandsPerFunction, numOfOperands);
 		printLineError(lineIndex, "The amount of received operands don't compatible with the expected for this assembly function. Expected: %d | Received: %d", opcodeData->numOfOperandsPerFunction,  numOfOperands);
 		return FALSE;
 	}

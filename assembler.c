@@ -1,3 +1,18 @@
+/********************************************************************************************
+ * Maman 14 - Assembler:
+ * Full implementation of 20 bit words assembler.
+ * You can find test evidences under the 'testEvidences' foler
+ * 
+ * For simple execution:
+ *  1) run "make".
+ *  2) run "./assembler testEvidences/testFiles/test1".
+ * 
+ * 	Created by:
+ *  - Eyal Eliyahu (208320002)
+ *  - Elad Tshuva(TODO)
+ ********************************************************************************************/
+
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -33,7 +48,7 @@ void compileFile(char* fileName) {
 	codeInstruction codeInstructionsList[MAX_CODE_INSTRUCTIONS_AMOUNT];
 	dataInstruction dataInstructionsList[MAX_DATA_INSTRUCTIONS_AMOUNT];
 
-	printf("------- Starting Assembler on file: %s.as -------\n", fileName);
+	printf("** Running Assembler On File: %s.as\n", fileName);
 
 	if(openFileSafe(&assemblyFile, fileName, ".as", "r")) {
 		isMacroParseSuccess = translateMacros(assemblyFile, fileName); 
@@ -59,7 +74,7 @@ void compileFile(char* fileName) {
 
 		}
 	}
-	printf("------- Finish Assembler on file: %s.as -------\n", fileName);
+	printf("** Finish Assembler On File: %s.as \n", fileName);
 	if(assemblyFile) {
 		fclose(assemblyFile);
 	}
