@@ -33,7 +33,7 @@ int processMacroLine(char* lineContent, int* isInMacro, char* macroString, char*
 	INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine); 
 	/* Checks if this line is start of new macro */
     if (strncmp("macro", lineContent+indexInLine, 5) == 0 && !*isInMacro) {
-		/* go to the end of the word: macro */
+		/* go to the end of the word "macro" */
 		INCREASE_INDEX_UNTILL_CHAR(lineContent, 'o', indexInLine);
 		INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexInLine);
 		for (; IS_TRUE_CHAR(lineContent[indexInLine]) && indexInLine <= MAX_LINE_LENGTH; indexInLine++, indexInWord++)

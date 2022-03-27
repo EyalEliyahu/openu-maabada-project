@@ -18,7 +18,7 @@ int parseStringEntry(int lineIndex, char* lineContent, int indexInLine, int* DC,
 int parseDataEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, int isReadingFirstParam, dataInstruction dataInstructionsList[MAX_DATA_INSTRUCTIONS_AMOUNT]);
 int parseCodeEntry(int lineIndex, char* lineContent, int indexInLine, int* IC, codeInstruction codeInstructionsList[MAX_CODE_INSTRUCTIONS_AMOUNT]);
 
-
+/* This function handle first pass parsing */
 int runFirstPass(
 	FILE* fileAfterMacroParsing, symbolTable* table, int* IC, int* DC, 
 	codeInstruction codeInstructionsList[MAX_CODE_INSTRUCTIONS_AMOUNT],
@@ -42,7 +42,7 @@ int runFirstPass(
 	return lineParseSuccess;
 }
 
-/* handle line parsing in first pass*/
+/* This function handle line parsing in first pass*/
 int parseLineForFirstPass(
 	int lineIndex, char* lineContent, symbolTable* table, int* IC, int* DC,
 	codeInstruction codeInstructionsList[MAX_CODE_INSTRUCTIONS_AMOUNT],
@@ -126,7 +126,7 @@ int parseLineForFirstPass(
 	return TRUE;
 }
 
-/* recursive function that handle parsing of string line */
+/* This recursive function that handle parsing of string line */
 int parseStringEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, dataInstruction dataInstructionsList[MAX_DATA_INSTRUCTIONS_AMOUNT]) {
 	dataInstruction *dataToAdd;
 	dataToAdd = (dataInstruction *) safeMalloc(sizeof(dataInstruction));
@@ -155,7 +155,7 @@ int parseStringEntry(int lineIndex, char* lineContent, int indexInLine, int* DC,
 	return parseStringEntry(lineIndex, lineContent,indexInLine, DC, dataInstructionsList);/* looking for the next char in string */
 }
 
-/* recursive function that handle parsing of data line */
+/* This recursive function that handle parsing of data line */
 int parseDataEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, int isReadingFirstParam, dataInstruction dataInstructionsList[MAX_DATA_INSTRUCTIONS_AMOUNT]) {
 	int indexInDataParam;
 	char dataParam[MAX_LINE_LENGTH];
@@ -197,7 +197,7 @@ int parseDataEntry(int lineIndex, char* lineContent, int indexInLine, int* DC, i
 
 }
 
-/* function that handle parsing of code line */
+/* This function handle parsing of code line */
 int parseCodeEntry(int lineIndex, char* lineContent, int indexInLine, int* IC, codeInstruction codeInstructionsList[MAX_CODE_INSTRUCTIONS_AMOUNT]) {
 	int indexInFunctionName, numOfOperands=0;
 	char* operandsArray[2];

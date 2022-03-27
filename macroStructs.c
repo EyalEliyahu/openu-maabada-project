@@ -8,6 +8,7 @@
 macroLine* macroHead = NULL;
 macroLine* macroTail = NULL;
 
+/* This function free dynamic allocated memory used for macro list */
 void freeMacroList()
 {
     macroLine* currentLine;
@@ -21,6 +22,7 @@ void freeMacroList()
     }
 }
 
+/* This function append new macro to the macro list */
 void appendToMacroList(char* macroName)
 {
 	macroLine* newMacro = (macroLine*)safeMalloc(sizeof(macroLine));
@@ -42,6 +44,7 @@ void appendToMacroList(char* macroName)
 	return;
 }
 
+/* This function return macro line */
 macroLine* getMacroLine(char* macroName)
 {
     macroLine* currentLine = macroHead;

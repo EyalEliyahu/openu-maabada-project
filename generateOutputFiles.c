@@ -17,7 +17,7 @@
 
 #define IS_SYMBOL_OF_ENTRY_TYPE(symbolTableItemIterator) (symbolTableItemIterator->symbolType == CODE_AND_ENTRY || symbolTableItemIterator->symbolType == DATA_AND_ENTRY)
 
-/* function that generates the .ob file */
+/* function that handle the generate of .ob file */
 void generateObFile(
 	char* fileName, int IC, int DC,
 	 codeInstruction codeInstructionsList[], dataInstruction dataInstructionsList[]
@@ -106,7 +106,7 @@ void generateObFile(
 	fclose(obFile);
 }
 
-/* function that generates the .ent FILE */
+/* function that handle the generate of .ent file */
 void generateEntFile(char* fileName, symbolTable* table) {
 	FILE* entFile;
 	int entrySymbolsCount = 0;
@@ -139,7 +139,7 @@ void generateEntFile(char* fileName, symbolTable* table) {
 	fclose(entFile);
 }
 
-/* function that generates the .ext file */
+/* function that handle the generate of .ext file */
 void generateExtFile(char* fileName, symbolTable* table, int IC, codeInstruction codeInstructionsList[MAX_CODE_INSTRUCTIONS_AMOUNT]) {
 	FILE* extFile = NULL;
 	int externSymbolsCount = 0;
@@ -184,7 +184,7 @@ void generateExtFile(char* fileName, symbolTable* table, int IC, codeInstruction
 	fclose(extFile);
 }
 
-/* function that trigger all of the generate files functions */
+/* function that handle the generate of the files (ob, ent and ext) */
 void generateOutputFiles(
 	char* fileName, symbolTable* table, int IC, int DC,
 	codeInstruction codeInstructionsList[MAX_CODE_INSTRUCTIONS_AMOUNT],

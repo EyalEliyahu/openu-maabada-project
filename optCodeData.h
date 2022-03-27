@@ -10,6 +10,7 @@ typedef struct dataInstruction {
 	int payload;
 } dataInstruction;
 
+/* define opcode data struct */
 typedef struct optCodeData {
 	char* name;
 	int numOfOperandsPerFunction;
@@ -19,7 +20,7 @@ typedef struct optCodeData {
 	int sourceOperandTypes[5];
 } optCodeData;
 
-/* define code instruction Struct */
+/* define data instruction Struct */
 typedef struct codeInstruction {
 	unsigned int opcode: 16;
 
