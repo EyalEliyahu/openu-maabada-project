@@ -5,7 +5,7 @@
 
 void generateOutputFiles(
 	char* fileName, symbolTable* table, int IC, int DC,
-	codeInstruction codeInstructionsList[MAX_MACHINE_CODE_SECTION],
-	dataInstruction dataInstructionsList[MAX_MACHINE_DATA_SECTION]
+	codeInstruction codeInstructionsList[MAX_CODE_INSTRUCTIONS_AMOUNT],
+	dataInstruction dataInstructionsList[MAX_DATA_INSTRUCTIONS_AMOUNT]
 );
 #endif

@@ -6,6 +6,7 @@
 #include <stdarg.h>
 #include "utils.h"
 
+/* This function handle print of error massages */
 void printLineError(int lineIndex, char* message, ...)
 {
 	va_list messageArgs;
@@ -16,8 +17,8 @@ void printLineError(int lineIndex, char* message, ...)
 	printf("\n");
 }
 
-int isStringInteger(char* string)
-{
+/* This function chec if there is digit in provided string */
+int isStringInteger(char* string) {
 	int i = 0;
 	if (string[0] == '-' || string[0] == '+')
 		i++; /* if string starts + or - */
@@ -31,6 +32,7 @@ int isStringInteger(char* string)
 	return i > 0; /* i will be 0 if string is empty and it's not a number */
 }
 
+/* This function handles malloc action safely*/
 void *safeMalloc(long size)
 {
 	void *ptr = malloc(size);
@@ -42,6 +44,7 @@ void *safeMalloc(long size)
 	return ptr;
 }
 
+/* This function handles strinf concat */
 char* stringsConcat(char* string1, char* string2)
 {
 	char* concattedString = (char* )safeMalloc(strlen(string1) + strlen(string2) + 1);
@@ -50,6 +53,7 @@ char* stringsConcat(char* string1, char* string2)
 	return concattedString;
 }
 
+/* This function handles open files in safe mode */
 int openFileSafe(FILE* *fileStream, char* fileName, char* fileExt, char* openMethod)
 {
 	char* fileNameWithExt = stringsConcat(fileName, fileExt);
@@ -93,8 +97,8 @@ int isSymbolWithValidIndex(char* operandString, int lineIndex)
 	return FALSE;
 }
 
-int getSymbolFromLine(int lineIndex, char* lineContent, char* symbolDest)
-{
+/* This function validate symbol index */
+int getSymbolFromLine(int lineIndex, char* lineContent, char* symbolDest) {
 	int indexAtSymbol = 0;
 	int indexAtLine = 0;
 
@@ -120,6 +124,7 @@ int getSymbolFromLine(int lineIndex, char* lineContent, char* symbolDest)
 	return TRUE;
 }
 
+/* This function handle the fetch of operands */
 int fetchOperands(int lineIndex, char* lineContent, int indexAtLine, char* *operandsArray, int* numOfOperands)
 {
 	int indexInOperandStr;
@@ -154,7 +159,7 @@ int fetchOperands(int lineIndex, char* lineContent, int indexAtLine, char* *oper
 			break;
 		else if (lineContent[indexAtLine] != ',')
 		{
-			printLineError(lineIndex, "There needs to be a comma between operands");
+			printLineError(lineIndex, "Between operands must have comma");
 			free(operandsArray[0]);
 			if (*numOfOperands > 1)
 				free(operandsArray[1]);
@@ -164,9 +169,9 @@ int fetchOperands(int lineIndex, char* lineContent, int indexAtLine, char* *oper
 		indexAtLine++;
 		INCREASE_INDEX_UNTILL_NEXT_CHAR(lineContent, indexAtLine);
 		if (IS_NULLISH_CHAR(lineContent[indexAtLine]))
-			printLineError(lineIndex, "There needs to be an operand after comma");
+			printLineError(lineIndex, "After comma needs to be an operand");
 		else if (lineContent[indexAtLine] == ',')
-			printLineError(lineIndex, "Multiple consecutive commas.");
+			printLineError(lineIndex, "consecutive commas are Forbidden.");
 		else
 			continue;
 		{
@@ -181,6 +186,7 @@ int fetchOperands(int lineIndex, char* lineContent, int indexAtLine, char* *oper
 	return TRUE;
 }
 
+/* This function handle the fetch of type */
 int fetchType(char* lineContent, int* indexInLine) {
 	char typeString[MAX_LINE_LENGTH];
 	int indexInThypeString = 0;
@@ -213,7 +219,8 @@ int fetchType(char* lineContent, int* indexInLine) {
 	return ERROR;
 }
 
-int fetchAddressType(char* operand, int line) {
+/* This function handle the fetch of address type */
+int fetchAddressType(char* operand, int lineIndex) {
 	if (operand[0] == '\0')
 		return NO_ADDRESS;
 	if (operand[0] == 'r' && isdigit(operand[1]) && operand[2] == '\0')
@@ -222,13 +229,14 @@ int fetchAddressType(char* operand, int line) {
 		return REGISTER;
 	if (operand[0] == '#' && isStringInteger(operand + 1))
 		return IMMEDIATE;
-	if (operand[0] && isSymbolWithValidIndex(operand, line))
+	if (operand[0] && isSymbolWithValidIndex(operand, lineIndex))
 		return INDEX;
-	if (isSymbolNameValid(operand, line))
+	if (isSymbolNameValid(operand, lineIndex))
 		return DIRECT;
 	return NO_ADDRESS;
 }
 
+/* This function handle the fetch of register */
 unsigned int fetchRegister(char* operand) {
 	unsigned int reg;
 	int index = 0, j;
@@ -258,6 +266,7 @@ unsigned int fetchRegister(char* operand) {
 	return atoi(temp);
 }
 
+/* This function generate the first code word and return code instruction*/
 codeInstruction *generateFirstCodeWord(optCodeData *opcodeData) {
 	codeInstruction *resWord;
 	resWord = (codeInstruction *)safeMalloc(sizeof(codeInstruction));
@@ -269,6 +278,7 @@ codeInstruction *generateFirstCodeWord(optCodeData *opcodeData) {
 	return resWord;
 }
 
+/* This function generate the second code word and return code instruction*/
 codeInstruction *generateSecondCodeWord(int lineIndex, char* lineContent, optCodeData *opcodeData, char* *operandsArray, int numOfOperands) {
 	codeInstruction *resWord;
 	int address1 = NO_ADDRESS;
@@ -370,18 +380,19 @@ int calcIcOffset(int ic) {
 	return ic % 16;
 }
 
+/* This function validate string entry*/
 int validateStringEntry(int lineIndex, char* lineContent, int indexAtLine ){
 
 	if (lineContent[indexAtLine] != '"')
 	{
-		printLineError(lineIndex, "String type should start with quotes");
+		printLineError(lineIndex, "String type need to start with quotes");
 		return FALSE;
 	}
 	indexAtLine++;
 
 	if (lineContent[indexAtLine] == '"')
 	{
-		printLineError(lineIndex, "String should not be empty!");
+		printLineError(lineIndex, "String can not be empty");
 		return FALSE;
 	}
 
@@ -389,7 +400,7 @@ int validateStringEntry(int lineIndex, char* lineContent, int indexAtLine ){
 		indexAtLine++;
 
 	if (lineContent[indexAtLine] != '"') {
-		printLineError(lineIndex, "String type should end with quotes");
+		printLineError(lineIndex, "String type can end with quotes");
 		return FALSE;
 
 	}
@@ -397,6 +408,7 @@ int validateStringEntry(int lineIndex, char* lineContent, int indexAtLine ){
 	return TRUE;
 }
 
+/* This function check if provided string is alphanumeric */
 int isAlphanumericStr(char* string) {
 	int i;
 	/*check for every char in string if it is non alphanumeric char if it is function returns TRUE*/
